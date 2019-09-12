@@ -1,4 +1,4 @@
-from SCF_functions import *
+from GHF.SCF_functions import *
 
 """Restricted Hartree Fock, by means of SCF procedure"""
 
