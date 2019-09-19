@@ -86,7 +86,8 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 #RHF(h14, 7)
 
 """calculate UHF energies of the 4 molecules"""
-# input: molecule, number of occupied alpha, number of occupied beta
+# input: molecule, number of occupied alpha, number of occupied beta,
+# extra electron method, internal stability analysis
 
 q = UHF(h, 1, 0)
 a = UHF(h3, 2, 1)
@@ -98,12 +99,13 @@ f = UHF(h8, 4, 4, extra_e_coeff=True)
 g = UHF(h9, 5, 4)
 h = UHF(h10, 5, 5)
 i = UHF(h11, 6, 5)
-j = UHF(h12, 6, 6, extra_e_coeff=True) # too low?
+j = UHF(h12, 6, 6, internal_stability_analysis=True)
 k = UHF(h13, 7, 6)
 l = UHF(h14, 7, 7, internal_stability_analysis=True)
 m = UHF(h15, 8, 7)
 
-#mf12 = scf.UHF(h12).run() # correct & lower energy value than what my UHF code finds!
+"""Calculate Delta E in kcal/mol"""
+
 
 d3 = (a - 3 * q) * 627.5
 d4 = (b - 4 * q) * 627.5
