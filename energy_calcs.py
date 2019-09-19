@@ -100,15 +100,10 @@ h = UHF(h10, 5, 5)
 i = UHF(h11, 6, 5)
 j = UHF(h12, 6, 6, extra_e_coeff=True) # too low?
 k = UHF(h13, 7, 6)
-l = UHF(h14, 7, 7)
+l = UHF(h14, 7, 7, internal_stability_analysis=True)
 m = UHF(h15, 8, 7)
 
-#mf3 = scf.UHF(h3).run()
-#mf4 = scf.UHF(h4).run()
-#mf8 = scf.UHF(h8).run()
 #mf12 = scf.UHF(h12).run() # correct & lower energy value than what my UHF code finds!
-#mf14 = scf.UHF(h14).run()
-
 
 d3 = (a - 3 * q) * 627.5
 d4 = (b - 4 * q) * 627.5
@@ -126,7 +121,6 @@ d15 = (m - 15 * q) * 627.5
 
 
 print(d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
-
 
 
 
