@@ -1,14 +1,10 @@
-from GHF.SCF_functions import *
-from functools import reduce
-from pyscf import *
-import scipy.linalg
+"""
+Unrestricted Hartree Fock, by means of SCF procedure
+====================================================
 
-
-
-"""Unrestricted Hartree Fock, by means of SCF procedure
 
 This function calculates the UHF energy for a given molecule and the number of occupied alpha and beta orbitals. 
-The molecule has to be created in pySCF: 
+The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
 
 number of occupied orbitals:
@@ -16,19 +12,48 @@ first the number of occupied alpha orbitals
 second the number of occupied beta orbitals
 
 There are two extra options added into the function:
-- extra_e_coeff: when true, the program will add two extra alpha electrons to the system and calculate when the new system's energy
-converges. From the last density matrix in this calculation, new coefficients for the alpha and beta orbitals will be calculated
-and used as new guess density for the original system.
 
-- internal_stability_analysis: when true, an internal stability analysis will be performed. When the wave finction is deemed
-unstable, new coefficients will be calculated that are closer in value to the stable condition, 
-which is done by varying the Hessian by means of a trial vector.
-These will then be used as a guess density for the energy calculation.
+- extra_e_coeff: when true, the program will add two extra alpha electrons to the system and calculate when the new system's energy converges. From the last density matrix in this calculation, new coefficients for the alpha and beta orbitals will be calculated and used as new guess density for the original system.
+
+- internal_stability_analysis: when true, an internal stability analysis will be performed. When the wave finction is deemed unstable, new coefficients will be calculated that are closer in value to the stable condition, which is done by varying the Hessian by means of a trial vector. These will then be used as a guess density for the energy calculation.
 
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
-for eventual subsequent calculations"""
+for eventual subsequent calculations
+"""
+from GHF.SCF_functions import *
+from functools import reduce
+from pyscf import *
+import scipy.linalg
 
 def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis=False):
+    """
+    Calculate UHF energy, with or without adding extra electrons to improve coefficients or internal stability analysis.
+    --------------------------------------------------------------------------------------------------------------------
+
+    Without extra steps
+    +++++++++++++++++++
+
+    >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+    >>> UHF(h3, 2, 1)
+
+
+    With extra electrons added to calculate coefficients
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+    >>> UHF(h3, 2, 1, extra_e_coeff=True)
+
+    With internal stability analysis
+    ++++++++++++++++++++++++++++++++
+
+    >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+    >>> UHF(h3, 2, 1, Internal_stability_analysis=True)
+
+     prints and returns UHF energy of h3
+
+
+
+    """
 
     # first case: no extra electrons and no stability analysis
     if extra_e_coeff==False and internal_stability_analysis==False:
@@ -45,58 +70,34 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         X = trans_matrix(overlap)
         core_guess = X.T.dot(one_electron).dot(X)
 
-        # density() creates a density matrix from a fock matrix and the number of occupied orbitals
-        def density(f_matrix, occ):
-            f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
-            coefficients = X.dot(f_eigenvectors)
-            coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
-            return np.einsum('ij,kj->ik', coefficients_r, coefficients_r) # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-
         # create guess density matrix from core guess, separate for alpha and beta and put it into an array
-        guess_density_a = density(core_guess, occ_a)
-        guess_density_b = density(core_guess, occ_b)
+        guess_density_a = density_matrix(core_guess, occ_a, X)
+        guess_density_b = density_matrix(core_guess, occ_b, X)
 
         densities_a = [guess_density_a]
         densities_b = [guess_density_b]
 
-        # calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total
-        # then calculate the initial electronic energy and put it into an array
-        def scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b):
-            scf_e = np.einsum('ij, ij->', density_matrix_a + density_matrix_b, one_electron)  # np.einsum here is used to add all the matrix values together
-            scf_e += np.einsum('ij, ij->', density_matrix_a, fock_a)
-            scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
-            scf_e *= 0.5 # divide by two, since the summation technically adds the alpha and beta values twice
-            return scf_e
-
-        electronic_e = scf_energy(guess_density_a, guess_density_b, one_electron, one_electron)
+        electronic_e = uhf_scf_energy(guess_density_a, guess_density_b, one_electron, one_electron,one_electron)
         energies = [electronic_e]
-
-        # calculate a fock matrix from a given alpha and beta density matrix
-        # fock alpha if 1 = alpha and 2 = beta and vice versa
-        def fock_matrix(density_matrix_1, density_matrix_2):
-            jk_integrals = two_electron - two_electron.transpose(0, 2, 1, 3) # exchange and coulomb integrals
-            jk_a = np.einsum('kl,ijkl->ij', density_matrix_1, jk_integrals)  # double summation of density matrix * (coulomb - exchange)
-            j_b = np.einsum('kl, ijkl->ij', density_matrix_2, two_electron)  # double summation of density matrix * exchange
-            return one_electron + jk_a + j_b
 
         # create an array to check the energy differences between iterations
         delta_e = []
 
         # create an iteration procedure
         def iteration():
-            fock_a = fock_matrix(densities_a[-1], densities_b[-1]) # create a fock matrix for alpha from last alpha density
-            fock_b = fock_matrix(densities_b[-1], densities_a[-1]) # create a fock matrix for beta from last beta density
+            fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron, two_electron) # create a fock matrix for alpha from last alpha density
+            fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron) # create a fock matrix for beta from last beta density
 
             fock_orth_a = X.T.dot(fock_a).dot(X) # orthogonalize both fock matrices
             fock_orth_b = X.T.dot(fock_b).dot(X)
 
-            new_density_a = density(fock_orth_a, occ_a) # create a new alpha density matrix
-            new_density_b = density(fock_orth_b, occ_b) # create a new beta density matrix
+            new_density_a = density_matrix(fock_orth_a, occ_a, X) # create a new alpha density matrix
+            new_density_b = density_matrix(fock_orth_b, occ_b, X) # create a new beta density matrix
 
             densities_a.append(new_density_a) # put the density matrices in their respective arrays
             densities_b.append(new_density_b)
 
-            energies.append(scf_energy(new_density_a, new_density_b, fock_a, fock_b)) # calculate the improved scf energy and add it to the array
+            energies.append(uhf_scf_energy(new_density_a, new_density_b, fock_a, fock_b, one_electron)) # calculate the improved scf energy and add it to the array
 
             delta_e.append(energies[-1] - energies[-2]) # calculate the energy difference and add it to the delta_E array
 
@@ -131,45 +132,31 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         X_t = trans_matrix(overlap_t)
         core_guess_t = X_t.T.dot(one_electron_t).dot(X_t)
 
-        # Calculate a new density matrix, given a fock matrix, the number of occupied orbitals and the orthogonalisation matrix
-        def density(f_matrix, occ, trans):
-            f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
-            coefficients = trans.dot(f_eigenvectors)
-            coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
-            return np.einsum('ij,kj->ik', coefficients_r, coefficients_r) # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
 
         # Calculate a guess density for the test system, both for alpha and beta.
         # add the two extra electrons to alpha
         # add the density matrices to respective arrays
-        guess_density_a_t = density(core_guess_t, occ_a + 2, X_t)
-        guess_density_b_t = density(core_guess_t, occ_b, X_t)
+        guess_density_a_t = density_matrix(core_guess_t, occ_a + 2, X_t)
+        guess_density_b_t = density_matrix(core_guess_t, occ_b, X_t)
 
         densities_a = [guess_density_a_t]
         densities_b = [guess_density_b_t]
 
-        # calculate a fock matrix from a given alpha and beta density matrix and the needed one and two electron integrals
-        # fock alpha if 1 = alpha and 2 = beta and vice versa
-        def fock_matrix(density_matrix_1, density_matrix_2, one_e, two_e):
-            jk_integrals = two_e - two_e.transpose(0, 2, 1, 3) # exchange and coulomb integrals
-            jk_a = np.einsum('kl, ijkl->ij', density_matrix_1, jk_integrals) # double summation of density matrix * (coulomb - exchange)
-            j_b = np.einsum('kl, ijkl->ij', density_matrix_2, two_e) # double summation of density matrix * exchange
-            return one_e + jk_a + j_b
-
         # create an array to check the differences between density matrices in between iterations
         delta_dens = []
 
-        # create an iteration procedure, based on the densities
+        # create an iteration procedure, based on the densities, for the test system
         def iteration_t():
             # create a fock matrix for alpha from last alpha density, and the integrals from the test system
-            fock_a = fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
+            fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
             # create a fock matrix for beta from last beta density, and the integrals from the test system
-            fock_b = fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
+            fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
 
             fock_orth_a = X_t.T.dot(fock_a).dot(X_t) # orthogonalize both fock matrices
             fock_orth_b = X_t.T.dot(fock_b).dot(X_t)
 
-            new_density_a = density(fock_orth_a, occ_a + 2, X_t) # create a new alpha density matrix, with the test system's orthogonalisation matrix
-            new_density_b = density(fock_orth_b, occ_b, X_t) # create a new beta density matrix, with the test system's orthogonalisation matrix
+            new_density_a = density_matrix(fock_orth_a, occ_a + 2, X_t) # create a new alpha density matrix, with the test system's orthogonalisation matrix
+            new_density_b = density_matrix(fock_orth_b, occ_b, X_t) # create a new beta density matrix, with the test system's orthogonalisation matrix
 
             densities_a.append(new_density_a) # add the densities to an array
             densities_b.append(new_density_b)
@@ -208,36 +195,27 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         imp_dens_a = [imp_guess_density_a]
         imp_dens_b = [imp_guess_density_b]
 
-        # calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total
-        # then calculate the initial electronic energy and put it into an array
-        def scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b):
-            scf_e = np.einsum('ij, ij->', density_matrix_a + density_matrix_b, one_electron) # np.einsum here is used to add all the matrix values together
-            scf_e += np.einsum('ij, ij->', density_matrix_a, fock_a)
-            scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
-            scf_e *= 0.5 # divide by two, since the summation technically adds the alpha and beta values twice
-            return scf_e
-
-        energies = [scf_energy(imp_dens_a[-1], imp_dens_b[-1], one_electron, one_electron)]
+        energies = [uhf_scf_energy(imp_dens_a[-1], imp_dens_b[-1], one_electron, one_electron, one_electron)]
         delta_e = []
 
         # define a new iteration procedure based on the energy difference
         def iteration():
             # create a fock matrix for alpha from last alpha density, and the integrals from the original system
-            fock_a = fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron, two_electron)
+            fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron, two_electron)
             # create a fock matrix for beta from last beta density, and the integrals from the original system
-            fock_b = fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
+            fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
 
             fock_orth_a = X.T.dot(fock_a).dot(X) # orthogonalize both fock matrices
             fock_orth_b = X.T.dot(fock_b).dot(X)
 
-            new_density_a = density(fock_orth_a, occ_a, X) # create a new alpha density matrix, with the original system's orthogonalisation matrix
-            new_density_b = density(fock_orth_b, occ_b, X) # create a new beta density matrix, with the original system's orthogonalisation matrix
+            new_density_a = density_matrix(fock_orth_a, occ_a, X) # create a new alpha density matrix, with the original system's orthogonalisation matrix
+            new_density_b = density_matrix(fock_orth_b, occ_b, X) # create a new beta density matrix, with the original system's orthogonalisation matrix
 
             imp_dens_a.append(new_density_a) # add the densities to an array
             imp_dens_b.append(new_density_b)
 
             # calculate the improved scf energy and add it to the array
-            energies.append(scf_energy(new_density_a, new_density_b, fock_a, fock_b) + nuclear_repulsion)
+            energies.append(uhf_scf_energy(new_density_a, new_density_b, fock_a, fock_b, one_electron) + nuclear_repulsion)
             delta_e.append(energies[-1] - energies[-2]) # calculate the energy difference and add it to the delta_E array
 
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
@@ -270,51 +248,27 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         X = trans_matrix(overlap)
         core_guess = X.T.dot(one_electron).dot(X)
 
-        # density() creates a density matrix from a fock matrix and the number of occupied orbitals
-        def density(f_matrix, occ):
-            f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
-            coefficients = X.dot(f_eigenvectors)
-            coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
-            return np.einsum('ij,kj->ik', coefficients_r, coefficients_r) # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-
         # create guess density matrix from core guess, separate for alpha and beta and put it into an array
         # Switch the spin state by adding one alpha and removing one beta electron
-        guess_density_a = density(core_guess, occ_a+1)
-        guess_density_b = density(core_guess, occ_b-1)
+        guess_density_a = density_matrix(core_guess, occ_a+1, X)
+        guess_density_b = density_matrix(core_guess, occ_b-1, X)
 
         densities_a = [guess_density_a]
         densities_b = [guess_density_b]
-
-        # calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total
-        # then calculate the initial electronic energy and put it into an array
-        def scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b):
-            scf_e = np.einsum('ij, ij->', density_matrix_a + density_matrix_b, one_electron) # np.einsum here is used to add all the matrix values together
-            scf_e += np.einsum('ij, ij->', density_matrix_a, fock_a)
-            scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
-            scf_e *= 0.5 # divide by two, since the summation technically adds the alpha and beta values twice
-            return scf_e
-
-        # calculate a fock matrix from a given alpha and beta density matrix
-        # fock alpha if 1 = alpha and 2 = beta and vice versa
-        def fock_matrix(density_matrix_1, density_matrix_2):
-            jk_integrals = two_electron - two_electron.transpose(0, 2, 1, 3) # exchange and coulomb integrals
-            jk_a = np.einsum('kl,ijkl->ij', density_matrix_1, jk_integrals) # double summation of density matrix * (coulomb - exchange)
-            j_b = np.einsum('kl, ijkl->ij', density_matrix_2, two_electron) # double summation of density matrix * exchange
-            return one_electron + jk_a + j_b
 
         # create an array to check the differences between density matrices in between iterations
         delta_dens = []
 
         # create an iteration procedure, based on the densities
         def iteration():
-            fock_a = fock_matrix(densities_a[-1], densities_b[-1]) # create a fock matrix for alpha from last alpha density
-            fock_b = fock_matrix(densities_b[-1], densities_a[-1]) # create a fock matrix for beta from last alpha density
+            fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron, two_electron) # create a fock matrix for alpha from last alpha density
+            fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron) # create a fock matrix for beta from last alpha density
 
             fock_orth_a = X.T.dot(fock_a).dot(X) # orthogonalize the fock matrices
             fock_orth_b = X.T.dot(fock_b).dot(X)
 
-            new_density_a = density(fock_orth_a, occ_a+1) # create a new alpha density matrix
-            new_density_b = density(fock_orth_b, occ_b-1) # create a new beta density matrix
+            new_density_a = density_matrix(fock_orth_a, occ_a+1, X) # create a new alpha density matrix
+            new_density_b = density_matrix(fock_orth_b, occ_b-1, X) # create a new beta density matrix
 
             densities_a.append(new_density_a) # add density matrices to an array
             densities_b.append(new_density_b)
@@ -350,8 +304,8 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
             vir_b_orb = coeff_b[:, vir_indx_b] # orbital coefficients associated with virtual (unoccupied) beta orbitals
 
             # initial fock matrix for stability analysis is the last fock matrix from the first iteration process, for both alpha and beta
-            fock_a_init = fock_matrix(densities_a[-1], densities_b[-1])
-            fock_b_init = fock_matrix(densities_b[-1], densities_a[-1])
+            fock_a_init = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron, two_electron)
+            fock_b_init = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron)
 
             # orthogonolize the initial fock matrix with the coefficients, calculated from the first iteration process
             # reduce() is a short way to write calculations, the first argument is an operation, the second one are the values
@@ -458,9 +412,9 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
                 mo_a = np.zeros(total_orbitals)
                 mo_b = np.zeros(total_orbitals)
                 for j in range(occ_a):
-                    mo_a[j] = 1 # create representation of alpha orbitals by adding an electron (a 1) to each occupied alpha arbital
+                    mo_a[j] = 1 # create representation of alpha orbitals by adding an electron (a 1) to each occupied alpha orbital
                 for k in range(occ_b):
-                    mo_b[k] = 1 # create representation of beta orbitals by adding an electron (a 1) to each occupied beta arbital
+                    mo_b[k] = 1 # create representation of beta orbitals by adding an electron (a 1) to each occupied beta orbital
                 new_orbitals = (rotate_mo(coeff_a, mo_a, v[:occ_a * n_vir_a]),
                       rotate_mo(coeff_b, mo_b, v[occ_a * n_vir_a:])) # create new orbitals by rotating the old ones
                 print("There is an internal instability in the UHF wave function.")
@@ -478,26 +432,26 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         imp_dens_b = [imp_guess_density_b]
 
         # Calculate the initial electronic energy and put it into an array
-        energies = [scf_energy(imp_dens_a[-1], imp_dens_b[-1], one_electron, one_electron)]
+        energies = [uhf_scf_energy(imp_dens_a[-1], imp_dens_b[-1], one_electron, one_electron, one_electron)]
         delta_e = []
 
         # define an iteration process
         def iteration_2():
-            fock_a = fock_matrix(imp_dens_a[-1], imp_dens_b[-1])  # create a fock matrix for alpha from last improved alpha density
-            fock_b = fock_matrix(imp_dens_b[-1], imp_dens_a[-1]) # create a fock matrix for beta from last improved alpha density
+            fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron, two_electron)  # create a fock matrix for alpha from last improved alpha density
+            fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron) # create a fock matrix for beta from last improved alpha density
 
             fock_orth_a = X.T.dot(fock_a).dot(X) # orthogonalize the fock matrices
             fock_orth_b = X.T.dot(fock_b).dot(X)
 
-            new_density_a = density(fock_orth_a, occ_a) # create a new alpha density matrix
-            new_density_b = density(fock_orth_b, occ_b) # create a new beta density matrix
+            new_density_a = density_matrix(fock_orth_a, occ_a, X) # create a new alpha density matrix
+            new_density_b = density_matrix(fock_orth_b, occ_b, X) # create a new beta density matrix
 
             imp_dens_a.append(new_density_a) # put the density matrices into their respective arrays
             imp_dens_b.append(new_density_b)
 
             # calculate the improved energy and add it to the array
             # calculate the energy difference and add it to the delta_e array
-            energies.append(scf_energy(new_density_a, new_density_b, fock_a, fock_b) + nuclear_repulsion)
+            energies.append(uhf_scf_energy(new_density_a, new_density_b, fock_a, fock_b, one_electron) + nuclear_repulsion)
             delta_e.append(energies[-1] - energies[-2])
 
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
@@ -513,17 +467,3 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
         return total_e
-
-
-
-
-
-
-
-
-
-
-
-
-
-

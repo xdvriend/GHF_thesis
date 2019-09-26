@@ -1,0 +1,31 @@
+\begin{sphinxtheindex}
+\let\bigletter\sphinxstyleindexlettergroup
+\let\spxpagem \sphinxstyleindexpagemain
+\let\spxentry \sphinxstyleindexentry
+\let\spxextra \sphinxstyleindexextra
+
+  \bigletter D
+  \item \spxentry{density\_matrix()}\spxextra{in module GHF.SCF\_functions}, \hyperpage{5}
+
+  \indexspace
+  \bigletter G
+  \item \spxentry{get\_integrals()}\spxextra{in module GHF.SCF\_functions}, \hyperpage{5}
+  \item \spxentry{GHF.RHF}\spxextra{module}, \hyperpage{1}
+  \item \spxentry{GHF.SCF\_functions}\spxextra{module}, \hyperpage{3}
+  \item \spxentry{GHF.UHF}\spxextra{module}, \hyperpage{1}
+
+  \indexspace
+  \bigletter R
+  \item \spxentry{RHF()}\spxextra{in module GHF.RHF}, \hyperpage{1}
+
+  \indexspace
+  \bigletter T
+  \item \spxentry{trans\_matrix()}\spxextra{in module GHF.SCF\_functions}, \hyperpage{5}
+
+  \indexspace
+  \bigletter U
+  \item \spxentry{UHF()}\spxextra{in module GHF.UHF}, \hyperpage{3}
+  \item \spxentry{uhf\_fock\_matrix()}\spxextra{in module GHF.SCF\_functions}, \hyperpage{5}
+  \item \spxentry{uhf\_scf\_energy()}\spxextra{in module GHF.SCF\_functions}, \hyperpage{5}
+
+\end{sphinxtheindex}

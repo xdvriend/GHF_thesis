@@ -74,12 +74,12 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 """calculate RHF energies of the 4 molecules"""
 # input: molecule, number of occupied orbitals
 
-RHF(h4, 2)
-RHF(h6, 3)
-RHF(h8, 4)
-RHF(h10, 5)
-RHF(h12, 6)
-RHF(h14, 7)
+#RHF(h4, 2)
+#RHF(h6, 3)
+#RHF(h8, 4)
+#RHF(h10, 5)
+#RHF(h12, 6)
+#RHF(h14, 7)
 
 """calculate UHF energies of the 4 molecules"""
 # input: molecule, number of occupied alpha, number of occupied beta,

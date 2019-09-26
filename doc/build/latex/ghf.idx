@@ -1,0 +1,10 @@
+\indexentry{GHF.RHF (module)@\spxentry{GHF.RHF}\spxextra{module}|hyperpage}{1}
+\indexentry{RHF() (in module GHF.RHF)@\spxentry{RHF()}\spxextra{in module GHF.RHF}|hyperpage}{1}
+\indexentry{GHF.UHF (module)@\spxentry{GHF.UHF}\spxextra{module}|hyperpage}{1}
+\indexentry{UHF() (in module GHF.UHF)@\spxentry{UHF()}\spxextra{in module GHF.UHF}|hyperpage}{3}
+\indexentry{GHF.SCF\_functions (module)@\spxentry{GHF.SCF\_functions}\spxextra{module}|hyperpage}{3}
+\indexentry{density\_matrix() (in module GHF.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module GHF.SCF\_functions}|hyperpage}{5}
+\indexentry{get\_integrals() (in module GHF.SCF\_functions)@\spxentry{get\_integrals()}\spxextra{in module GHF.SCF\_functions}|hyperpage}{5}
+\indexentry{trans\_matrix() (in module GHF.SCF\_functions)@\spxentry{trans\_matrix()}\spxextra{in module GHF.SCF\_functions}|hyperpage}{5}
+\indexentry{uhf\_fock\_matrix() (in module GHF.SCF\_functions)@\spxentry{uhf\_fock\_matrix()}\spxextra{in module GHF.SCF\_functions}|hyperpage}{5}
+\indexentry{uhf\_scf\_energy() (in module GHF.SCF\_functions)@\spxentry{uhf\_scf\_energy()}\spxextra{in module GHF.SCF\_functions}|hyperpage}{5}
