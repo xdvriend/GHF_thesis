@@ -3,8 +3,10 @@ language: python
 python:
 - "3.6"
 before install:
-- sudo apt-get install -y flake8==3.7.8
-- sudo apt-get install -y pytest==5.1.2
+- python --version
+  - pip install -U pip
+  - pip install -U pytest
+  - pip install -U flake8
 install:
 - pip install -r requirements.txt
 script:
