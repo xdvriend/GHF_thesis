@@ -1,16 +1,9 @@
-os: osx
 language: python
 python:
-- 3.6
-- 2.7
-- 3.5
-before install:
-- python --version
-  - pip install -U pip
-  - pip install -U pytest
-  - pip install -U flake8
+- "3.6"
 install:
 - pip install -r requirements.txt
+- pip install flake8
 script:
 - pytest
-- flake8
+- flake8 . --exit-zero
