@@ -5,5 +5,5 @@ install:
 - pip install -r requirements.txt
 - pip install flake8
 script:
-- pytest
+- pytest . --exit-zero
 - flake8 . --exit-zero
