@@ -1,6 +1,10 @@
 language: python
 python:
 - "3.6"
+install:
+- pip install -q Flake
+- pip install -q pytest
+- python setup.py -q install
 script:
 - pytest
 - flake8
