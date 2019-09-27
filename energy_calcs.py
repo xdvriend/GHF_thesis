@@ -85,40 +85,40 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 # input: molecule, number of occupied alpha, number of occupied beta,
 # extra electron method, internal stability analysis
 
-q = UHF(h, 1, 0)
-a = UHF(h3, 2, 1)
-b = UHF(h4, 2, 2, extra_e_coeff=True)
-c = UHF(h5, 3, 2)
-d = UHF(h6, 3, 3)
-e = UHF(h7, 4, 3)
-f = UHF(h8, 4, 4, extra_e_coeff=True)
-g = UHF(h9, 5, 4)
-h = UHF(h10, 5, 5)
-i = UHF(h11, 6, 5)
-j = UHF(h12, 6, 6, internal_stability_analysis=True)
-k = UHF(h13, 7, 6)
+#q = UHF(h, 1, 0)
+#a = UHF(h3, 2, 1)
+#b = UHF(h4, 2, 2, extra_e_coeff=True)
+#c = UHF(h5, 3, 2)
+#d = UHF(h6, 3, 3)
+#e = UHF(h7, 4, 3)
+#f = UHF(h8, 4, 4, extra_e_coeff=True)
+#g = UHF(h9, 5, 4)
+#h = UHF(h10, 5, 5)
+#i = UHF(h11, 6, 5)
+#j = UHF(h12, 6, 6, internal_stability_analysis=True)
+#k = UHF(h13, 7, 6)
 l = UHF(h14, 7, 7, internal_stability_analysis=True)
-m = UHF(h15, 8, 7)
+#m = UHF(h15, 8, 7)
 
 """Calculate Delta E in kcal/mol"""
 
 
-d3 = (a - 3 * q) * 627.5
-d4 = (b - 4 * q) * 627.5
-d5 = (c - 5 * q) * 627.5
-d6 = (d - 6 * q) * 627.5
-d7 = (e - 7 * q) * 627.5
-d8 = (f - 8 * q) * 627.5
-d9 = (g - 9 * q) * 627.5
-d10 = (h - 10 * q) * 627.5
-d11 = (i - 11 * q) * 627.5
-d12 = (j - 12 * q) * 627.5
-d13 = (k - 13 * q) * 627.5
-d14 = (l - 14 * q) * 627.5
-d15 = (m - 15 * q) * 627.5
+#d3 = (a - 3 * q) * 627.5
+#d4 = (b - 4 * q) * 627.5
+#d5 = (c - 5 * q) * 627.5
+#d6 = (d - 6 * q) * 627.5
+#d7 = (e - 7 * q) * 627.5
+#d8 = (f - 8 * q) * 627.5
+#d9 = (g - 9 * q) * 627.5
+#d10 = (h - 10 * q) * 627.5
+#d11 = (i - 11 * q) * 627.5
+#d12 = (j - 12 * q) * 627.5
+#d13 = (k - 13 * q) * 627.5
+#d14 = (l - 14 * q) * 627.5
+#d15 = (m - 15 * q) * 627.5
 
 
-print(d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
+#print(d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
 
 
 
