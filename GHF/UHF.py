@@ -337,7 +337,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
             h_diag_b = fock_vir_b.diagonal().real[:, None] - fock_occ_b.diagonal().real
             h_diag = np.hstack((h_diag_a.reshape(-1), h_diag_b.reshape(-1)))
 
-            # The result of h_op is the displacement vector that reduces the gradient g.
+            # The result of h_op is the displacement vector.
             def h_op(x):
                 x1a = x[:n_vir_a * occ_a].reshape(n_vir_a, occ_a) # create a trial vector for alpha orbitals
                 x1b = x[n_vir_a * occ_a:].reshape(n_vir_b, occ_b) # create a trial vector for beta orbitals
@@ -403,7 +403,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
                 return np.dot(mo_coeff, u)
 
             x0 = np.zeros_like(g) # like returns a matrix of the same shape as the argument given
-            x0[g != 0] = 1. / hdiag[g != 0]
+            x0[g != 0] = 1. / hdiag[g != 0] # create initial guess for davidson solver
             # use the davidson solver to find the eigenvalues and eigenvectors needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
             if e < -1e-5: # this points towards an internal instability
