@@ -19,7 +19,7 @@ install:
   - conda info -a
 
   - conda create -q -n ghf_test 
-  - conda activate test-environment
+  - conda activate ghf_test
   - conda install -c pyscf pyscf
   - pip3 install -r requirements.txt
   - pip3 install flake8
