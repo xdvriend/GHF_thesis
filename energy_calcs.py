@@ -1,24 +1,18 @@
 from GHF.RHF import RHF
-from GHF.UHF_expanded import UHF
+from GHF.UHF import UHF
 from pyscf import *
 
 
 """Create a molecule with pyscf"""
 # This part needs to be ran in pyscf
+# Create the molecules as specified in the RHF/UHF code
 
-h2o = gto.M(atom ='O 0.000000000000 -0.143225816552 0.000000000000; H 1.638036840407 1.136548822547 -0.000000000000; '
-                 'H -1.638036840407 1.136548822547 -0.000000000000', unit = 'bohr', basis = 'sto-3g')
 
 h = gto.M(atom = 'h 0 0 0', spin = 1, basis = 'cc-pvdz')
 
-h2 = gto.M(atom = 'H 0 0 0; H 0 0 1', basis = 'cc-pvdz')
-
-
 h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
 
-
 h4 = gto.M(atom = 'h 0 0.707107 0; h 0.707107 0 0; h 0 -0.707107 0; h -0.707107 0 0' ,spin = 2, basis = 'cc-pvdz')
-
 
 h5 = gto.M(atom = 'h 0 0.850651 0; h 0.8090171766429887 0.26286561528204344 0; h 0.5000001126478447, -0.6881911152820434, 0;'
                   ' h -0.5000001126478445, -0.6881911152820435, 0; h -0.8090171766429888 0.2628656152820433 0', spin = 1, basis = 'cc-pvdz')
@@ -80,13 +74,16 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 """calculate RHF energies of the 4 molecules"""
 # input: molecule, number of occupied orbitals
 
-#RHF(h4, 2)
-#RHF(h8, 4)
-#RHF(h12, 6)
-#RHF(h14, 7)
+RHF(h4, 2)
+RHF(h6, 3)
+RHF(h8, 4)
+RHF(h10, 5)
+RHF(h12, 6)
+RHF(h14, 7)
 
 """calculate UHF energies of the 4 molecules"""
-# input: molecule, number of occupied alpha, number of occupied beta
+# input: molecule, number of occupied alpha, number of occupied beta,
+# extra electron method, internal stability analysis
 
 q = UHF(h, 1, 0)
 a = UHF(h3, 2, 1)
@@ -98,16 +95,12 @@ f = UHF(h8, 4, 4, extra_e_coeff=True)
 g = UHF(h9, 5, 4)
 h = UHF(h10, 5, 5)
 i = UHF(h11, 6, 5)
-j = UHF(h12, 6, 6, extra_e_coeff=True) # too low?
+j = UHF(h12, 6, 6, internal_stability_analysis=True)
 k = UHF(h13, 7, 6)
-l = UHF(h14, 7, 7)
+l = UHF(h14, 7, 7, internal_stability_analysis=True)
 m = UHF(h15, 8, 7)
 
-#mf3 = scf.UHF(h3).run()
-#mf4 = scf.UHF(h4).run()
-#mf8 = scf.UHF(h8).run()
-#mf12 = scf.UHF(h12).run() # correct & lower energy value than what my UHF code finds!
-#mf14 = scf.UHF(h14).run()
+"""Calculate Delta E in kcal/mol"""
 
 
 d3 = (a - 3 * q) * 627.5
@@ -126,7 +119,6 @@ d15 = (m - 15 * q) * 627.5
 
 
 print(d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
-
 
 
 
