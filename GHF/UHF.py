@@ -113,6 +113,17 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Number of iterations: " + str(i))
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
+        # calculate and return the spin (multiplicity)
+        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron,
+                                 two_electron)
+        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron)
+        val_a, vec_a = la.eigh(fock_a)
+        val_b, vec_b = la.eigh(fock_b)
+        coeff_a = X.dot(vec_a)
+        coeff_b = X.dot(vec_b)
+        spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
+
+
         return total_e
 
     # Second case: push the iteration out of a local minimum by adding two electrons to the system and using those coefficients
@@ -169,10 +180,16 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         while abs(delta_dens[-1]) >= 1e-12:
             iteration_t()
 
-        # Now that the test system has converged, we use the last calculated density matrix to calculate new orbital coefficients
+        # Now that the test system has converged, we use the last calculated density matrices to calculate new orbital coefficients
         # for both alpha and beta
-        val_a, coeff_a = la.eigh(densities_a[-1])
-        val_b, coeff_b = la.eigh(densities_b[-1])
+        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
+        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
+
+        val_a, vec_a = la.eigh(fock_a)
+        val_b, vec_b = la.eigh(fock_b)
+
+        coeff_a = X_t.dot(vec_a)
+        coeff_b = X_t.dot(vec_b)
 
         # reset the number of electrons in the system and rebuild the molecule
         molecule.nelectron = None
@@ -230,6 +247,16 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Number of iterations: " + str(i))
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
+        # calculate and return the spin (multiplicity)
+        fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron,
+                                 two_electron)
+        fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
+        val_a, vec_a = la.eigh(fock_a)
+        val_b, vec_b = la.eigh(fock_b)
+        coeff_a = X.dot(vec_a)
+        coeff_b = X.dot(vec_b)
+        spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
+
         return total_e
 
     # Third case: Use an internal stability analysis to find coefficients closer to the stable condition and use these for
@@ -282,13 +309,20 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
             iteration()
 
         # now that the system has converged, calculate the system's orbital coefficients from the last calculated density matrix
-        val_a, coeff_a = la.eigh(densities_a[-1])
-        val_b, coeff_b = la.eigh(densities_b[-1])
+
+        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron, two_electron)
+        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron)
+
+        val_a, vec_a = la.eigh(fock_a)
+        val_b, vec_b = la.eigh(fock_b)
+
+        coeff_a = X.dot(vec_a)
+        coeff_b = X.dot(vec_b)
 
         # the generate_g() function returns 3 values
         # - the gradient, g
         # - the result of h_op, the trial vector
-        # - the diagonal Hessian matrix, h_diag
+        # - the diagonal of the Hessian matrix, h_diag
         def generate_g():
             total_orbitals = overlap.shape[0] # total number of orbitals = number of basis functions
             n_vir_a = int(total_orbitals - occ_a) # number of virtual (unoccupied) alpha orbitals
@@ -465,5 +499,15 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         total_e = energies[-1]
         print("Number of iterations: " + str(i))
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
+
+        # calculate and return the spin (multiplicity)
+        fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron,
+                                 two_electron)
+        fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
+        val_a, vec_a = la.eigh(fock_a)
+        val_b, vec_b = la.eigh(fock_b)
+        coeff_a = X.dot(vec_a)
+        coeff_b = X.dot(vec_b)
+        spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
         return total_e
