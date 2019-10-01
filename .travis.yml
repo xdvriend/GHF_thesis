@@ -21,11 +21,12 @@ install:
   - conda create -q -n ghf_test 
   - conda activate ghf_test
   - conda install -c pyscf pyscf
-  - conda install pytest
-  - pip3 install -r requirements.txt
-  - pip3 install flake8
-  - pip3 install pytest-cov
-  - pip3 install -e . #install the ghf project in development mode
+  - pip install -U pip
+  - pip install -r requirements.txt
+  - pip install flake8
+  - pip install -U pytest
+  - pip install pytest-cov
+  - pip install ".[test]" #install the ghf project in development mode
 
 script:
   - pytest
