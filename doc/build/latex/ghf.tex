@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Sep 26, 2019}
+\date{Oct 02, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -87,7 +87,7 @@
 \pagestyle{normal}
 \phantomsection\label{\detokenize{index::doc}}
 
-\phantomsection\label{\detokenize{RHF:module-GHF.RHF}}\index{GHF.RHF (module)@\spxentry{GHF.RHF}\spxextra{module}}
+\phantomsection\label{\detokenize{RHF:module-ghf.RHF}}\index{ghf.RHF (module)@\spxentry{ghf.RHF}\spxextra{module}}
 
 \chapter{Restricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{RHF:restricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{RHF::doc}}
@@ -100,10 +100,10 @@ number of doubly occupied orbitals (1 for H\_2, 2 for H\_4,…)
 
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations
-\index{RHF() (in module GHF.RHF)@\spxentry{RHF()}\spxextra{in module GHF.RHF}}
+\index{RHF() (in module ghf.RHF)@\spxentry{RHF()}\spxextra{in module ghf.RHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:GHF.RHF.RHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_occupied\_orbitals}}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_occupied\_orbitals}}{}
 Input is a molecule and the number of occupied orbitals.
 
 Molecules are made in pySCF, eg.:
@@ -117,7 +117,7 @@ prints and returns RHF energy of h\_2
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{UHF:module-GHF.UHF}}\index{GHF.UHF (module)@\spxentry{GHF.UHF}\spxextra{module}}
+\phantomsection\label{\detokenize{UHF:module-ghf.UHF}}\index{ghf.UHF (module)@\spxentry{ghf.UHF}\spxextra{module}}
 
 \chapter{Unrestricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{UHF:unrestricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{UHF::doc}}
@@ -141,10 +141,10 @@ internal\_stability\_analysis: when true, an internal stability analysis will be
 
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations
-\index{UHF() (in module GHF.UHF)@\spxentry{UHF()}\spxextra{in module GHF.UHF}}
+\index{UHF() (in module ghf.UHF)@\spxentry{UHF()}\spxextra{in module ghf.UHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:GHF.UHF.UHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{occ\_a}, \emph{occ\_b}, \emph{extra\_e\_coeff=False}, \emph{internal\_stability\_analysis=False}}{}~
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{occ\_a}, \emph{occ\_b}, \emph{extra\_e\_coeff=False}, \emph{internal\_stability\_analysis=False}}{}~
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}
@@ -166,15 +166,15 @@ prints and returns UHF energy of h3
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{SCF_functions:module-GHF.SCF_functions}}\index{GHF.SCF\_functions (module)@\spxentry{GHF.SCF\_functions}\spxextra{module}}
+\phantomsection\label{\detokenize{SCF_functions:module-ghf.SCF_functions}}\index{ghf.SCF\_functions (module)@\spxentry{ghf.SCF\_functions}\spxextra{module}}
 
 \chapter{Useful functions for SCF procedure}
 \label{\detokenize{SCF_functions:useful-functions-for-scf-procedure}}\label{\detokenize{SCF_functions::doc}}
 A number of functions used throughout the UHF and RHF calculations are summarised here.
-\index{density\_matrix() (in module GHF.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module GHF.SCF\_functions}}
+\index{density\_matrix() (in module ghf.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:GHF.SCF_functions.density_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{density\_matrix}}}{\emph{f\_matrix}, \emph{occ}, \emph{trans}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.density_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{density\_matrix}}}{\emph{f\_matrix}, \emph{occ}, \emph{trans}}{}~\begin{itemize}
 \item {} 
 density() creates a density matrix from a fock matrix and the number of occupied orbitals.
 
@@ -187,18 +187,47 @@ a transformation matrix X.
 
 \end{fulllineitems}
 
-\index{get\_integrals() (in module GHF.SCF\_functions)@\spxentry{get\_integrals()}\spxextra{in module GHF.SCF\_functions}}
+\index{get\_integrals() (in module ghf.SCF\_functions)@\spxentry{get\_integrals()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:GHF.SCF_functions.get_integrals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals}}}{\emph{molecule}}{}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals}}}{\emph{molecule}}{}
 A function to calculate your integrals \& nuclear repulsion with pyscf.
 
 \end{fulllineitems}
 
-\index{trans\_matrix() (in module GHF.SCF\_functions)@\spxentry{trans\_matrix()}\spxextra{in module GHF.SCF\_functions}}
+\index{spin() (in module ghf.SCF\_functions)@\spxentry{spin()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:GHF.SCF_functions.trans_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{trans\_matrix}}}{\emph{overlap}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.spin}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{spin}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{occ\_a}} \textendash{} number of occupied alpha orbitals
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{occ\_b}} \textendash{} number of occupied beta orbitals
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coeff\_a}} \textendash{} MO coefficients of alpha orbitals
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coeff\_b}} \textendash{} MO coefficients of beta orbitals
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{overlap}} \textendash{} overlap matrix of the molecule
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+S\textasciicircum{}2, S\_z and spin multiplicity
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{trans\_matrix() (in module ghf.SCF\_functions)@\spxentry{trans\_matrix()}\spxextra{in module ghf.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.trans_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{trans\_matrix}}}{\emph{overlap}}{}~\begin{itemize}
 \item {} 
 Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation.
 
@@ -209,10 +238,10 @@ Input should be an overlap matrix.
 
 \end{fulllineitems}
 
-\index{uhf\_fock\_matrix() (in module GHF.SCF\_functions)@\spxentry{uhf\_fock\_matrix()}\spxextra{in module GHF.SCF\_functions}}
+\index{uhf\_fock\_matrix() (in module ghf.SCF\_functions)@\spxentry{uhf\_fock\_matrix()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:GHF.SCF_functions.uhf_fock_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_fock\_matrix}}}{\emph{density\_matrix\_1}, \emph{density\_matrix\_2}, \emph{one\_electron}, \emph{two\_electron}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.uhf_fock_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_fock\_matrix}}}{\emph{density\_matrix\_1}, \emph{density\_matrix\_2}, \emph{one\_electron}, \emph{two\_electron}}{}~\begin{itemize}
 \item {} 
 calculate a fock matrix from a given alpha and beta density matrix
 
@@ -226,10 +255,10 @@ input is the density matrix for alpha and beta, a one electron matrix and a two 
 
 \end{fulllineitems}
 
-\index{uhf\_scf\_energy() (in module GHF.SCF\_functions)@\spxentry{uhf\_scf\_energy()}\spxextra{in module GHF.SCF\_functions}}
+\index{uhf\_scf\_energy() (in module ghf.SCF\_functions)@\spxentry{uhf\_scf\_energy()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:GHF.SCF_functions.uhf_scf_energy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{GHF.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_scf\_energy}}}{\emph{density\_matrix\_a}, \emph{density\_matrix\_b}, \emph{fock\_a}, \emph{fock\_b}, \emph{one\_electron}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.uhf_scf_energy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_scf\_energy}}}{\emph{density\_matrix\_a}, \emph{density\_matrix\_b}, \emph{fock\_a}, \emph{fock\_b}, \emph{one\_electron}}{}~\begin{itemize}
 \item {} 
 calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total
 
@@ -249,9 +278,9 @@ input is the density matrices for alpha and beta, the fock matrices for alpha an
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
 \bigletter{g}
-\item\relax\sphinxstyleindexentry{GHF.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-GHF.RHF}}
-\item\relax\sphinxstyleindexentry{GHF.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-GHF.SCF_functions}}
-\item\relax\sphinxstyleindexentry{GHF.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-GHF.UHF}}
+\item\relax\sphinxstyleindexentry{ghf.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-ghf.RHF}}
+\item\relax\sphinxstyleindexentry{ghf.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-ghf.SCF_functions}}
+\item\relax\sphinxstyleindexentry{ghf.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-ghf.UHF}}
 \end{sphinxtheindex}
 
 \renewcommand{\indexname}{Index}

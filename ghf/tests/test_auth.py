@@ -29,6 +29,6 @@ def test_extra_e():
     assert UHF(h4, 2, 2, extra_e_coeff = True) == -2.021088247702995
 
 def test_stability():
-    assert UHF(h14, 7, 7, internal_stability_analysis=True) == -7.531851094087873
+    assert UHF(h14, 7, 7, internal_stability_analysis=True) == -7.53185109407865
 
 

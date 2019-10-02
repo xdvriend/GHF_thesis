@@ -8,6 +8,7 @@ from pyscf import *
 import numpy as np
 from numpy import linalg as la
 from scipy import diag
+from functools import reduce
 
 
 def get_integrals(molecule):
@@ -70,3 +71,28 @@ def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_elect
     scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
     scf_e *= 0.5  # divide by two, since the summation technically adds the alpha and beta values twice
     return scf_e
+
+def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
+    """
+
+    :param occ_a: number of occupied alpha orbitals
+    :param occ_b: number of occupied beta orbitals
+    :param coeff_a: MO coefficients of alpha orbitals
+    :param coeff_b: MO coefficients of beta orbitals
+    :param overlap: overlap matrix of the molecule
+    :return: S^2, S_z and spin multiplicity
+    """
+    occ_indx_a = np.arange(occ_a)  # indices of the occupied alpha orbitals
+    occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
+    occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
+    occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
+    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))
+    ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)
+    ss_z = (occ_b - occ_a)**2 * 0.25
+    ss = (ss_xy + ss_z).real
+    s_z = (occ_a - occ_b) / 2
+    multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1
+    print("<S^2> = " + str(ss) + ", <S_z> = " + str(s_z) + ", Multiplicity = " + str(multiplicity))
+    return ss, s_z, multiplicity
+
+

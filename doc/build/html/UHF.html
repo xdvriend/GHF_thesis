@@ -149,7 +149,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-GHF.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
+  <span class="target" id="module-ghf.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Unrestricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#unrestricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This function calculates the UHF energy for a given molecule and the number of occupied alpha and beta orbitals. 
 The molecule has to be created in pySCF:
@@ -165,8 +165,8 @@ second the number of occupied beta orbitals</p>
 <p>The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations</p>
 <dl class="function">
-<dt id="GHF.UHF.UHF">
-<code class="sig-prename descclassname">GHF.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">extra_e_coeff=False</em>, <em class="sig-param">internal_stability_analysis=False</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.UHF.UHF" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.UHF.UHF">
+<code class="sig-prename descclassname">ghf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">extra_e_coeff=False</em>, <em class="sig-param">internal_stability_analysis=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
 <dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">UHF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>

@@ -1,3 +1,6 @@
 ghf.egg-info/
 ghf/__pycache__/
 tests/__pycache__/
+doc/.DS_Store
+doc/build/.DS_Store
+doc/source/.DS_Store
