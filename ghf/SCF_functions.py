@@ -73,12 +73,20 @@ def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_elect
     return scf_e
 
 def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
+    """
+
+    :param occ_a: number of occupied alpha orbitals
+    :param occ_b: number of occupied beta orbitals
+    :param coeff_a: MO coefficients of alpha orbitals
+    :param coeff_b: MO coefficients of beta orbitals
+    :param overlap: overlap matrix of the molecule
+    :return: S^2, S_z and spin multiplicity
+    """
     occ_indx_a = np.arange(occ_a)  # indices of the occupied alpha orbitals
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
     s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))
-    #print(occ_a_orb, occ_b_orb)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)
     ss_z = (occ_b - occ_a)**2 * 0.25
     ss = (ss_xy + ss_z).real

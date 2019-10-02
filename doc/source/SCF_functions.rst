@@ -1,2 +1,2 @@
-.. automodule:: GHF.SCF_functions
+.. automodule:: ghf.SCF_functions
     :members:

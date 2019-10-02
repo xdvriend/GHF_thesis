@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.9.6)  26 SEP 2019 13:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.9.6)  2 OCT 2019 17:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -875,49 +875,43 @@ Underfull \hbox (badness 10000) in paragraph at lines 147--148
 ]
 Chapter 3.
 
-Underfull \hbox (badness 10000) in paragraph at lines 215--215
+Underfull \hbox (badness 10000) in paragraph at lines 244--244
 []\T1/ptm/m/it/10 density_matrix_1\T1/ptm/m/n/10 , \T1/ptm/m/it/10 den-sity_mat
 rix_2\T1/ptm/m/n/10 , \T1/ptm/m/it/10 one_electron\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 232--232
+Underfull \hbox (badness 10000) in paragraph at lines 261--261
 []\T1/ptm/m/it/10 density_matrix_a\T1/ptm/m/n/10 , \T1/ptm/m/it/10 den-sity_mat
 rix_b\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fock_a\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fo
 ck_b\T1/ptm/m/n/10 ,
  []
 
-[5] [6
+[5] [6] [7
 
-] [7
 
 
 ] (./ghf.ind [8
 
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
-[]\T1/pcr/m/n/10 uhf_fock_matrix() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ule
- []
-
-[9
+] [9
 
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 259.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 259.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 288.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 288.
  (./ghf.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 259.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 259.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 288.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 288.
 Package rerunfilecheck Info: File `ghf.out' has not changed.
-(rerunfilecheck)             Checksum: 09069B154E1C992944E9205F4424430F;1079.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 259.
+(rerunfilecheck)             Checksum: 90A2B44B448B7D26D463D48B6D065C65;1079.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 288.
  ) 
 Here is how much of TeX's memory you used:
- 13387 strings out of 492616
- 188083 string characters out of 6129482
- 299214 words of memory out of 5000000
- 16985 multiletter control sequences out of 15000+600000
+ 13389 strings out of 492616
+ 188132 string characters out of 6129482
+ 299273 words of memory out of 5000000
+ 16986 multiletter control sequences out of 15000+600000
  46449 words of font info for 67 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  37i,11n,45p,473b,535s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -931,10 +925,10 @@ s/type1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type
 1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/urw/t
 imes/utmb8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/urw/times/utmr8
 a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on ghf.pdf (13 pages, 115459 bytes).
+Output written on ghf.pdf (13 pages, 116967 bytes).
 PDF statistics:
- 165 PDF objects out of 1000 (max. 8388607)
- 133 compressed objects within 2 object streams
- 29 named destinations out of 1000 (max. 500000)
+ 167 PDF objects out of 1000 (max. 8388607)
+ 135 compressed objects within 2 object streams
+ 30 named destinations out of 1000 (max. 500000)
  61 words of extra memory for PDF output out of 10000 (max. 10000000)
 

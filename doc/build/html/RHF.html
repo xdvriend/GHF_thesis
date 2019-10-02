@@ -149,7 +149,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-GHF.RHF"></span><div class="section" id="restricted-hartree-fock-by-means-of-scf-procedure">
+  <span class="target" id="module-ghf.RHF"></span><div class="section" id="restricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Restricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#restricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This function calculates the RHF energy of a given molecule and the number of occupied orbitals.
 The molecule has to be created in pySCF:
@@ -159,8 +159,8 @@ number of doubly occupied orbitals (1 for H_2, 2 for H_4,…)</p>
 <p>The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations</p>
 <dl class="function">
-<dt id="GHF.RHF.RHF">
-<code class="sig-prename descclassname">GHF.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_occupied_orbitals</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.RHF.RHF" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.RHF.RHF">
+<code class="sig-prename descclassname">ghf.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_occupied_orbitals</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input is a molecule and the number of occupied orbitals.</p>
 <p>Molecules are made in pySCF, eg.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>

@@ -148,12 +148,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-GHF.SCF_functions"></span><div class="section" id="useful-functions-for-scf-procedure">
+  <span class="target" id="module-ghf.SCF_functions"></span><div class="section" id="useful-functions-for-scf-procedure">
 <h1>Useful functions for SCF procedure<a class="headerlink" href="#useful-functions-for-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>A number of functions used throughout the UHF and RHF calculations are summarised here.</p>
 <dl class="function">
-<dt id="GHF.SCF_functions.density_matrix">
-<code class="sig-prename descclassname">GHF.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.SCF_functions.density_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>density() creates a density matrix from a fock matrix and the number of occupied orbitals.</p></li>
 <li><p>Input is a fock matrix, the number of occupied orbitals, which can be separat for alpha and beta in case of UHF. And</p></li>
@@ -162,14 +162,33 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="GHF.SCF_functions.get_integrals">
-<code class="sig-prename descclassname">GHF.SCF_functions.</code><code class="sig-name descname">get_integrals</code><span class="sig-paren">(</span><em class="sig-param">molecule</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.SCF_functions.get_integrals" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.SCF_functions.get_integrals">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">get_integrals</code><span class="sig-paren">(</span><em class="sig-param">molecule</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.get_integrals" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function to calculate your integrals &amp; nuclear repulsion with pyscf.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="GHF.SCF_functions.trans_matrix">
-<code class="sig-prename descclassname">GHF.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.SCF_functions.spin">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">spin</code><span class="sig-paren">(</span><em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">coeff_a</em>, <em class="sig-param">coeff_b</em>, <em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.spin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occ_a</strong> – number of occupied alpha orbitals</p></li>
+<li><p><strong>occ_b</strong> – number of occupied beta orbitals</p></li>
+<li><p><strong>coeff_a</strong> – MO coefficients of alpha orbitals</p></li>
+<li><p><strong>coeff_b</strong> – MO coefficients of beta orbitals</p></li>
+<li><p><strong>overlap</strong> – overlap matrix of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>S^2, S_z and spin multiplicity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.trans_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation.</p></li>
 <li><p>Input should be an overlap matrix.</p></li>
@@ -177,8 +196,8 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="GHF.SCF_functions.uhf_fock_matrix">
-<code class="sig-prename descclassname">GHF.SCF_functions.</code><code class="sig-name descname">uhf_fock_matrix</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_1</em>, <em class="sig-param">density_matrix_2</em>, <em class="sig-param">one_electron</em>, <em class="sig-param">two_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.SCF_functions.uhf_fock_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.SCF_functions.uhf_fock_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">uhf_fock_matrix</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_1</em>, <em class="sig-param">density_matrix_2</em>, <em class="sig-param">one_electron</em>, <em class="sig-param">two_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.uhf_fock_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>calculate a fock matrix from a given alpha and beta density matrix</p></li>
 <li><p>fock alpha if 1 = alpha and 2 = beta and vice versa</p></li>
@@ -187,8 +206,8 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="GHF.SCF_functions.uhf_scf_energy">
-<code class="sig-prename descclassname">GHF.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#GHF.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="ghf.SCF_functions.uhf_scf_energy">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total</p></li>
 <li><p>then calculate the initial electronic energy and put it into an array</p></li>

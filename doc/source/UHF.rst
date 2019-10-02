@@ -1,2 +1,2 @@
-.. automodule:: GHF.UHF
+.. automodule:: ghf.UHF
     :members:

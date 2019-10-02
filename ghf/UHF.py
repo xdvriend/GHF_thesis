@@ -114,15 +114,20 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
         # calculate and return the spin (multiplicity)
-        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron,
+        # first calculate and orthogonalise the fock matrix
+        # calculate the coefficients from the orthogonal fock matrix
+        fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], one_electron,
                                  two_electron)
-        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron)
-        val_a, vec_a = la.eigh(fock_a)
-        val_b, vec_b = la.eigh(fock_b)
-        coeff_a = X.dot(vec_a)
-        coeff_b = X.dot(vec_b)
-        #mf = scf.UHF(molecule)
-        #mf.kernel()
+        fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], one_electron, two_electron)
+
+        fock_a_ = X.T.dot(fock_a).dot(X)  # orthogonalize both fock matrices
+        fock_b_ = X.T.dot(fock_b).dot(X)
+
+        val_a, vec_a = la.eigh(fock_a_)
+        val_b, vec_b = la.eigh(fock_b_)
+        coeff_a = X @ vec_a
+        coeff_b = X @ vec_b
+
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
 
@@ -187,8 +192,11 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
         fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
 
-        val_a, vec_a = la.eigh(fock_a)
-        val_b, vec_b = la.eigh(fock_b)
+        fock_orth_a = X_t.T.dot(fock_a).dot(X_t)  # orthogonalize both fock matrices
+        fock_orth_b = X_t.T.dot(fock_b).dot(X_t)
+
+        val_a, vec_a = la.eigh(fock_orth_a)
+        val_b, vec_b = la.eigh(fock_orth_b)
 
         coeff_a = X_t.dot(vec_a)
         coeff_b = X_t.dot(vec_b)
@@ -250,13 +258,20 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
         # calculate and return the spin (multiplicity)
-        fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron,
+        # first calculate and orthogonalise the fock matrix
+        # calculate the coefficients from the orthogonal fock matrix
+        fock_a = uhf_fock_matrix(imp_dens_a[-2], imp_dens_b[-2], one_electron,
                                  two_electron)
-        fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
-        val_a, vec_a = la.eigh(fock_a)
-        val_b, vec_b = la.eigh(fock_b)
-        coeff_a = X.dot(vec_a)
-        coeff_b = X.dot(vec_b)
+        fock_b = uhf_fock_matrix(imp_dens_b[-2], imp_dens_a[-2], one_electron, two_electron)
+
+        fock_a_ = X.T.dot(fock_a).dot(X)  # orthogonalize both fock matrices
+        fock_b_ = X.T.dot(fock_b).dot(X)
+
+        val_a, vec_a = la.eigh(fock_a_)
+        val_b, vec_b = la.eigh(fock_b_)
+        coeff_a = X @ vec_a
+        coeff_b = X @ vec_b
+
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
         return total_e
@@ -315,8 +330,11 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron, two_electron)
         fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron, two_electron)
 
-        val_a, vec_a = la.eigh(fock_a)
-        val_b, vec_b = la.eigh(fock_b)
+        fock_orth_a = X.T.dot(fock_a).dot(X)  # orthogonalize the fock matrices
+        fock_orth_b = X.T.dot(fock_b).dot(X)
+
+        val_a, vec_a = la.eigh(fock_orth_a)
+        val_b, vec_b = la.eigh(fock_orth_b)
 
         coeff_a = X.dot(vec_a)
         coeff_b = X.dot(vec_b)
@@ -503,13 +521,20 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         print("Converged SCF energy in Hartree: " + str(total_e) + " (UHF)")
 
         # calculate and return the spin (multiplicity)
-        fock_a = uhf_fock_matrix(imp_dens_a[-1], imp_dens_b[-1], one_electron,
+        # first calculate and orthogonalise the fock matrix
+        # calculate the coefficients from the orthogonal fock matrix
+        fock_a = uhf_fock_matrix(imp_dens_a[-2], imp_dens_b[-2], one_electron,
                                  two_electron)
-        fock_b = uhf_fock_matrix(imp_dens_b[-1], imp_dens_a[-1], one_electron, two_electron)
-        val_a, vec_a = la.eigh(fock_a)
-        val_b, vec_b = la.eigh(fock_b)
-        coeff_a = X.dot(vec_a)
-        coeff_b = X.dot(vec_b)
+        fock_b = uhf_fock_matrix(imp_dens_b[-2], imp_dens_a[-2], one_electron, two_electron)
+
+        fock_a_ = X.T.dot(fock_a).dot(X)  # orthogonalize both fock matrices
+        fock_b_ = X.T.dot(fock_b).dot(X)
+
+        val_a, vec_a = la.eigh(fock_a_)
+        val_b, vec_b = la.eigh(fock_b_)
+        coeff_a = X @ vec_a
+        coeff_b = X @ vec_b
+
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
         return total_e

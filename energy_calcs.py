@@ -7,6 +7,8 @@ from pyscf import *
 # This part needs to be ran in pyscf
 # Create the molecules as specified in the RHF/UHF code
 
+h2 = gto.M(atom = 'h 0 0 0; h 0 0 0.1', spin = 0, basis = 'cc-pvdz')
+
 
 h = gto.M(atom = 'h 0 0 0', spin = 1, basis = 'cc-pvdz')
 
@@ -86,8 +88,9 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 # extra electron method, internal stability analysis
 
 #q = UHF(h, 1, 0)
+#a = UHF(h2, 1, 1)
 a = UHF(h3, 2, 1)
-#b = UHF(h4, 2, 2, extra_e_coeff=True)
+b = UHF(h4, 2, 2, extra_e_coeff=True)
 #c = UHF(h5, 3, 2)
 #d = UHF(h6, 3, 3)
 #e = UHF(h7, 4, 3)
@@ -95,12 +98,12 @@ a = UHF(h3, 2, 1)
 #g = UHF(h9, 5, 4)
 #h = UHF(h10, 5, 5)
 #i = UHF(h11, 6, 5)
-#j = UHF(h12, 6, 6, internal_stability_analysis=True)
+j = UHF(h12, 6, 6, internal_stability_analysis=True)
 #k = UHF(h13, 7, 6)
-l = UHF(h14, 7, 7,internal_stability_analysis=True)
+#l = UHF(h14, 7, 7,internal_stability_analysis=True)
 #m = UHF(h15, 8, 7)
 
-mf = scf.UHF(h3).run()
+
 
 
 
