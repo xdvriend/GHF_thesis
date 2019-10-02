@@ -139,7 +139,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         one_electron_t = get_integrals(molecule)[1]
         two_electron_t = get_integrals(molecule)[2]
 
-        # Calculate the orthogonalistion matrix and the core guess for the new test system (_t)
+        # Calculate the orthogonalisation matrix and the core guess for the new test system (_t)
         X_t = trans_matrix(overlap_t)
         core_guess_t = X_t.T.dot(one_electron_t).dot(X_t)
 
