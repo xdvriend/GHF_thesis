@@ -97,7 +97,7 @@ a = UHF(h3, 2, 1)
 #i = UHF(h11, 6, 5)
 #j = UHF(h12, 6, 6, internal_stability_analysis=True)
 #k = UHF(h13, 7, 6)
-#l = UHF(h14, 7, 7,internal_stability_analysis=True)
+l = UHF(h14, 7, 7,internal_stability_analysis=True)
 #m = UHF(h15, 8, 7)
 
 mf = scf.UHF(h3).run()
