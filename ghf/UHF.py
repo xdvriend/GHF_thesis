@@ -20,7 +20,7 @@ There are two extra options added into the function:
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations
 """
-from GHF.SCF_functions import *
+from ghf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg

@@ -12,7 +12,7 @@ number of doubly occupied orbitals (1 for H_2, 2 for H_4,...)
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations"""
 
-from GHF.SCF_functions import *
+from ghf.SCF_functions import *
 
 def RHF(molecule, number_occupied_orbitals):
     """

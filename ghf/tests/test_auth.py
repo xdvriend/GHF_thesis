@@ -1,6 +1,6 @@
-from GHF.RHF import RHF
-from GHF.UHF import UHF
-from GHF.SCF_functions import *
+from ghf.RHF import RHF
+from ghf.UHF import UHF
+from ghf.SCF_functions import *
 from pyscf import *
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
