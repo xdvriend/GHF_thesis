@@ -1,6 +1,6 @@
-from GHF.RHF import RHF
-from GHF.UHF import UHF
-from GHF.SCF_functions import *
+from ghf.RHF import RHF
+from ghf.UHF import UHF
+from ghf.SCF_functions import *
 from pyscf import *
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,7 +26,7 @@ def test_UHF():
     assert UHF(h3, 2, 1) == -1.5062743202681235
 
 def test_extra_e():
-    assert UHF(h4, 2, extra_e_coeff = True) == -2.021088247702995
+    assert UHF(h4, 2, 2, extra_e_coeff = True) == -2.021088247702995
 
 def test_stability():
     assert UHF(h14, 7, 7, internal_stability_analysis=True) == -7.53185109407865

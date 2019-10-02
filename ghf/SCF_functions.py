@@ -78,6 +78,7 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
     s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))
+    #print(occ_a_orb, occ_b_orb)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)
     ss_z = (occ_b - occ_a)**2 * 0.25
     ss = (ss_xy + ss_z).real

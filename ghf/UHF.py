@@ -20,7 +20,7 @@ There are two extra options added into the function:
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations
 """
-from GHF.SCF_functions import *
+from ghf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg
@@ -121,6 +121,8 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         val_b, vec_b = la.eigh(fock_b)
         coeff_a = X.dot(vec_a)
         coeff_b = X.dot(vec_b)
+        #mf = scf.UHF(molecule)
+        #mf.kernel()
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
 
