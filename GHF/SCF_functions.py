@@ -12,7 +12,7 @@ def get_integrals(molecule):
     nuclear_repulsion = gto.mole.energy_nuc(molecule)
     return overlap, one_electron, two_electron, nuclear_repulsion
 
-"""Define a transformation matrix X"""
+"""Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation"""
 
 def trans_matrix(overlap):
     eigenvalues, eigenvectors = la.eigh(overlap)  # calculate eigenvalues & eigenvectors of the overlap matrix

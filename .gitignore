@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ghf.egg-info/
 ghf/__pycache__/
 ghf/.DS_Store
@@ -5,3 +6,8 @@ tests/__pycache__/
 doc/.DS_Store
 doc/build/.DS_Store
 doc/source/.DS_Store
+=======
+*/__pycache__
+*/.idea
+*/.DS_Store
+>>>>>>> 4f711325fe0b14587ba7bf20cbb31b18a40e74e7
