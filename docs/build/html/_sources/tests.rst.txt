@@ -1,0 +1,2 @@
+.. automodule:: ghf.tests
+    :members:
