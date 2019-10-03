@@ -8,6 +8,8 @@ docs/source/.DS_Store
 docs/build/latex
 !docs/build/latex/ghf.tex
 !docs/build/latex/ghf.pdf
+docs/build/html
+!docs/build/html/*.html
 
 
 
