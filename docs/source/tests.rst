@@ -1,2 +1,2 @@
-.. automodule:: ghf.tests
+.. automodule:: ghf.tests.test_auth
     :members:

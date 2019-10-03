@@ -2,5 +2,6 @@
 \contentsline {chapter}{\numberline {1}Restricted Hartree Fock, by means of SCF procedure}{1}{chapter.1}% 
 \contentsline {chapter}{\numberline {2}Unrestricted Hartree Fock, by means of SCF procedure}{3}{chapter.2}% 
 \contentsline {chapter}{\numberline {3}Useful functions for SCF procedure}{5}{chapter.3}% 
-\contentsline {chapter}{Python Module Index}{7}{section*.14}% 
-\contentsline {chapter}{Index}{9}{section*.15}% 
+\contentsline {chapter}{\numberline {4}Testing the RHF and UHF methods}{7}{chapter.4}% 
+\contentsline {chapter}{Python Module Index}{9}{section*.19}% 
+\contentsline {chapter}{Index}{11}{section*.20}% 

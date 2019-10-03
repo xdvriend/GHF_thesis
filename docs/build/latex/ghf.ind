@@ -12,6 +12,7 @@
   \item \spxentry{get\_integrals()}\spxextra{in module ghf.SCF\_functions}, \hyperpage{5}
   \item \spxentry{ghf.RHF}\spxextra{module}, \hyperpage{1}
   \item \spxentry{ghf.SCF\_functions}\spxextra{module}, \hyperpage{3}
+  \item \spxentry{ghf.tests.test\_auth}\spxextra{module}, \hyperpage{6}
   \item \spxentry{ghf.UHF}\spxextra{module}, \hyperpage{1}
 
   \indexspace
@@ -24,6 +25,10 @@
 
   \indexspace
   \bigletter T
+  \item \spxentry{test\_extra\_e()}\spxextra{in module ghf.tests.test\_auth}, \hyperpage{7}
+  \item \spxentry{test\_RHF()}\spxextra{in module ghf.tests.test\_auth}, \hyperpage{7}
+  \item \spxentry{test\_stability()}\spxextra{in module ghf.tests.test\_auth}, \hyperpage{7}
+  \item \spxentry{test\_UHF()}\spxextra{in module ghf.tests.test\_auth}, \hyperpage{7}
   \item \spxentry{trans\_matrix()}\spxextra{in module ghf.SCF\_functions}, \hyperpage{5}
 
   \indexspace

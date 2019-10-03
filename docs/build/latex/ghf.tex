@@ -272,6 +272,44 @@ input is the density matrices for alpha and beta, the fock matrices for alpha an
 
 \end{fulllineitems}
 
+\phantomsection\label{\detokenize{tests:module-ghf.tests.test_auth}}\index{ghf.tests.test\_auth (module)@\spxentry{ghf.tests.test\_auth}\spxextra{module}}
+
+\chapter{Testing the RHF and UHF methods}
+\label{\detokenize{tests:testing-the-rhf-and-uhf-methods}}\label{\detokenize{tests::doc}}
+Simple tests to check whether or not the functions return the correct value.
+\index{test\_RHF() (in module ghf.tests.test\_auth)@\spxentry{test\_RHF()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_RHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_RHF}}}{}{}
+test\_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10\textasciicircum{}16.
+
+\end{fulllineitems}
+
+\index{test\_UHF() (in module ghf.tests.test\_auth)@\spxentry{test\_UHF()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_UHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_UHF}}}{}{}
+test\_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
+\index{test\_extra\_e() (in module ghf.tests.test\_auth)@\spxentry{test\_extra\_e()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_extra_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_extra\_e}}}{}{}
+test\_extra\_e will test the UHF method, with the added option of first adding 2 electrons to the system and using those coefficients
+for the actual system, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
+\index{test\_stability() (in module ghf.tests.test\_auth)@\spxentry{test\_stability()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_stability}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_stability}}}{}{}
+test\_stability will test the UHF method, with stability analysis, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
 
 
 \renewcommand{\indexname}{Python Module Index}
@@ -280,6 +318,7 @@ input is the density matrices for alpha and beta, the fock matrices for alpha an
 \bigletter{g}
 \item\relax\sphinxstyleindexentry{ghf.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-ghf.RHF}}
 \item\relax\sphinxstyleindexentry{ghf.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-ghf.SCF_functions}}
+\item\relax\sphinxstyleindexentry{ghf.tests.test\_auth}\sphinxstyleindexpageref{tests:\detokenize{module-ghf.tests.test_auth}}
 \item\relax\sphinxstyleindexentry{ghf.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-ghf.UHF}}
 \end{sphinxtheindex}
 
