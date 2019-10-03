@@ -36,7 +36,7 @@ def trans_matrix(overlap):
 def density_matrix(f_matrix, occ, trans):
     """
     - density() creates a density matrix from a fock matrix and the number of occupied orbitals.
-    - Input is a fock matrix, the number of occupied orbitals, which can be separat for alpha and beta in case of UHF. And
+    - Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF. And
     a transformation matrix X.
     """
     f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
@@ -86,12 +86,12 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))
-    ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)
-    ss_z = (occ_b - occ_a)**2 * 0.25
-    ss = (ss_xy + ss_z).real
-    s_z = (occ_a - occ_b) / 2
-    multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1
+    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb)) # Basically (alpha orbitals).T * S * (beta orbitals)
+    ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s) # = S^2_x + S^2_y
+    ss_z = (occ_b - occ_a)**2 * 0.25 # = S^2_z
+    ss = (ss_xy + ss_z).real # = S^2_total
+    s_z = (occ_a - occ_b) / 2 # = S_z
+    multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1 # = 2S+1
     print("<S^2> = " + str(ss) + ", <S_z> = " + str(s_z) + ", Multiplicity = " + str(multiplicity))
     return ss, s_z, multiplicity
 

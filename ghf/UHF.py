@@ -47,7 +47,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
     ++++++++++++++++++++++++++++++++
 
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> UHF(h3, 2, 1, Internal_stability_analysis=True)
+    >>> UHF(h3, 2, 1, internal_stability_analysis=True)
 
      prints and returns UHF energy of h3
 
