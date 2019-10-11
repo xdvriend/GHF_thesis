@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Testing the RHF and UHF methods &mdash; GHF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Useful functions for SCF procedure" href="SCF_functions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GHF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing the RHF and UHF methods</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GHF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Testing the RHF and UHF methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tests.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-ghf.tests.test_auth"></span><div class="section" id="testing-the-rhf-and-uhf-methods">
+<h1>Testing the RHF and UHF methods<a class="headerlink" href="#testing-the-rhf-and-uhf-methods" title="Permalink to this headline">¶</a></h1>
+<p>Simple tests to check whether or not the functions return the correct value.</p>
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_RHF">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_RHF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_RHF" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^16.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_UHF">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_UHF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_UHF" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_extra_e">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_extra_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_extra_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_extra_e will test the UHF method, with the added option of first adding 2 electrons to the system and using those coefficients
+for the actual system, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_stability">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_stability" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_stability will test the UHF method, with stability analysis, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="SCF_functions.html" class="btn btn-neutral float-left" title="Useful functions for SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Xeno De Vriendt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

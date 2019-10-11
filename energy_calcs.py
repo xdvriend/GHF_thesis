@@ -1,5 +1,5 @@
-from GHF.RHF import RHF
-from GHF.UHF import UHF
+from ghf.RHF import RHF
+from ghf.UHF import UHF
 from pyscf import *
 
 

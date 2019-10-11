@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Useful functions for SCF procedure &mdash; GHF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Testing the RHF and UHF methods" href="tests.html" />
+    <link rel="prev" title="Unrestricted Hartree Fock, by means of SCF procedure" href="UHF.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GHF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GHF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Useful functions for SCF procedure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/SCF_functions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-ghf.SCF_functions"></span><div class="section" id="useful-functions-for-scf-procedure">
+<h1>Useful functions for SCF procedure<a class="headerlink" href="#useful-functions-for-scf-procedure" title="Permalink to this headline">¶</a></h1>
+<p>A number of functions used throughout the UHF and RHF calculations are summarised here.</p>
+<dl class="function">
+<dt id="ghf.SCF_functions.density_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><p>density() creates a density matrix from a fock matrix and the number of occupied orbitals.</p></li>
+<li><p>Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF. And</p></li>
+</ul>
+<p>a transformation matrix X.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.get_integrals">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">get_integrals</code><span class="sig-paren">(</span><em class="sig-param">molecule</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.get_integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to calculate your integrals &amp; nuclear repulsion with pyscf.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.spin">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">spin</code><span class="sig-paren">(</span><em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">coeff_a</em>, <em class="sig-param">coeff_b</em>, <em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.spin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occ_a</strong> – number of occupied alpha orbitals</p></li>
+<li><p><strong>occ_b</strong> – number of occupied beta orbitals</p></li>
+<li><p><strong>coeff_a</strong> – MO coefficients of alpha orbitals</p></li>
+<li><p><strong>coeff_b</strong> – MO coefficients of beta orbitals</p></li>
+<li><p><strong>overlap</strong> – overlap matrix of the molecule</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>S^2, S_z and spin multiplicity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.trans_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><p>Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation.</p></li>
+<li><p>Input should be an overlap matrix.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.uhf_fock_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">uhf_fock_matrix</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_1</em>, <em class="sig-param">density_matrix_2</em>, <em class="sig-param">one_electron</em>, <em class="sig-param">two_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.uhf_fock_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><p>calculate a fock matrix from a given alpha and beta density matrix</p></li>
+<li><p>fock alpha if 1 = alpha and 2 = beta and vice versa</p></li>
+<li><p>input is the density matrix for alpha and beta, a one electron matrix and a two electron tensor.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.uhf_scf_energy">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><p>calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total</p></li>
+<li><p>then calculate the initial electronic energy and put it into an array</p></li>
+<li><p>input is the density matrices for alpha and beta, the fock matrices for alpha and beta and lastly a one electron matrix</p></li>
+</ul>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tests.html" class="btn btn-neutral float-right" title="Testing the RHF and UHF methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="UHF.html" class="btn btn-neutral float-left" title="Unrestricted Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Xeno De Vriendt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
