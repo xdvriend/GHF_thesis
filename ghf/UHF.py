@@ -25,6 +25,7 @@ from functools import reduce
 from pyscf import *
 import scipy.linalg
 
+
 def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis=False):
     """
     Calculate UHF energy, with or without adding extra electrons to improve coefficients or internal stability analysis.
@@ -58,7 +59,8 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
     # first case: no extra electrons and no stability analysis
     if extra_e_coeff==False and internal_stability_analysis==False:
 
-        # get_integrals (from GHF.SCF_functions) calculates the overlap matrix, one_electron integrals, two_electron_integrals
+        # get_integrals (from GHF.SCF_functions) calculates the overlap matrix, one_electron integrals,
+        # two_electron_integrals
         # and the nuclear repulsion value.
         overlap = get_integrals(molecule)[0]
         one_electron = get_integrals(molecule)[1]
