@@ -72,6 +72,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         X = trans_matrix(overlap)
         core_guess = X.T.dot(one_electron).dot(X)
 
+
         # create guess density matrix from core guess, separate for alpha and beta and put it into an array
         guess_density_a = density_matrix(core_guess, occ_a, X)
         guess_density_b = density_matrix(core_guess, occ_b, X)
