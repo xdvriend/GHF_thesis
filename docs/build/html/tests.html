@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; GHF 0.1 documentation</title>
+  <title>Testing the RHF and UHF methods &mdash; GHF 0.1 documentation</title>
   
 
   
@@ -80,10 +80,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing the RHF and UHF methods</a></li>
 </ul>
 
             
@@ -129,7 +131,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>&lt;no title&gt;</li>
+      <li>Testing the RHF and UHF methods</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -148,7 +150,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
+  <span class="target" id="module-ghf.tests.test_auth"></span><div class="section" id="testing-the-rhf-and-uhf-methods">
+<h1>Testing the RHF and UHF methods<a class="headerlink" href="#testing-the-rhf-and-uhf-methods" title="Permalink to this headline">¶</a></h1>
+<p>Simple tests to check whether or not the functions return the correct value.</p>
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_RHF">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_RHF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_RHF" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^16.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_UHF">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_UHF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_UHF" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_extra_e">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_extra_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_extra_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_extra_e will test the UHF method, with the added option of first adding 2 electrons to the system and using those coefficients
+for the actual system, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.tests.test_auth.test_stability">
+<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_stability" title="Permalink to this definition">¶</a></dt>
+<dd><p>test_stability will test the UHF method, with stability analysis, by checking whether or not it returns the expected result. The accuracy is 10^-6.</p>
+</dd></dl>
+
+</div>
+
 
            </div>
            

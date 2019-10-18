@@ -12,5 +12,6 @@ GHF's documentation
 
    RHF
    UHF
+   GHF
    SCF_functions
    tests

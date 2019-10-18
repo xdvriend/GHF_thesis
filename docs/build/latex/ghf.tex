@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Oct 10, 2019}
+\date{Oct 18, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -163,6 +163,40 @@ for eventual subsequent calculations
 
 prints and returns UHF energy of h3
 \end{quote}
+
+\end{fulllineitems}
+
+\phantomsection\label{\detokenize{GHF:module-ghf.GHF}}\index{ghf.GHF (module)@\spxentry{ghf.GHF}\spxextra{module}}
+
+\chapter{Generalised Hartree Fock, by means of SCF procedure}
+\label{\detokenize{GHF:generalised-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{GHF::doc}}
+This function calculates the GHF energy for a given molecule and the number of electrons in the system.
+The molecule has to be created in pySCF:
+molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
+
+The function can do this in two ways.
+\begin{itemize}
+\item {} 
+Create the general density matrix and work with this as a whole
+
+\item {} 
+create the density matrix in spin-blocked notation
+
+\end{itemize}
+\index{GHF() (in module ghf.GHF)@\spxentry{GHF()}\spxextra{in module ghf.GHF}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.GHF.}}\sphinxbfcode{\sphinxupquote{GHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+Input is a molecule and the number of electrons.
+
+Molecules are made in pySCF, eg.:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{GHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
+\end{sphinxVerbatim}
+
+prints and returns GHF energy of h\_2
 
 \end{fulllineitems}
 
@@ -272,14 +306,54 @@ input is the density matrices for alpha and beta, the fock matrices for alpha an
 
 \end{fulllineitems}
 
+\phantomsection\label{\detokenize{tests:module-ghf.tests.test_auth}}\index{ghf.tests.test\_auth (module)@\spxentry{ghf.tests.test\_auth}\spxextra{module}}
+
+\chapter{Testing the RHF and UHF methods}
+\label{\detokenize{tests:testing-the-rhf-and-uhf-methods}}\label{\detokenize{tests::doc}}
+Simple tests to check whether or not the functions return the correct value.
+\index{test\_RHF() (in module ghf.tests.test\_auth)@\spxentry{test\_RHF()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_RHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_RHF}}}{}{}
+test\_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10\textasciicircum{}16.
+
+\end{fulllineitems}
+
+\index{test\_UHF() (in module ghf.tests.test\_auth)@\spxentry{test\_UHF()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_UHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_UHF}}}{}{}
+test\_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
+\index{test\_extra\_e() (in module ghf.tests.test\_auth)@\spxentry{test\_extra\_e()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_extra_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_extra\_e}}}{}{}
+test\_extra\_e will test the UHF method, with the added option of first adding 2 electrons to the system and using those coefficients
+for the actual system, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
+\index{test\_stability() (in module ghf.tests.test\_auth)@\spxentry{test\_stability()}\spxextra{in module ghf.tests.test\_auth}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_stability}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_stability}}}{}{}
+test\_stability will test the UHF method, with stability analysis, by checking whether or not it returns the expected result. The accuracy is 10\textasciicircum{}-6.
+
+\end{fulllineitems}
+
 
 
 \renewcommand{\indexname}{Python Module Index}
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
 \bigletter{g}
+\item\relax\sphinxstyleindexentry{ghf.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-ghf.GHF}}
 \item\relax\sphinxstyleindexentry{ghf.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-ghf.RHF}}
 \item\relax\sphinxstyleindexentry{ghf.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-ghf.SCF_functions}}
+\item\relax\sphinxstyleindexentry{ghf.tests.test\_auth}\sphinxstyleindexpageref{tests:\detokenize{module-ghf.tests.test_auth}}
 \item\relax\sphinxstyleindexentry{ghf.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-ghf.UHF}}
 \end{sphinxtheindex}
 
