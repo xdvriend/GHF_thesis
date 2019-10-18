@@ -9,26 +9,16 @@ def GHF(molecule, number_of_electrons):
     two_electron = get_integrals(molecule)[2]
     nuclear_repulsion = get_integrals(molecule)[3]
 
-    def core_hamiltonian(one_electron):
-        shape = np.shape(one_electron)
+    def expand_matrix(matrix):
+        shape = np.shape(matrix)
         zero = np.zeros(shape)
-        top = np.hstack((one_electron, zero))
-        bottom = np.hstack((zero, one_electron))
-        return np.vstack((top, bottom))
-
-    def orth_matrix(trans_matrix):
-        v = trans_matrix
-        shape = np.shape(v)
-        zero = np.zeros(shape)
-        top = np.hstack((v, zero))
-        bottom = np.hstack((zero, v))
+        top = np.hstack((matrix, zero))
+        bottom = np.hstack((zero, matrix))
         return np.vstack((top, bottom))
 
     s_min_12 = trans_matrix(overlap)
-    s_12_o = orth_matrix(s_min_12)
-    v_inv_t = la.inv(s_min_12).T
-    fock_o = orth_matrix(v_inv_t)
-    c_ham = core_hamiltonian(one_electron)
+    s_12_o = expand_matrix(s_min_12)
+    c_ham = expand_matrix(one_electron)
 
     def coeff_matrix(orth_matrix, core_ham):
         return orth_matrix @ core_ham @ orth_matrix.T
@@ -52,6 +42,8 @@ def GHF(molecule, number_of_electrons):
         elif sigma == 'b' and tau == 'a':
             coeff_s = coeff_b[:, 0:number_of_electrons]
             coeff_t = coeff_a[:, 0:number_of_electrons].conj()
+            print(coeff_s, coeff_t)
+
             return np.einsum('ij, kj -> ik', coeff_s, coeff_t)
         elif sigma == 'b' and tau == 'b':
             coeff_s = coeff_b[:, 0:number_of_electrons]
@@ -117,7 +109,7 @@ def GHF(molecule, number_of_electrons):
         f_bb = fock_block('b', 'b', densities[-1])
 
         f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-        f_o = fock_o @ f @ fock_o.T
+        f_o = s_12_o @ f @ s_12_o.T
 
         new_p1 = density_block(f_o, 'a', 'a')
         new_p2 = density_block(f_o, 'a', 'b')
