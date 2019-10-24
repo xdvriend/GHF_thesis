@@ -18,6 +18,7 @@ import numpy
 import numpy as np
 from numpy import linalg as la
 import scipy
+from scipy import linalg as LA
 from functools import reduce
 
 
@@ -68,6 +69,19 @@ def real_GHF(molecule, number_of_electrons):
 
     c_init = coeff_matrix(s_12_o, c_ham)
 
+    def unitary_rotation(coefficient_matrix):
+        shape = np.shape(coefficient_matrix)
+        one = np.full(shape, 1)
+        neg = np.full(shape, -1)
+        ones = np.tril(one)
+        negative = np.triu(neg)
+        exp = -1 * (ones + negative)
+        U = LA.expm(exp)
+        return U @ coefficient_matrix @ la.inv(U)
+
+    c_init_rot = unitary_rotation(c_init)
+
+
     def density_block(fock_t, sigma, tau):
         """
         :param fock_t: a fock matrix
@@ -107,10 +121,10 @@ def real_GHF(molecule, number_of_electrons):
         coeff_r = coeff[:, 0:number_of_electrons]
         return np.einsum('ij,kj->ik', coeff_r, coeff_r)
 
-    p_block_aa_g = density_block(c_init, 'a', 'a')  # aa-block of guess density
-    p_block_ab_g = density_block(c_init, 'a', 'b')  # ab-block of guess density
-    p_block_ba_g = density_block(c_init, 'b', 'a')  # ba-block of guess density
-    p_block_bb_g = density_block(c_init, 'b', 'b')  # bb-block of guess density
+    p_block_aa_g = density_block(c_init_rot, 'a', 'a')  # aa-block of guess density
+    p_block_ab_g = density_block(c_init_rot, 'a', 'b')  # ab-block of guess density
+    p_block_ba_g = density_block(c_init_rot, 'b', 'a')  # ba-block of guess density
+    p_block_bb_g = density_block(c_init_rot, 'b', 'b')  # bb-block of guess density
 
     def spin_blocked(block_1, block_2, block_3, block_4):
         """
@@ -122,7 +136,7 @@ def real_GHF(molecule, number_of_electrons):
         return np.vstack((top, bottom))
 
     #p_g = spin_blocked(p_block_aa_g, p_block_ab_g, p_block_ba_g, p_block_bb_g)
-    p_g = density(c_init)  # total guess density
+    p_g = density(c_init_rot)  # total guess density
     densities = [p_g]
 
     def coulomb(density_block, two_electron):

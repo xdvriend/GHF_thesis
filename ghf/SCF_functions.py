@@ -29,7 +29,7 @@ def trans_matrix(overlap):
     """
     eigenvalues, eigenvectors = la.eigh(overlap)  # calculate eigenvalues & eigenvectors of the overlap matrix
     diag_matrix = diag(eigenvalues)  # create a diagonal matrix from the eigenvalues of the overlap
-    X = eigenvectors.dot(np.sqrt(la.inv(diag_matrix))).dot(eigenvectors.T)
+    X = eigenvectors.dot(np.sqrt(la.inv(diag_matrix))).dot(eigenvectors.conj().T)
     return X
 
 
