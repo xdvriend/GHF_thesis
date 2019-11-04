@@ -14,12 +14,13 @@ The function can do this in two ways.
 """
 
 from ghf.SCF_functions import *
-import numpy
 import numpy as np
 from numpy import linalg as la
 import scipy
 from scipy import linalg as LA
 from functools import reduce
+import matplotlib.pyplot as plt
+
 
 
 def real_GHF(molecule, number_of_electrons):
@@ -195,6 +196,7 @@ def real_GHF(molecule, number_of_electrons):
     electronic_e = scf_e(p_g, c_ham, c_ham)
     energies = [electronic_e]
     delta_e = []
+    fock_o = []
 
     def iter():
         """
@@ -210,6 +212,8 @@ def real_GHF(molecule, number_of_electrons):
         # orthogonalise the Fock matrix
         f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
         f_o = s_12_o @ f @ s_12_o.T
+        fock_o.append(f)
+
 
         # Create the new density matrix
         new_p1 = density_block(f_o, 'a', 'a')
@@ -230,17 +234,22 @@ def real_GHF(molecule, number_of_electrons):
         iter()
         i += 1
 
+    print(i)
+    print(energies[-1] + nuclear_repulsion)
+
     f_aa = fock_block('a', 'a', densities[-1])
     f_ab = fock_block('a', 'b', densities[-1])
     f_ba = fock_block('b', 'a', densities[-1])
     f_bb = fock_block('b', 'b', densities[-1])
     f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-    f_o = s_12_o @ f @ s_12_o.T
 
     dim = int(np.shape(f)[0])
 
+    f_o = s_12_o.T @ f @ s_12_o
     val, vec = la.eigh(f_o)
     coeff = s_12_o @ vec
+
+
 
     def generate_g():
         total_orbitals = c_ham.shape[0]
@@ -251,29 +260,50 @@ def real_GHF(molecule, number_of_electrons):
         occ_orb = coeff[:, occ_indx]
         vir_orb = coeff[:, vir_indx]
 
+
         fock_init = f
-        fock = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
+        fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
 
-        fock_occ = f[occ_indx[:, None], occ_indx]
-        fock_vir = f[vir_indx[:, None], vir_indx]
 
-        g = fock[vir_indx[:, None], occ_indx]
+        fock_occ = fock_ao[occ_indx[:, None], occ_indx]
+        fock_vir = fock_ao[vir_indx[:, None], vir_indx]
+
+
+        g = fock_ao[vir_indx[:, None], occ_indx]
         h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
 
         def h_op(x):
             x = x.reshape(n_vir, n_occ)
             x2 = np.einsum('ps,sq->pq', fock_vir, x)
             x2 -= np.einsum('ps,rp->rs', fock_occ, x)
-            d1 = reduce(numpy.dot, (vir_orb, x, occ_orb.conj().T))
+            d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))
             dm1 = d1 + d1.conj().T
 
             def vind(dm1):
                 vj, vk = scf.hf.get_jk(molecule, dm1, hermi=1)
                 return vj - vk
-
             v1 = vind(dm1)
             x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))
             return x2.ravel()
+
+        def h_op_2(x):
+            x = x.reshape(n_vir, n_occ)
+            x2 = np.einsum('ps,sq->pq', fock_vir, x)
+            x2 -= np.einsum('ps,rp->rs', fock_occ, x)
+            d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))
+            dm1 = d1 + d1.conj().T
+
+            def vind(dm1):
+                vj, vk = scf.hf.get_jk(molecule, dm1, hermi=1)
+                return vj - vk
+            v1 = vind(dm1)
+            x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))
+            bottom_right = np.zeros((np.shape(x2)[0], np.shape(x2)[0]))
+            top_left = np.zeros((np.shape(x2)[1], np.shape(x2)[1]))
+            top = np.hstack((top_left, x2.T))
+            bottom = np.hstack((x2, bottom_right))
+            hess = np.vstack((top, bottom))
+            return hess
 
         return g.reshape(-1), h_op, h_diag.reshape(-1)
 
@@ -314,18 +344,32 @@ def real_GHF(molecule, number_of_electrons):
 
         x0 = np.zeros_like(g)
         x0[g != 0] = 1. / hdiag[g != 0]
+        #print(hessian_x(x0))
+        #print(np.shape(hessian_x(x0)))
+        #hess = hessian_x(x0)
         e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
+        #e, v = la.eigh(hess)
+        #print(e)
         if e < -1e-5:
+            print('yes')
             mo_occ = np.zeros(dim,)
             for i in range(number_of_electrons):
                 mo_occ[i] = 1
             mo = rotate_mo(coeff, mo_occ, v)
         else:
+            print('no')
             mo = coeff
         return mo
 
+    #mf = scf.GHF(molecule).run()
+    #mf.stability()
+    #mo1 = internal_stability()
+    #dm1 = mf.make_rdm1(mo1, mf.mo_occ)
+
     new_guess = internal_stability()
-    imp_dens = [new_guess]
+    coeff_r = new_guess[:, 0:number_of_electrons]
+    guess_dens = np.einsum('ij,kj->ik', coeff_r, coeff_r)
+    imp_dens = [guess_dens]
 
     electronic_e = scf_e(imp_dens[-1], c_ham, c_ham)
     new_energies = [electronic_e]
@@ -352,12 +396,16 @@ def real_GHF(molecule, number_of_electrons):
 
     new_iter()
     i = 1
-    while abs(delta_e[-1]) >= 1e-12:
+    while abs(delta_e[-1]) >= 1e-12 and i<5000:
         new_iter()
         i += 1
 
-    scf_e = energies[-1] + nuclear_repulsion
+
+    scf_e = new_energies[-1] + nuclear_repulsion
 
     print("Number of iterations: " + str(i))
     print("Converged SCF energy in Hartree: " + str(scf_e) + " (real GHF)")
+
+    #plt.plot(np.real(new_energies + nuclear_repulsion))
+    #plt.show()
     return scf_e

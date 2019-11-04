@@ -3,9 +3,10 @@ import numpy
 import numpy as np
 import math as m
 from numpy import linalg as la
-from scipy import linalg as LA
 import scipy
 from functools import reduce
+import matplotlib.pyplot as plt
+
 
 
 def complex_GHF(molecule, number_of_electrons):
@@ -46,7 +47,6 @@ def complex_GHF(molecule, number_of_electrons):
             for k in range(dim):
                 matrix[j][k] = m.e ** ((2j * m.pi * (j + 1) * (k + 1))/dim)
                 U = matrix/m.sqrt(dim)
-        print(U @ U.conj().T)
         return U @ coefficient_matrix @ U.conj().T
 
     c_init_rot = unitary_rotation(c_init)
@@ -158,7 +158,7 @@ def complex_GHF(molecule, number_of_electrons):
         iter()
         i += 1
 
-    print(energies[-1])
+    print(energies[-1] + nuclear_repulsion)
 
     f_aa = fock_block('a', 'a', densities[-1])
     f_ab = fock_block('a', 'b', densities[-1])
@@ -182,12 +182,12 @@ def complex_GHF(molecule, number_of_electrons):
         vir_orb = coeff[:, vir_indx]
 
         fock_init = f
-        fock = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
+        fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
 
-        fock_occ = f[occ_indx[:, None], occ_indx]
-        fock_vir = f[vir_indx[:, None], vir_indx]
+        fock_occ = fock_ao[occ_indx[:, None], occ_indx]
+        fock_vir = fock_ao[vir_indx[:, None], vir_indx]
 
-        g = fock[vir_indx[:, None], occ_indx]
+        g = fock_ao[vir_indx[:, None], occ_indx]
         h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
 
         def h_op(x):
@@ -282,15 +282,18 @@ def complex_GHF(molecule, number_of_electrons):
 
     new_iter()
     i = 1
-    while abs(delta_e[-1]) >= 1e-12 and i<4000:
+    while abs(delta_e[-1]) >= 1e-12 and i<5000:
         new_iter()
         i += 1
 
     e = energies[-1]
-    if e.imag < 10 ** (-15):
-        x = e.real
-        scf_e = x + nuclear_repulsion
+    scf_e = e + nuclear_repulsion
+
+
 
     print("Number of iterations: " + str(i))
     print("Converged SCF energy in Hartree: " + str(scf_e) + " (complex GHF)")
+
+    plt.plot(np.real(energies + nuclear_repulsion))
+    plt.show()
     return scf_e

@@ -1,7 +1,9 @@
 from ghf.RHF import RHF
 from ghf.UHF import UHF
-from ghf.GHF import GHF
+from ghf.real_GHF import real_GHF
+from ghf.complex_GHF import complex_GHF
 from pyscf import *
+import numpy as np
 
 
 """Create a molecule with pyscf"""
@@ -10,6 +12,8 @@ from pyscf import *
 
 
 h = gto.M(atom = 'h 0 0 0', spin = 1, basis = 'cc-pvdz')
+
+h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
 
 h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
 
@@ -75,7 +79,7 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 """calculate RHF energies of the 4 molecules"""
 # input: molecule, number of occupied orbitals
 
-#RHF(h4, 2)
+#UHF(h, 1, 0)
 #RHF(h6, 3)
 #RHF(h8, 4)
 #RHF(h10, 5)
@@ -86,9 +90,9 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 # input: molecule, number of occupied alpha, number of occupied beta,
 # extra electron method, internal stability analysis
 
-q = UHF(h, 1, 0)
-#a = UHF(h3, 2, 1)
-#b = UHF(h4, 2, 2, extra_e_coeff=True)
+#q = GHF(h, 1)
+#a = UHF(h3, 2, 1, internal_stability_analysis=True)
+#b = UHF(h4, 2, 2, internal_stability_analysis=True)
 #c = UHF(h5, 3, 2)
 #d = UHF(h6, 3, 3)
 #e = UHF(h7, 4, 3)
@@ -124,8 +128,10 @@ q = UHF(h, 1, 0)
 
 """GHF test run"""
 
-a = GHF(h3, 3)
-d3 = (a - 3 * q) * 627.5
-print(d3)
-
+#a2 = GHF(h15, 15)
+b2 = real_GHF(h3, 3)
+#b3 = complex_GHF(h4, 4)
+#d3 = (a - 3 * q) * 627.5
+#d3b = (a2 - 3*q) * 627.5
+#print(d3, d3b)
 
