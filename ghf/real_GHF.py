@@ -80,6 +80,14 @@ def real_GHF(molecule, number_of_electrons):
         U = LA.expm(exp)
         return U @ coefficient_matrix @ la.inv(U)
 
+    def random_unitary_matrix(dimension):
+        x = np.random.rand(dimension, dimension)
+        x_t = x.T
+        y = x + x_t
+        val, vec = la.eigh(y)
+        return vec
+
+    dim = int(np.shape(c_ham)[0])
     c_init_rot = unitary_rotation(c_init)
 
 
@@ -212,6 +220,9 @@ def real_GHF(molecule, number_of_electrons):
         # orthogonalise the Fock matrix
         f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
         f_o = s_12_o @ f @ s_12_o.T
+        eigenval, eigenvec = la.eigh(f_o)
+        coeff = s_12_o @ eigenvec
+        #print(coeff)
         fock_o.append(f)
 
 
@@ -223,6 +234,8 @@ def real_GHF(molecule, number_of_electrons):
 
         #p_new = spin_blocked(new_p1, new_p2, new_p3, new_p4)
         p_new = density(f_o)
+
+
         densities.append(p_new)
 
         energies.append(scf_e(densities[-1], f, c_ham))
@@ -230,12 +243,15 @@ def real_GHF(molecule, number_of_electrons):
 
     iter()
     i = 1
-    while abs(delta_e[-1]) >= 1e-12:
+    while abs(delta_e[-1]) >= 1e-12 and i<5000:
         iter()
         i += 1
 
     print(i)
     print(energies[-1] + nuclear_repulsion)
+    #print(energies + nuclear_repulsion)
+    #plt.plot(energies + nuclear_repulsion)
+    #plt.show()
 
     f_aa = fock_block('a', 'a', densities[-1])
     f_ab = fock_block('a', 'b', densities[-1])
@@ -249,6 +265,11 @@ def real_GHF(molecule, number_of_electrons):
     val, vec = la.eigh(f_o)
     coeff = s_12_o @ vec
 
+    val2, vec2 = la.eigh(coeff)
+    #print(val2)
+    #print(np.trace(coeff))
+    #print(la.det(coeff))
+    #print(coeff)
 
 
     def generate_g():
@@ -333,8 +354,12 @@ def real_GHF(molecule, number_of_electrons):
         def unpack_uniq_variables(dx, mo_occ):
             nmo = len(mo_occ)
             idx = uniq_variable_indices(mo_occ)
+            #print(np.shape(idx))
+            #idx2 = np.ravel(idx[0:number_of_electrons, number_of_electrons:2 * nmo])
+            #print(np.shape(idx2))
             x1 = np.zeros((nmo, nmo), dtype=dx.dtype)
             x1[idx] = dx
+            #print(np.shape(dx))
             return x1 - x1.conj().T
 
         def rotate_mo(mo_coeff, mo_occ, dx):
@@ -391,7 +416,7 @@ def real_GHF(molecule, number_of_electrons):
         p_new = density(f_o)
         imp_dens.append(p_new)
 
-        new_energies.append(scf_e(densities[-1], f, c_ham))
+        new_energies.append(scf_e(imp_dens[-1], f, c_ham))
         delta_e.append(new_energies[-1] - new_energies[-2])
 
     new_iter()
@@ -408,4 +433,4 @@ def real_GHF(molecule, number_of_electrons):
 
     #plt.plot(np.real(new_energies + nuclear_repulsion))
     #plt.show()
-    return scf_e
+    return scf_e, coeff

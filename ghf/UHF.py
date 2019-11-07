@@ -132,12 +132,32 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         coeff_a = X @ vec_a
         coeff_b = X @ vec_b
 
+        def expand_matrix(matrix, matrix2):
+            """
+            :param matrix:
+            :return: a matrix double the size, where blocks of zero's are added top right and bottom left.
+            """
+            shape = np.shape(matrix)  # get the shape of the matrix you want to expand
+            zero = np.zeros(shape)  # create a zero-matrix with the same shape
+            top = np.hstack((matrix,
+                             zero))  # create the top part of the expanded matrix by putting the matrix and zero-matrix together
+            bottom = np.hstack((zero,
+                                matrix2))  # create the bottom part of the expanded matrix by putting the matrix and zero-matrix together
+            return np.vstack((top, bottom))  # Add top and bottom part together.
+
+        A = expand_matrix(coeff_a, coeff_b)
+        val, vec = la.eigh(A)
+        #print(val)
+        #print(np.trace(A))
+        #print(la.det(A))
+        #print(A)
+
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
         #plt.plot(np.real(energies + nuclear_repulsion))
         #plt.show()
 
-        return total_e
+        return total_e, A
 
     # Second case: push the iteration out of a local minimum by adding two electrons to the system and using those coefficients
     # for the energy calculation.
