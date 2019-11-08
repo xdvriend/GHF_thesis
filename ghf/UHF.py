@@ -24,7 +24,6 @@ from ghf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg
-import matplotlib.pyplot as plt
 
 
 def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis=False):
@@ -154,8 +153,6 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
 
         spin(occ_a, occ_b, coeff_a, coeff_b, overlap)
 
-        #plt.plot(np.real(energies + nuclear_repulsion))
-        #plt.show()
 
         return total_e
 
