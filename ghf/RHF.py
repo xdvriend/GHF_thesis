@@ -57,7 +57,7 @@ def RHF(molecule, number_occupied_orbitals):
         """calculate a fock matrix from a given density matrix"""
         jk_integrals = 2 * two_electron - two_electron.transpose(0, 2, 1, 3) # jk_integrals = coulomb - exchange
         return one_electron + np.einsum('kl,ijkl->ij', density_matrix, jk_integrals) # double summation of density matrix * (coulomb - exchange)
-
+    print(rhf_fock_matrix(densities[-1]))
 # create an array to check the energy differences between iterations
     delta_e = []
 

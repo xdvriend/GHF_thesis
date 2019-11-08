@@ -5,7 +5,6 @@ import math as m
 from numpy import linalg as la
 import scipy
 from functools import reduce
-import matplotlib.pyplot as plt
 
 
 

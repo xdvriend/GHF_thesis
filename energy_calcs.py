@@ -75,11 +75,13 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
                    'h -2.287167284342726 0.7431456992624793 0; h -1.7871666964458222 1.6091721213142263 0; '
                    'h -0.9781487508336995 2.196958064720962 0', spin = 1, basis = 'cc-pvdz')
 
+Be = gto.M(atom = 'Be 1 0 0', basis = 'sto-6g')
 
 """calculate RHF energies of the 4 molecules"""
 # input: molecule, number of occupied orbitals
 
 #UHF(h, 1, 0)
+RHF(h2, 1)
 #RHF(h6, 3)
 #RHF(h8, 4)
 #RHF(h10, 5)
@@ -91,7 +93,7 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 # extra electron method, internal stability analysis
 
 #q = GHF(h, 1)
-#a = UHF(h3, 2, 1, internal_stability_analysis=True)
+#a = UHF(h3, 2, 1)
 #b = UHF(h4, 2, 2, internal_stability_analysis=True)
 #c = UHF(h5, 3, 2)
 #d = UHF(h6, 3, 3)
@@ -104,7 +106,13 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 #k = UHF(h13, 7, 6)
 #l = UHF(h14, 7, 7, internal_stability_analysis=True)
 #m = UHF(h15, 8, 7)
-
+#x = UHF(Be, 2, 2, internal_stability_analysis=True)
+#x2 = real_GHF(Be, 4)
+#mf = scf.GHF(Be).run()
+#mf.stability()
+#mo1 = mf.stability()
+#dm1 = mf.make_rdm1(mo1, mf.mo_occ)
+#mf = mf.run(dm1)
 """Calculate Delta E in kcal/mol"""
 
 
@@ -129,9 +137,39 @@ h15 = gto.M(atom = 'h 0 2.40487 0; h 0.9781487508336996 2.1969580647209614 0; h 
 """GHF test run"""
 
 #a2 = GHF(h15, 15)
-b2 = real_GHF(h3, 3)
-#b3 = complex_GHF(h4, 4)
+#b3 = real_GHF(h3, 3)
+#b2 = real_GHF(h4, 4)
+#b4 = real_GHF(h5, 5)
+#b5 = real_GHF(h6, 6)
+#b6 = real_GHF(h7, 7)
+#b7 = real_GHF(h8, 8)
+#b8 = real_GHF(h9, 9)
+#b9 = real_GHF(h10, 10)
+#b10 = real_GHF(h11, 11)
+#b11 = real_GHF(h12, 12)
+#b12 = real_GHF(h13, 13)
+#b13 = real_GHF(h14, 14)
+#b14 = real_GHF(h15, 15)
 #d3 = (a - 3 * q) * 627.5
 #d3b = (a2 - 3*q) * 627.5
 #print(d3, d3b)
 
+#c2 = complex_GHF(h3, 3)
+#c3 = complex_GHF(h4, 4)
+#i = 1
+#list_h3_r = []
+#list_h3_c = []
+#for i in range(100):
+    #x = real_GHF(h3, 3)
+#y = complex_GHF(h3, 3)
+    #list_h3_r.append(x)
+   # list_h3_c.append(y)
+    #print(i)
+    #i += 1
+
+#print(np.amin(list_h3_r))
+#print(np.amin(list_h3_c))
+
+#x = UHF(h3, 2, 1)[1] @ np.linalg.inv(real_GHF(h3, 3)[1]).T
+#print(x.T @ x)
+#print(np.linalg.det(UHF(h3, 2, 1)[1]), np.linalg.det(real_GHF(h3, 3)[1]))

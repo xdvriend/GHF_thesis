@@ -19,7 +19,6 @@ from numpy import linalg as la
 import scipy
 from scipy import linalg as LA
 from functools import reduce
-import matplotlib.pyplot as plt
 
 
 
