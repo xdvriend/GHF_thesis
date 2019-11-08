@@ -29,7 +29,8 @@ def test_RHF():
     test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^16.
 
     """
-    assert RHF(h4, 2) == -1.9403598392831243
+    x = RHF(h4, 4)
+    assert x.get_scf_solution() == -1.9403598392831243
 
 def test_UHF():
     """

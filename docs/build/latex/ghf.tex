@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Oct 22, 2019}
+\date{Nov 08, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -100,20 +100,113 @@ number of doubly occupied orbitals (1 for H\_2, 2 for H\_4,…)
 
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations
-\index{RHF() (in module ghf.RHF)@\spxentry{RHF()}\spxextra{in module ghf.RHF}}
+\index{RHF (class in ghf.RHF)@\spxentry{RHF}\spxextra{class in ghf.RHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_occupied\_orbitals}}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
 Input is a molecule and the number of occupied orbitals.
 
-Molecules are made in pySCF, eg.:
+Molecules are made in pySCF and calculations are performed as follows, eg.:
+
+The following snippet prints and returns RHF energy of h\_2
+and the number of iterations needed to get this value.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{RHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 109}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.9403598392831243 (RHF)}
 \end{sphinxVerbatim}
+\index{get\_last\_dens() (ghf.RHF.RHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.RHF.RHF method}}
 
-prints and returns RHF energy of h\_2
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+Prints the last density matrix of the converged solution.
+:return: The last density matrix.
+
+\end{fulllineitems}
+
+\index{get\_last\_fock() (ghf.RHF.RHF method)@\spxentry{get\_last\_fock()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+Prints the last fock matrix of the converged solution.
+:return: The last Fock matrix.
+
+\end{fulllineitems}
+
+\index{get\_mo\_coeff() (ghf.RHF.RHF method)@\spxentry{get\_mo\_coeff()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+Prints the mo coefficients of the converged solution.
+:return: The mo coefficients
+
+\end{fulllineitems}
+
+\index{get\_one\_e() (ghf.RHF.RHF method)@\spxentry{get\_one\_e()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The one electron integral matrix: T + V
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_ovlp() (ghf.RHF.RHF method)@\spxentry{get\_ovlp()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The overlap matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{}{}
+Prints the number of iterations and the converged scf energy.
+:return: The converged scf energy.
+
+\end{fulllineitems}
+
+\index{get\_two\_e() (ghf.RHF.RHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The electron repulsion interaction tensor
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{nuc\_rep() (ghf.RHF.RHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The nuclear repulsion value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{scf() (ghf.RHF.RHF method)@\spxentry{scf()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{}{}
+Performs a self consistent field calculation to find the lowest RHF energy.
+:return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
+
+\end{fulllineitems}
+
 
 \end{fulllineitems}
 
