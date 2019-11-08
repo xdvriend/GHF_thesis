@@ -157,7 +157,7 @@ def UHF(molecule, occ_a, occ_b, extra_e_coeff=False, internal_stability_analysis
         #plt.plot(np.real(energies + nuclear_repulsion))
         #plt.show()
 
-        return total_e, A
+        return total_e
 
     # Second case: push the iteration out of a local minimum by adding two electrons to the system and using those coefficients
     # for the energy calculation.

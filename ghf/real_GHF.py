@@ -68,7 +68,8 @@ def real_GHF(molecule, number_of_electrons):
         """
         return orth_matrix @ core_ham @ orth_matrix.T
 
-    c_init = coeff_matrix(s_12_o, c_ham)
+    c_init_rot = coeff_matrix(s_12_o, c_ham)
+
 
     def unitary_rotation(coefficient_matrix):
         shape = np.shape(coefficient_matrix)
@@ -88,7 +89,7 @@ def real_GHF(molecule, number_of_electrons):
         return vec
 
     dim = int(np.shape(c_ham)[0])
-    c_init_rot = unitary_rotation(c_init)
+    #c_init_rot = unitary_rotation(c_init)
 
 
     def density_block(fock_t, sigma, tau):
@@ -391,39 +392,40 @@ def real_GHF(molecule, number_of_electrons):
     #mo1 = internal_stability()
     #dm1 = mf.make_rdm1(mo1, mf.mo_occ)
 
-    new_guess = internal_stability()
-    coeff_r = new_guess[:, 0:number_of_electrons]
-    guess_dens = np.einsum('ij,kj->ik', coeff_r, coeff_r)
-    imp_dens = [guess_dens]
+    for i in range(10):
+        new_guess = internal_stability()
+        coeff_r = new_guess[:, 0:number_of_electrons]
+        guess_dens = np.einsum('ij,kj->ik', coeff_r, coeff_r)
+        imp_dens = [guess_dens]
 
-    electronic_e = scf_e(imp_dens[-1], c_ham, c_ham)
-    new_energies = [electronic_e]
-    delta_e = []
+        electronic_e = scf_e(imp_dens[-1], c_ham, c_ham)
+        new_energies = [electronic_e]
+        delta_e = []
 
-    def new_iter():
-        # create the four spin blocks of the Fock matrix
-        f_aa = fock_block('a', 'a', imp_dens[-1])
-        f_ab = fock_block('a', 'b', imp_dens[-1])
-        f_ba = fock_block('b', 'a', imp_dens[-1])
-        f_bb = fock_block('b', 'b', imp_dens[-1])
+        def new_iter():
+            # create the four spin blocks of the Fock matrix
+            f_aa = fock_block('a', 'a', imp_dens[-1])
+            f_ab = fock_block('a', 'b', imp_dens[-1])
+            f_ba = fock_block('b', 'a', imp_dens[-1])
+            f_bb = fock_block('b', 'b', imp_dens[-1])
 
-        # Add them together to form the total Fock matrix in spin block notation
-        # orthogonalise the Fock matrix
-        f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-        f_o = s_12_o @ f @ s_12_o.T
+            # Add them together to form the total Fock matrix in spin block notation
+            # orthogonalise the Fock matrix
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f_o = s_12_o @ f @ s_12_o.T
 
-        # p_new = spin_blocked(new_p1, new_p2, new_p3, new_p4)
-        p_new = density(f_o)
-        imp_dens.append(p_new)
+            # p_new = spin_blocked(new_p1, new_p2, new_p3, new_p4)
+            p_new = density(f_o)
+            imp_dens.append(p_new)
 
-        new_energies.append(scf_e(imp_dens[-1], f, c_ham))
-        delta_e.append(new_energies[-1] - new_energies[-2])
+            new_energies.append(scf_e(imp_dens[-1], f, c_ham))
+            delta_e.append(new_energies[-1] - new_energies[-2])
 
-    new_iter()
-    i = 1
-    while abs(delta_e[-1]) >= 1e-12 and i<5000:
         new_iter()
-        i += 1
+        i = 1
+        while abs(delta_e[-1]) >= 1e-12 and i < 5000:
+            new_iter()
+            i += 1
 
 
     scf_e = new_energies[-1] + nuclear_repulsion
@@ -433,4 +435,4 @@ def real_GHF(molecule, number_of_electrons):
 
     #plt.plot(np.real(new_energies + nuclear_repulsion))
     #plt.show()
-    return scf_e, coeff
+    return scf_e
