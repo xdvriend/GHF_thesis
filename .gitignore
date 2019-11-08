@@ -10,6 +10,8 @@ docs/build/latex
 !docs/build/latex/ghf.pdf
 docs/build/html
 !docs/build/html/*.html
+polygons.py
+refactor_test.py
 
 
 

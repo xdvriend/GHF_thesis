@@ -1,14 +1,11 @@
 """
 Restricted Hartree Fock, by means of SCF procedure
 ==================================================
-
 This function calculates the RHF energy of a given molecule and the number of occupied orbitals.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-
 number of occupied orbitals:
 number of doubly occupied orbitals (1 for H_2, 2 for H_4,...)
-
 The function prints the number of iterations and the converged SCF energy, while also returning the energy value
 for eventual subsequent calculations"""
 
@@ -22,7 +19,6 @@ class RHF:
         Input is a molecule and the number of occupied orbitals.
 
         Molecules are made in pySCF and calculations are performed as follows, eg.:
-
         The following snippet prints and returns RHF energy of h_2
         and the number of iterations needed to get this value.
 
@@ -35,6 +31,7 @@ class RHF:
     def __init__(self, molecule, number_of_electrons):
         """
         Initiate the RHF instance by specifying the molecule in question with pyscf and the total number of electrons.
+
         :param molecule: The molecule on which to perform the calculations
         :param number_of_electrons: The total number of electrons in the system
         """
@@ -48,24 +45,28 @@ class RHF:
 
     def get_ovlp(self):
         """
+
         :return: The overlap matrix
         """
         return self.integrals[0]  # Get the overlap integrals of the given molecule
 
     def get_one_e(self):
         """
+
         :return: The one electron integral matrix: T + V
         """
         return self.integrals[1]  # Get the one electron integrals of the given molecule
 
     def get_two_e(self):
         """
+
         :return: The electron repulsion interaction tensor
         """
         return self.integrals[2]  # Get the two electron integrals of the given molecule
 
     def nuc_rep(self):
         """
+
         :return: The nuclear repulsion value
         """
         return self.integrals[3]  # Get the nuclear repulsion value of the given molecule
@@ -73,6 +74,7 @@ class RHF:
     def scf(self):
         """
         Performs a self consistent field calculation to find the lowest RHF energy.
+
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -136,6 +138,7 @@ class RHF:
     def get_scf_solution(self):
         """
         Prints the number of iterations and the converged scf energy.
+
         :return: The converged scf energy.
         """
         print("Number of iterations: " + str(self.scf()[1]))
@@ -145,6 +148,7 @@ class RHF:
     def get_mo_coeff(self):
         """
         Prints the mo coefficients of the converged solution.
+
         :return: The mo coefficients
         """
         print(self.scf()[2])
@@ -153,6 +157,7 @@ class RHF:
     def get_last_dens(self):
         """
         Prints the last density matrix of the converged solution.
+
         :return: The last density matrix.
         """
         print(self.scf()[3])
@@ -161,6 +166,7 @@ class RHF:
     def get_last_fock(self):
         """
         Prints the last fock matrix of the converged solution.
+        
         :return: The last Fock matrix.
         """
         print(self.scf()[4])
