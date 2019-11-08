@@ -142,7 +142,7 @@ class RHF:
         :return: The converged scf energy.
         """
         print("Number of iterations: " + str(self.scf()[1]))
-        print("Converged SCF energy in Hartree: " + str(self.scf()[1]) + " (RHF)")
+        print("Converged SCF energy in Hartree: " + str(self.scf()[0]) + " (RHF)")
         return self.scf()[0]
 
     def get_mo_coeff(self):
@@ -166,7 +166,7 @@ class RHF:
     def get_last_fock(self):
         """
         Prints the last fock matrix of the converged solution.
-        
+
         :return: The last Fock matrix.
         """
         print(self.scf()[4])
