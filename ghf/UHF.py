@@ -538,6 +538,4 @@ class UHF:
                 new_orbitals = (coeff_a, coeff_b)
                 print('There is no internal instability in the UHF wave function.')
             return new_orbitals
-        new_coeff_a = s_12 @ internal_stability()[0]
-        new_coeff_b = s_12 @ internal_stability()[1]
-        return new_coeff_a, new_coeff_b
+        return internal_stability()
