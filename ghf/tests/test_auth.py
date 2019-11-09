@@ -54,6 +54,7 @@ def test_stability():
     """
     x = UHF(h14, 14)
     guess = x.stability()
-    assert -7.531852 <= x.get_scf_solution(guess) <= -7.531851
+    b = x.get_scf_solution(guess)
+    assert -7.531852 <= b <= -7.531851
 
 
