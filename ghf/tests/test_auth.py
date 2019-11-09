@@ -23,7 +23,6 @@ h14 = gto.M(atom = 'h 0 2.24698 0; h 0.9749280841223709 2.024459026799378 0; h 1
                    'h -1.756759704476014 1.4009691149805368 0; h -0.9749280841223712 2.0244590267993776 0',spin = 0, basis = 'cc-pvdz')
 
 
-
 def test_RHF():
     """
     test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^16.
@@ -32,12 +31,14 @@ def test_RHF():
     x = RHF(h4, 4)
     assert x.get_scf_solution() == -1.9403598392831243
 
+
 def test_UHF():
     """
     test_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10^-6.
     """
     x = UHF(h3, 3)
     assert -1.506275 <= x.get_scf_solution() <= -1.506274
+
 
 def test_extra_e():
     """
@@ -47,6 +48,7 @@ def test_extra_e():
     x = UHF(h4, 4)
     guess = x.extra_electron_guess()
     assert -2.021089 <= x.get_scf_solution(guess) <= -2.021088
+
 
 def test_stability():
     """
