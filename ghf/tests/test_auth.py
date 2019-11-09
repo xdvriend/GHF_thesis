@@ -36,19 +36,24 @@ def test_UHF():
     """
     test_UHF will test the regular UHF method, by checking whether or not it returns the expected result. The accuracy is 10^-6.
     """
-    assert -1.506275 <= UHF(h3, 2, 1) <= -1.506274
+    x = UHF(h3, 3)
+    assert -1.506275 <= x.get_scf_solution() <= -1.506274
 
 def test_extra_e():
     """
     test_extra_e will test the UHF method, with the added option of first adding 2 electrons to the system and using those coefficients
     for the actual system, by checking whether or not it returns the expected result. The accuracy is 10^-6.
     """
-    assert -2.021089 <= UHF(h4, 2, 2, extra_e_coeff = True) <= -2.021088
+    x = UHF(h4, 4)
+    guess = x.extra_electron_guess()
+    assert -2.021089 <= x.get_scf_solution(guess) <= -2.021088
 
 def test_stability():
     """
     test_stability will test the UHF method, with stability analysis, by checking whether or not it returns the expected result. The accuracy is 10^-6.
     """
-    assert -7.531852 <= UHF(h14, 7, 7, internal_stability_analysis=True) <= -7.531851
+    x = UHF(h14, 14)
+    guess = x.stability()
+    assert -7.531852 <= x.get_scf_solution(guess) <= -7.531851
 
 

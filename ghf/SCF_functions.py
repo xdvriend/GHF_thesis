@@ -36,8 +36,8 @@ def trans_matrix(overlap):
 def density_matrix(f_matrix, occ, trans):
     """
     - density() creates a density matrix from a fock matrix and the number of occupied orbitals.
-    - Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF. And
-    a transformation matrix X.
+    - Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.
+    And a transformation matrix X.
     """
     f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
     coefficients = trans.dot(f_eigenvectors)
@@ -48,7 +48,6 @@ def density_matrix(f_matrix, occ, trans):
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
     """
     - calculate a fock matrix from a given alpha and beta density matrix
-
     - fock alpha if 1 = alpha and 2 = beta and vice versa
     - input is the density matrix for alpha and beta, a one electron matrix and a two electron tensor.
     """
@@ -72,6 +71,7 @@ def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_elect
     scf_e *= 0.5  # divide by two, since the summation technically adds the alpha and beta values twice
     return scf_e
 
+
 def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     """
 
@@ -92,7 +92,6 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     ss = (ss_xy + ss_z).real # = S^2_total
     s_z = (occ_a - occ_b) / 2 # = S_z
     multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1 # = 2S+1
-    print("<S^2> = " + str(ss) + ", <S_z> = " + str(s_z) + ", Multiplicity = " + str(multiplicity))
     return ss, s_z, multiplicity
 
 

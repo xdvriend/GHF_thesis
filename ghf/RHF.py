@@ -1,13 +1,10 @@
 """
 Restricted Hartree Fock, by means of SCF procedure
 ==================================================
-This function calculates the RHF energy of a given molecule and the number of occupied orbitals.
+This class is used to calculate the RHF energy of a given molecule and the number of electrons.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-number of occupied orbitals:
-number of doubly occupied orbitals (1 for H_2, 2 for H_4,...)
-The function prints the number of iterations and the converged SCF energy, while also returning the energy value
-for eventual subsequent calculations"""
+"""
 
 from ghf.SCF_functions import *
 
@@ -122,10 +119,10 @@ class RHF:
             return densities[-1]  # a function that gives the last density matrix of the scf procedure
 
         def last_fock():
-            return rhf_fock_matrix(densities[-1])  # a function that gives the last Fock matrix of the scf procedure
+            return rhf_fock_matrix(densities[-2])  # a function that gives the last Fock matrix of the scf procedure
 
         def get_mo():
-            last_f = rhf_fock_matrix(densities[-1])  # get the last fock matrix
+            last_f = rhf_fock_matrix(densities[-2])  # get the last fock matrix
             f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
             coefficients = s_12.dot(f_eigenvectors)  # transform to mo basis
             return coefficients  # A function that returns the converged mo coefficients

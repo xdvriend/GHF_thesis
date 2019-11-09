@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Nov 08, 2019}
+\date{Nov 09, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -91,13 +91,9 @@
 
 \chapter{Restricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{RHF:restricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{RHF::doc}}
-This function calculates the RHF energy of a given molecule and the number of occupied orbitals.
+This class is used to calculate the RHF energy of a given molecule and the number of electrons.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-number of occupied orbitals:
-number of doubly occupied orbitals (1 for H\_2, 2 for H\_4,…)
-The function prints the number of iterations and the converged SCF energy, while also returning the energy value
-for eventual subsequent calculations
 \index{RHF (class in ghf.RHF)@\spxentry{RHF}\spxextra{class in ghf.RHF}}
 
 \begin{fulllineitems}
@@ -231,48 +227,199 @@ number of iterations, scf energy, mo coefficients, last density matrix, last foc
 
 \chapter{Unrestricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{UHF:unrestricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{UHF::doc}}
-This function calculates the UHF energy for a given molecule and the number of occupied alpha and beta orbitals. 
-The molecule has to be created in pySCF:
-molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-
-number of occupied orbitals:
-first the number of occupied alpha orbitals
-second the number of occupied beta orbitals
-
-There are two extra options added into the function:
-\begin{itemize}
-\item {} 
-extra\_e\_coeff: when true, the program will add two extra alpha electrons to the system and calculate when the new system’s energy converges. From the last density matrix in this calculation, new coefficients for the alpha and beta orbitals will be calculated and used as new guess density for the original system.
-
-\item {} 
-internal\_stability\_analysis: when true, an internal stability analysis will be performed. When the wave finction is deemed unstable, new coefficients will be calculated that are closer in value to the stable condition, which is done by varying the Hessian by means of a trial vector. These will then be used as a guess density for the energy calculation.
-
-\end{itemize}
-
-The function prints the number of iterations and the converged SCF energy, while also returning the energy value
-for eventual subsequent calculations
-\index{UHF() (in module ghf.UHF)@\spxentry{UHF()}\spxextra{in module ghf.UHF}}
+This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
+Several options are available to make sure you get the lowest energy from your calculation, as well as some usefull
+functions to get intermediate values such as MO coefficients, density and fock matrices.
+\index{UHF (class in ghf.UHF)@\spxentry{UHF}\spxextra{class in ghf.UHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{occ\_a}, \emph{occ\_b}, \emph{extra\_e\_coeff=False}, \emph{internal\_stability\_analysis=False}}{}~
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)}
-\end{sphinxVerbatim}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+Input is a molecule and the number of occupied orbitals.
+
+Molecules are made in pySCF and calculations are performed as follows, eg.:
+The following snippet prints and returns UHF energy of h\_3
+and the number of iterations needed to get this value.
+
+For a normal scf calculation your input looks like the following example:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{extra\PYGZus{}e\PYGZus{}coeff}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 62}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202681235 (UHF)}
+\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 0.7735672504295973, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.5, Multiplicity = 2.023430009098014}
 \end{sphinxVerbatim}
+\index{extra\_electron\_guess() (ghf.UHF.UHF method)@\spxentry{extra\_electron\_guess()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.extra_electron_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{extra\_electron\_guess}}}{}{}
+This method adds two electrons to the system in order to get coefficients that can be used as a better guess
+for the scf procedure. This essentially forces the system into it’s \textless{}S\_z\textgreater{} = 0 state.
+
+To perform a calculation with this method, you will have to work as follows:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{internal\PYGZus{}stability\PYGZus{}analysis}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{extra\PYGZus{}electron\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 74}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030547 (UHF)}
+\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.0565277001056579, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529487976}
 \end{sphinxVerbatim}
-\begin{quote}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+A new guess matrix to use for the scf procedure.
 
-prints and returns UHF energy of h3
-\end{quote}
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_last\_dens() (ghf.UHF.UHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+Gets the last density matrix of the converged solution.
+Alpha density in the first matrix, beta density in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last density matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_last\_fock() (ghf.UHF.UHF method)@\spxentry{get\_last\_fock()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+Gets the last fock matrix of the converged solution.
+Alpha Fock matrix first, beta Fock matrix second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_coeff() (ghf.UHF.UHF method)@\spxentry{get\_mo\_coeff()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+Gets the mo coefficients of the converged solution.
+Alpha coefficients in the first matrix, beta coefficients in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The mo coefficients
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_one\_e() (ghf.UHF.UHF method)@\spxentry{get\_one\_e()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The one electron integral matrix: T + V
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_ovlp() (ghf.UHF.UHF method)@\spxentry{get\_ovlp()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The overlap matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}}{}
+Prints the number of iterations and the converged scf energy.
+Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_two\_e() (ghf.UHF.UHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The electron repulsion interaction tensor
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{nuc\_rep() (ghf.UHF.UHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The nuclear repulsion value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{scf() (ghf.UHF.UHF method)@\spxentry{scf()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}}{}
+Performs a self consistent field calculation to find the lowest UHF energy.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{initial\_guess}} \textendash{} A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used for both.
+
+\item[{Returns}] \leavevmode
+The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{stability() (ghf.UHF.UHF method)@\spxentry{stability()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
+Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
+value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
+of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
+
+To perform a stability analysis, use the following syntax:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\PYG{g+go}{There is an internal instability in the UHF wave function.}
+\PYG{g+go}{Number of iterations: 78}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030716 (UHF)}
+\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.056527700105677, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529488145}
+\end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+New and improved MO’s.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 
 \end{fulllineitems}
 
@@ -323,11 +470,11 @@ A number of functions used throughout the UHF and RHF calculations are summarise
 density() creates a density matrix from a fock matrix and the number of occupied orbitals.
 
 \item {} 
-Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF. And
+Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.
 
 \end{itemize}
 
-a transformation matrix X.
+And a transformation matrix X.
 
 \end{fulllineitems}
 
