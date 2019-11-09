@@ -104,10 +104,8 @@ class UHF:
             guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
             guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
         else:
-            initial_guess_a = initial_guess[0]
-            initial_guess_b = initial_guess[1]
-            guess_density_a = density_matrix(initial_guess_a, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess_b, self.n_b, s_12)
+            guess_density_a = initial_guess[0]
+            guess_density_b = initial_guess[1]
 
         densities_a = [guess_density_a]
         densities_b = [guess_density_b]
@@ -540,4 +538,6 @@ class UHF:
                 new_orbitals = (coeff_a, coeff_b)
                 print('There is no internal instability in the UHF wave function.')
             return new_orbitals
-        return internal_stability()
+        new_coeff_a = s_12 @ internal_stability()[0]
+        new_coeff_b = s_12 @ internal_stability()[1]
+        return new_coeff_a, new_coeff_b
