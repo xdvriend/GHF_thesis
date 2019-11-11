@@ -22,7 +22,7 @@ def test_RHF():
 
     """
     x = RHF(h4, 4)
-    assert -1.940359839282 <= x.get_scf_solution() <= -1.940359839283
+    assert -1.940359839283 <= x.get_scf_solution() <= -1.940359839282
 
 
 def test_UHF():
