@@ -554,11 +554,14 @@ A function that creates a matrix with random values that can be used as an initi
 for the SCF calculations.
 
 To use this guess:
-\textgreater{}\textgreater{}\textgreater{} h3 = gto.M(atom = ‘h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1’, spin = 1, basis = ‘cc-pvdz’)
-\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h3, 3)
-\textgreater{}\textgreater{}\textgreater{} guess = x.random\_guess()
-\textgreater{}\textgreater{}\textgreater{} x.get\_scf\_solution(guess)
-:return: A random hermitian matrix.
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\PYG{g+go}{:return: A random hermitian matrix.}
+\end{sphinxVerbatim}
 
 \end{fulllineitems}
 
@@ -584,13 +587,16 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
 
 To perform a stability analysis, use the following syntax, this will continue the analysis until there is
 no more instability:
-\textgreater{}\textgreater{}\textgreater{} h4 = gto.M(atom = ‘h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0’ , spin = 2, basis = ‘cc-pvdz’)
-\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h4, 4)
-\textgreater{}\textgreater{}\textgreater{} x.scf()
-\textgreater{}\textgreater{}\textgreater{} guess = x.stability()
-\textgreater{}\textgreater{}\textgreater{} while x.instability:
-\textgreater{}\textgreater{}\textgreater{}     new\_guess = x.stability()
-\textgreater{}\textgreater{}\textgreater{}     x.get\_scf\_solution(new\_guess)
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{scf}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{while} \PYG{n}{x}\PYG{o}{.}\PYG{n}{instability}\PYG{p}{:}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{new\PYGZus{}guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{new\PYGZus{}guess}\PYG{p}{)}
+\end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 New and improved MO’s.
@@ -607,11 +613,14 @@ A function that creates an initial guess matrix by performing a unitary transfor
 matrix.
 
 To use this guess:
-\textgreater{}\textgreater{}\textgreater{} h3 = gto.M(atom = ‘h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1’, spin = 1, basis = ‘cc-pvdz’)
-\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h3, 3)
-\textgreater{}\textgreater{}\textgreater{} guess = x.unitary\_rotation\_guess()
-\textgreater{}\textgreater{}\textgreater{} x.get\_scf\_solution(guess)
-:return: A rotated guess matrix.
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{unitary\PYGZus{}rotation\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\PYG{g+go}{:return: A rotated guess matrix.}
+\end{sphinxVerbatim}
 
 \end{fulllineitems}
 

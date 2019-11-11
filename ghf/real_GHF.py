@@ -91,6 +91,7 @@ class RealGHF:
         matrix.
 
         To use this guess:
+        
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
         >>> x = RealGHF(h3, 3)
         >>> guess = x.unitary_rotation_guess()
@@ -125,6 +126,7 @@ class RealGHF:
         for the SCF calculations.
 
         To use this guess:
+
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
         >>> x = RealGHF(h3, 3)
         >>> guess = x.random_guess()
@@ -365,6 +367,7 @@ class RealGHF:
 
         To perform a stability analysis, use the following syntax, this will continue the analysis until there is
         no more instability:
+
         >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
         >>> x = RealGHF(h4, 4)
         >>> x.scf()
