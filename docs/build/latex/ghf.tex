@@ -442,6 +442,14 @@ The following snippet prints and returns UHF energy of h3
 and the number of iterations needed to get this value.
 
 For a normal scf calculation your input looks like the following example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.} \PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 82}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202607725 (Real GHF)}
+\end{sphinxVerbatim}
 \index{get\_last\_dens() (ghf.real\_GHF.RealGHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
@@ -544,6 +552,12 @@ The nuclear repulsion value
 \phantomsection\label{\detokenize{real_GHF:ghf.real_GHF.RealGHF.random_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{random\_guess}}}{}{}
 A function that creates a matrix with random values that can be used as an initial guess
 for the SCF calculations.
+
+To use this guess:
+\textgreater{}\textgreater{}\textgreater{} h3 = gto.M(atom = ‘h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1’, spin = 1, basis = ‘cc-pvdz’)
+\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h3, 3)
+\textgreater{}\textgreater{}\textgreater{} guess = x.random\_guess()
+\textgreater{}\textgreater{}\textgreater{} x.get\_scf\_solution(guess)
 :return: A random hermitian matrix.
 
 \end{fulllineitems}
@@ -568,8 +582,20 @@ Performing a stability analysis checks whether or not the wave function is stabl
 value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
 of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
 
-To perform a stability analysis, use the following syntax:
-:return: New and improved MO’s.
+To perform a stability analysis, use the following syntax, this will continue the analysis until there is
+no more instability:
+\textgreater{}\textgreater{}\textgreater{} h4 = gto.M(atom = ‘h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0’ , spin = 2, basis = ‘cc-pvdz’)
+\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h4, 4)
+\textgreater{}\textgreater{}\textgreater{} x.scf()
+\textgreater{}\textgreater{}\textgreater{} guess = x.stability()
+\textgreater{}\textgreater{}\textgreater{} while x.instability:
+\textgreater{}\textgreater{}\textgreater{}     new\_guess = x.stability()
+\textgreater{}\textgreater{}\textgreater{}     x.get\_scf\_solution(new\_guess)
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+New and improved MO’s.
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -579,6 +605,12 @@ To perform a stability analysis, use the following syntax:
 \phantomsection\label{\detokenize{real_GHF:ghf.real_GHF.RealGHF.unitary_rotation_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{unitary\_rotation\_guess}}}{}{}
 A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
 matrix.
+
+To use this guess:
+\textgreater{}\textgreater{}\textgreater{} h3 = gto.M(atom = ‘h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1’, spin = 1, basis = ‘cc-pvdz’)
+\textgreater{}\textgreater{}\textgreater{} x = RealGHF(h3, 3)
+\textgreater{}\textgreater{}\textgreater{} guess = x.unitary\_rotation\_guess()
+\textgreater{}\textgreater{}\textgreater{} x.get\_scf\_solution(guess)
 :return: A rotated guess matrix.
 
 \end{fulllineitems}

@@ -28,6 +28,12 @@ class RealGHF:
     and the number of iterations needed to get this value.
 
     For a normal scf calculation your input looks like the following example:
+
+    >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+    >>> x = RealGHF(h3, 3)
+    >>> x. get_scf_solution()
+    Number of iterations: 82
+    Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
     """
     def __init__(self, molecule, number_of_electrons):
         """
@@ -83,6 +89,12 @@ class RealGHF:
         """
         A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
         matrix.
+
+        To use this guess:
+        >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+        >>> x = RealGHF(h3, 3)
+        >>> guess = x.unitary_rotation_guess()
+        >>> x.get_scf_solution(guess)
         :return: A rotated guess matrix.
         """
         c_ham = expand_matrix(self.get_one_e())
@@ -111,6 +123,12 @@ class RealGHF:
         """
         A function that creates a matrix with random values that can be used as an initial guess
         for the SCF calculations.
+
+        To use this guess:
+        >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+        >>> x = RealGHF(h3, 3)
+        >>> guess = x.random_guess()
+        >>> x.get_scf_solution(guess)
         :return: A random hermitian matrix.
         """
         dim = int(np.shape(self.get_ovlp())[0] * 2)
@@ -345,7 +363,16 @@ class RealGHF:
         value of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
         of the lowest eigenvalue. These new MO's can then be used to start a new scf procedure.
 
-        To perform a stability analysis, use the following syntax:
+        To perform a stability analysis, use the following syntax, this will continue the analysis until there is
+        no more instability:
+        >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
+        >>> x = RealGHF(h4, 4)
+        >>> x.scf()
+        >>> guess = x.stability()
+        >>> while x.instability:
+        >>>     new_guess = x.stability()
+        >>>     x.get_scf_solution(new_guess)
+
         :return: New and improved MO's.
         """
         # Calculate the original coefficients after the scf calculation.
