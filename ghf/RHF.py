@@ -13,7 +13,7 @@ class RHF:
     """
         calculate RHF energy.
         ---------------------
-        Input is a molecule and the number of occupied orbitals.
+        Input is a molecule and the number of electrons.
 
         Molecules are made in pySCF and calculations are performed as follows, eg.:
         The following snippet prints and returns RHF energy of h_2
@@ -32,7 +32,12 @@ class RHF:
         :param molecule: The molecule on which to perform the calculations
         :param number_of_electrons: The total number of electrons in the system
         """
+        self.molecule = molecule
         self.integrals = get_integrals(molecule)
+        self.energy = None
+        self.mo = None
+        self.last_dens = None
+        self.last_fock = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
         if number_of_electrons % 2 == 0:
@@ -115,22 +120,29 @@ class RHF:
             iteration()
             i += 1
 
+        # a function that gives the last density matrix of the scf procedure
         def last_dens():
-            return densities[-1]  # a function that gives the last density matrix of the scf procedure
+            return densities[-1]
+        self.last_dens = last_dens()
 
+        # a function that gives the last Fock matrix of the scf procedure
         def last_fock():
-            return rhf_fock_matrix(densities[-2])  # a function that gives the last Fock matrix of the scf procedure
+            return rhf_fock_matrix(densities[-2])
+        self.last_fock = last_fock()
 
+        # A function that returns the converged mo coefficients
         def get_mo():
             last_f = rhf_fock_matrix(densities[-2])  # get the last fock matrix
             f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
             coefficients = s_12.dot(f_eigenvectors)  # transform to mo basis
-            return coefficients  # A function that returns the converged mo coefficients
+            return coefficients
+        self.mo = get_mo()
 
-        scf_e = energies[-1] + self.nuc_rep()  # calculate the total energy, taking nuclear repulsion into account
-        coeff = get_mo()  # summon get_mo() to retrieve the mo's
+        # calculate the total energy, taking nuclear repulsion into account
+        scf_e = energies[-1] + self.nuc_rep()
+        self.energy = scf_e
 
-        return scf_e, i, coeff, last_dens(), last_fock()
+        return scf_e, i, get_mo(), last_dens(), last_fock()
 
     def get_scf_solution(self):
         """
@@ -140,31 +152,28 @@ class RHF:
         """
         print("Number of iterations: " + str(self.scf()[1]))
         print("Converged SCF energy in Hartree: " + str(self.scf()[0]) + " (RHF)")
-        return self.scf()[0]
+        return self.energy
 
     def get_mo_coeff(self):
         """
-        Prints the mo coefficients of the converged solution.
+        Returns mo coefficients of the converged solution.
 
         :return: The mo coefficients
         """
-        print(self.scf()[2])
-        return self.scf()[2]
+        return self.mo
 
     def get_last_dens(self):
         """
-        Prints the last density matrix of the converged solution.
+        Returns the last density matrix of the converged solution.
 
         :return: The last density matrix.
         """
-        print(self.scf()[3])
-        return self.scf()[3]
+        return self.last_dens
 
     def get_last_fock(self):
         """
-        Prints the last fock matrix of the converged solution.
+        Returns the last fock matrix of the converged solution.
 
         :return: The last Fock matrix.
         """
-        print(self.scf()[4])
-        return self.scf()[4]
+        return self.last_fock

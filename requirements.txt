@@ -6,6 +6,7 @@ flake8==3.7.8
 importlib-metadata==0.23
 mccabe==0.6.1
 more-itertools==7.2.0
+numpy==1.15.4
 packaging==19.2
 pluggy==0.13.0
 py==1.8.0

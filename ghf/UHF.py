@@ -16,7 +16,7 @@ class UHF:
     """
     Calculate UHF energy.
     ---------------------
-    Input is a molecule and the number of occupied orbitals.
+    Input is a molecule and the number of electrons.
 
     Molecules are made in pySCF and calculations are performed as follows, eg.:
     The following snippet prints and returns UHF energy of h_3
@@ -25,7 +25,7 @@ class UHF:
     For a normal scf calculation your input looks like the following example:
 
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = UHF(h_3, 3)
+    >>> x = UHF(h3, 3)
     >>> x.get_scf_solution()
     Number of iterations: 62
     Converged SCF energy in Hartree: -1.5062743202681235 (UHF)
@@ -33,7 +33,7 @@ class UHF:
     """
     def __init__(self, molecule, number_of_electrons):
         """
-        Initiate the RHF instance by specifying the molecule in question with pyscf and the total number of electrons.
+        Initiate the UHF instance by specifying the molecule in question with pyscf and the total number of electrons.
 
         :param molecule: The molecule on which to perform the calculations
         :param number_of_electrons: The total number of electrons in the system
@@ -91,7 +91,7 @@ class UHF:
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
-        :param initial_guess: A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used for both.
+        :param initial_guess: A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
@@ -156,7 +156,7 @@ class UHF:
         def last_fock():
             last_fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
             last_fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
-            return last_fock_a, last_fock_b
+            return s_12.T @ last_fock_a @ s_12, s_12.T @ last_fock_b @ s_12
         self.last_fock = last_fock()
 
         def get_mo():
@@ -307,6 +307,10 @@ class UHF:
 
         coeff_a = s_12_t.dot(vec_a)
         coeff_b = s_12_t.dot(vec_b)
+
+        # Remove the added electrons from the system and reset the system to the original molecule.
+        self.molecule.nelectron = self.n_a + self.n_b
+        self.molecule.build()
 
         return coeff_a, coeff_b
 
@@ -525,7 +529,7 @@ class UHF:
                 mo_a = np.zeros(total_orbitals)
                 mo_b = np.zeros(total_orbitals)
                 # create representation of alpha orbitals by adding an electron (a 1) to each occupied alpha orbital
-                # create representation of beta orbitals by adding an electron (a 1) to each occupied beta orbital
+                # create representation of beta orbitals by adding an electron (b 1) to each occupied beta orbital
                 for j in range(self.n_a):
                     mo_a[j] = 1
                 for k in range(self.n_b):

@@ -159,9 +159,22 @@
 <code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>density() creates a density matrix from a fock matrix and the number of occupied orbitals.</p></li>
-<li><p>Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.</p></li>
+<li><p>Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.
+And a transformation matrix X.</p></li>
 </ul>
-<p>And a transformation matrix X.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.expand_matrix">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.expand_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a matrix double the size, where blocks of zero’s are added top right and bottom left.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -190,6 +203,14 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="ghf.SCF_functions.spin_blocked">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">spin_blocked</code><span class="sig-paren">(</span><em class="sig-param">block_1</em>, <em class="sig-param">block_2</em>, <em class="sig-param">block_3</em>, <em class="sig-param">block_4</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.spin_blocked" title="Permalink to this definition">¶</a></dt>
+<dd><p>When creating the blocks of the density or fock matrix separately, this function is used to add them together,
+and create the total density or Fock matrix in spin Blocked notation.
+:return: a density matrix in the spin-blocked notation</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ghf.SCF_functions.trans_matrix">
 <code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
@@ -212,9 +233,11 @@
 <dt id="ghf.SCF_functions.uhf_scf_energy">
 <code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li><p>calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total</p></li>
+<li><p>calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta,
+so 4 matrices in total.</p></li>
 <li><p>then calculate the initial electronic energy and put it into an array</p></li>
-<li><p>input is the density matrices for alpha and beta, the fock matrices for alpha and beta and lastly a one electron matrix</p></li>
+<li><p>input is the density matrices for alpha and beta, the fock matrices for alpha and beta and lastly a one electron
+matrix.</p></li>
 </ul>
 </dd></dl>
 

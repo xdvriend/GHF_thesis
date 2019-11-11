@@ -159,7 +159,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 <dl class="class">
 <dt id="ghf.RHF.RHF">
 <em class="property">class </em><code class="sig-prename descclassname">ghf.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF" title="Permalink to this definition">¶</a></dt>
-<dd><p>Input is a molecule and the number of occupied orbitals.</p>
+<dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns RHF energy of h_2
 and the number of iterations needed to get this value.</p>
@@ -173,7 +173,7 @@ and the number of iterations needed to get this value.</p>
 <dl class="method">
 <dt id="ghf.RHF.RHF.get_last_dens">
 <code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints the last density matrix of the converged solution.</p>
+<dd><p>Returns the last density matrix of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The last density matrix.</p>
@@ -184,7 +184,7 @@ and the number of iterations needed to get this value.</p>
 <dl class="method">
 <dt id="ghf.RHF.RHF.get_last_fock">
 <code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints the last fock matrix of the converged solution.</p>
+<dd><p>Returns the last fock matrix of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The last Fock matrix.</p>
@@ -195,7 +195,7 @@ and the number of iterations needed to get this value.</p>
 <dl class="method">
 <dt id="ghf.RHF.RHF.get_mo_coeff">
 <code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints the mo coefficients of the converged solution.</p>
+<dd><p>Returns mo coefficients of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The mo coefficients</p>

@@ -159,13 +159,13 @@ functions to get intermediate values such as MO coefficients, density and fock m
 <dl class="class">
 <dt id="ghf.UHF.UHF">
 <em class="property">class </em><code class="sig-prename descclassname">ghf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
-<dd><p>Input is a molecule and the number of occupied orbitals.</p>
+<dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns UHF energy of h_3
 and the number of iterations needed to get this value.</p>
 <p>For a normal scf calculation your input looks like the following example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h_3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
 <span class="go">Number of iterations: 62</span>
 <span class="go">Converged SCF energy in Hartree: -1.5062743202681235 (UHF)</span>
@@ -288,7 +288,7 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dd><p>Performs a self consistent field calculation to find the lowest UHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>initial_guess</strong> – A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used for both.</p>
+<dd class="field-odd"><p><strong>initial_guess</strong> – A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices</p>

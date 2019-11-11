@@ -3,435 +3,473 @@ Real generalised Hartree Fock, by means of SCF procedure
 =========================================================
 
 
-This function calculates the real GHF energy for a given molecule and the number of electrons in the system.
+This class creates a generalised Hartree-Fock object which can be used for scf calculations. Different initial guesses
+are provided as well as the option to perform a stability analysis.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
 
-The function can do this in two ways.
-
-- Create the general density matrix and work with this as a whole
-- create the density matrix in spin-blocked notation
 """
 
 from ghf.SCF_functions import *
 import numpy as np
 from numpy import linalg as la
-import scipy
-from scipy import linalg as LA
+from scipy import linalg as la2
 from functools import reduce
 
 
-
-def real_GHF(molecule, number_of_electrons):
+class RealGHF:
     """
-       calculate GHF energy.
-       ---------------------
-       Input is a molecule and the number of electrons.
+    Calculate the real GHF energy.
+    --------------------------------
+    Input is a molecule and the number of electrons.
 
-       Molecules are made in pySCF, eg.:
+    Molecules are made in pySCF and calculations are performed as follows, eg.:
+    The following snippet prints and returns UHF energy of h3
+    and the number of iterations needed to get this value.
 
-       >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
-       >>> GHF(h_2, 2)
-
-       prints and returns GHF energy of h_2
-
-       """
-    # get_integrals (from GHF.SCF_functions) calculates the overlap matrix, one_electron integrals,
-    # two_electron_integrals
-    # and the nuclear repulsion value.
-    overlap = get_integrals(molecule)[0]
-    one_electron = get_integrals(molecule)[1]
-    two_electron = get_integrals(molecule)[2]
-    nuclear_repulsion = get_integrals(molecule)[3]
-
-    def expand_matrix(matrix):
+    For a normal scf calculation your input looks like the following example:
+    """
+    def __init__(self, molecule, number_of_electrons):
         """
-        :param matrix:
-        :return: a matrix double the size, where blocks of zero's are added top right and bottom left.
+        Initiate an instance of a real GHF class.
+
+        :param molecule: The molecule on which to perform the calculations, made in PySCF.
+        :param number_of_electrons: The amount of electrons present in the system.
         """
-        shape = np.shape(matrix)  # get the shape of the matrix you want to expand
-        zero = np.zeros(shape)  # create a zero-matrix with the same shape
-        top = np.hstack((matrix, zero))  # create the top part of the expanded matrix by putting the matrix and zero-matrix together
-        bottom = np.hstack((zero, matrix))# create the bottom part of the expanded matrix by putting the matrix and zero-matrix together
-        return np.vstack((top, bottom))  # Add top and bottom part together.
+        # Set the molecule, the integrals, the mo coefficients, the number of electrons,
+        # the energy, the last fock and the last density matrices as class parameters.
+        self.molecule = molecule
+        self.number_of_electrons = number_of_electrons
+        self.integrals = get_integrals(molecule)
+        self.energy = None
+        self.mo = None
+        self.last_dens = None
+        self.last_fock = None
+        self.instability = None
 
-    s_min_12 = trans_matrix(overlap)
-    s_12_o = expand_matrix(s_min_12)
-    c_ham = expand_matrix(one_electron)
-
-    def coeff_matrix(orth_matrix, core_ham):
+    # Get the overlap integrals of the given molecule
+    def get_ovlp(self):
         """
-        :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
-        :param core_ham: the expanded core Hamiltonian matrix
-        :return: The orthogonalised version of the core Hamiltonian matrix
+
+        :return: The overlap matrix
         """
-        return orth_matrix @ core_ham @ orth_matrix.T
+        return self.integrals[0]
 
-    c_init_rot = coeff_matrix(s_12_o, c_ham)
-
-
-    def unitary_rotation(coefficient_matrix):
-        shape = np.shape(coefficient_matrix)
-        one = np.full(shape, 1)
-        neg = np.full(shape, -1)
-        ones = np.tril(one)
-        negative = np.triu(neg)
-        exp = -1 * (ones + negative)
-        U = LA.expm(exp)
-        return U @ coefficient_matrix @ la.inv(U)
-
-    def random_unitary_matrix(dimension):
-        x = np.random.rand(dimension, dimension)
-        x_t = x.T
-        y = x + x_t
-        val, vec = la.eigh(y)
-        return vec
-
-    dim = int(np.shape(c_ham)[0])
-    #c_init_rot = unitary_rotation(c_init)
-
-
-    def density_block(fock_t, sigma, tau):
+    # Get the one electron integrals of the given molecule
+    def get_one_e(self):
         """
-        :param fock_t: a fock matrix
-        :param sigma: can be either 'a' for alpha or 'b' for beta
-        :param tau: can be either 'a' for alpha or 'b' for beta
-        :return: one of the four blocks in the density matrix, depending on the given sigma and tau
-        """
-        dim = int(np.shape(fock_t)[0] / 2)  # determine the dimension of 1 block.
-        eigenval, eigenvec = la.eigh(fock_t)  # calculate the eigenvectors
-        coeff = s_12_o @ eigenvec  # orthogonalise the eigenvectors
-        coeff_a = coeff[:dim, :]  # determine the C^alpha coefficients
-        coeff_b = coeff[dim:2*dim, :]  # determine the C^beta coefficients
-        if sigma == 'a' and tau == 'a':  # alpha-alpha block
-            coeff_s = coeff_a[:, 0:number_of_electrons]
-            coeff_t = coeff_a[:, 0:number_of_electrons]
-            return np.einsum('ij, kj -> ik', coeff_s, coeff_t)
-        elif sigma == 'a' and tau == 'b':  # alpha-beta block
-            coeff_s = coeff_a[:, 0:number_of_electrons]
-            coeff_t = coeff_b[:, 0:number_of_electrons]
-            return np.einsum('ij, kj -> ik', coeff_s, coeff_t)
-        elif sigma == 'b' and tau == 'a':  # beta-alpha block
-            coeff_s = coeff_b[:, 0:number_of_electrons]
-            coeff_t = coeff_a[:, 0:number_of_electrons]
-            return np.einsum('ij, kj -> ik', coeff_s, coeff_t)
-        elif sigma == 'b' and tau == 'b':  # beta-beta block
-            coeff_s = coeff_b[:, 0:number_of_electrons]
-            coeff_t = coeff_b[:, 0:number_of_electrons]
-            return np.einsum('ij, kj -> ik', coeff_s, coeff_t)
 
-    def density(fock):
+        :return: The one electron integral matrix: T + V
         """
-        :param fock: a fock matrix
-        :return: one big density matrix
-        """
-        eigenval, eigenvec = la.eigh(fock)
-        coeff = s_12_o @ eigenvec
-        coeff_r = coeff[:, 0:number_of_electrons]
-        return np.einsum('ij,kj->ik', coeff_r, coeff_r)
+        return self.integrals[1]
 
-    p_block_aa_g = density_block(c_init_rot, 'a', 'a')  # aa-block of guess density
-    p_block_ab_g = density_block(c_init_rot, 'a', 'b')  # ab-block of guess density
-    p_block_ba_g = density_block(c_init_rot, 'b', 'a')  # ba-block of guess density
-    p_block_bb_g = density_block(c_init_rot, 'b', 'b')  # bb-block of guess density
+    # Get the two electron integrals of the given molecule
+    def get_two_e(self):
+        """
 
-    def spin_blocked(block_1, block_2, block_3, block_4):
+        :return: The electron repulsion interaction tensor
         """
-        When creating the blocks of the density separately, this function is used to add them together
-        :return: a density matrix in the spin-blocked notation
-        """
-        top = np.hstack((block_1, block_2))
-        bottom = np.hstack((block_3, block_4))
-        return np.vstack((top, bottom))
+        return self.integrals[2]
 
-    #p_g = spin_blocked(p_block_aa_g, p_block_ab_g, p_block_ba_g, p_block_bb_g)
-    p_g = density(c_init_rot)  # total guess density
-    densities = [p_g]
+    # Get the nuclear repulsion value of the given molecule
+    def nuc_rep(self):
+        """
 
-    def coulomb(density_block, two_electron):
+        :return: The nuclear repulsion value
         """
-        Calculate the coulomb integrals.
-        """
-        return np.einsum('kl, ijkl -> ij', density_block, two_electron)
+        return self.integrals[3]
 
-    def exchange(density_block, two_electron):
+    def unitary_rotation_guess(self):
         """
-        Calculate the exchange integrals.
+        A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
+        matrix.
+        :return: A rotated guess matrix.
         """
-        return np.einsum('kl, ijkl -> ij', density_block, two_electron.transpose(0, 2, 1, 3))
+        c_ham = expand_matrix(self.get_one_e())
 
-    def fock_block(sigma, tau, p):
+        def unitary_rotation(coefficient_matrix):
+            """
+            Perform a unitary transformation on the given coefficient matrix.
+            :param coefficient_matrix: The initial coefficient matrix, most often the core hamiltonian.
+            :return: The rotated coefficient matrix.
+            """
+            # Make sure the unitary matrix is the same size as the coefficient matrix.
+            shape = np.shape(coefficient_matrix)
+            # Create the unitary matrix as an exponential of a dense 1/-1 matrix, with all diagonal elements 0.
+            one = np.full(shape, 1)
+            neg = np.full(shape, -1)
+            ones = np.tril(one)
+            negative = np.triu(neg)
+            exp = -1 * (ones + negative)
+            u = la2.expm(exp)
+            # Return UCU^1 as the transformed matrix.
+            return u @ coefficient_matrix @ la.inv(u)
+
+        return unitary_rotation(c_ham)
+
+    def random_guess(self):
         """
-        :param sigma: Can be either 'a' for alpha or 'b' for beta.
-        :param tau: Can be either 'a' for alpha or 'b' for beta.
-        :param p: a complete density matrix
-        :return: one of the four blocks of the fock matrix, depending on the sigma and tau values.
+        A function that creates a matrix with random values that can be used as an initial guess
+        for the SCF calculations.
+        :return: A random hermitian matrix.
         """
-        if sigma == tau:
-            d = 1
+        dim = int(np.shape(self.get_ovlp())[0] * 2)
+
+        def random_hermitian_matrix(dimension):
+            # fill a matrix of the given dimensions with random numbers.
+            x = np.random.rand(dimension, dimension)
+            # Make the matrix symmetric by adding it's transpose.
+            # Get the eigenvectors to use them, since they form a hermitian matrix.
+            x_t = x.T
+            y = x + x_t
+            val, vec = la.eigh(y)
+            return vec
+
+        return random_hermitian_matrix(dim)
+
+    def scf(self, guess=None):
+        """
+        This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
+        in the real class, all values throughout are real. For complex, see the "complex_GHF" class.
+        :param guess: The initial guess to start the calculation. Different options are integrated within the class.
+        If no guess is specified, the core hamiltonian will be used.
+        :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices.
+        """
+        # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
+        # Also define the core Hamiltonian matrix in it's spin-blocked notation.
+        s_min_12 = trans_matrix(self.get_ovlp())
+        s_12_o = expand_matrix(s_min_12)
+        c_ham = expand_matrix(self.get_one_e())
+
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.T
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
         else:
-            d = 0
-        dim = int(np.shape(p)[0] / 2)  # determine the dimension of 1 block.
-        # split the density matrix in it's four spin-blocks
-        # calculate the coulomb and exchange integrals
-        # depending on which block of the Fock matrix you're making, use the needed J & K values.
-        p_aa = p[0:dim, 0:dim]
-        p_ab = p[dim:2*dim, 0:dim]
-        p_ba = p[0:dim, dim:2*dim]
-        p_bb = p[dim:2*dim, dim:2*dim]
-        h_st = one_electron
-        j_aa = coulomb(p_aa, two_electron)
-        j_bb = coulomb(p_bb, two_electron)
-        k_aa = exchange(p_aa, two_electron)
-        k_ab = exchange(p_ab, two_electron)
-        k_ba = exchange(p_ba, two_electron)
-        k_bb = exchange(p_bb, two_electron)
-        if sigma == 'a' and tau == 'a':  # aa-block
-            return d * h_st + d * (j_aa + j_bb) - k_aa
-        if sigma == 'a' and tau == 'b':  # ab-block
-            return d * h_st + d * (j_aa + j_bb) - k_ab
-        if sigma == 'b' and tau == 'a':  # ba-block
-            return d * h_st + d * (j_aa + j_bb) - k_ba
-        if sigma == 'b' and tau == 'b':  # bb-block
-            return d * h_st + d * (j_aa + j_bb) - k_bb
+            initial_guess = guess
 
-    def scf_e(dens, fock, one_electron):
-        """
-       Calculates the scf energy for the GHF method
-        """
-        return np.sum(dens * (one_electron + fock)) / 2
+        def density(fock):
+            """
+            :param fock: a fock matrix
+            :return: one big density matrix
+            """
+            # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
+            eigenval, eigenvec = la.eigh(fock)
+            coeff = s_12_o @ eigenvec
+            coeff_r = coeff[:, 0:self.number_of_electrons]
+            # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
+            return np.einsum('ij,kj->ik', coeff_r, coeff_r)
 
-    electronic_e = scf_e(p_g, c_ham, c_ham)
-    energies = [electronic_e]
-    delta_e = []
-    fock_o = []
+        # Calculate the guess density from the given initial guess and put it in an array.
+        p_g = density(initial_guess)
+        densities = [p_g]
 
-    def iter():
-        """
-        This creates an iteration process to converge to the minimun energy.
-        """
-        # create the four spin blocks of the Fock matrix
-        f_aa = fock_block('a', 'a', densities[-1])
-        f_ab = fock_block('a', 'b', densities[-1])
-        f_ba = fock_block('b', 'a', densities[-1])
-        f_bb = fock_block('b', 'b', densities[-1])
+        # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
+        # Fock matrix in it's spin-blocked notation.
+        def coulomb(density_block):
+            """
+            Calculate the coulomb integrals.
+            """
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e())
 
-        # Add them together to form the total Fock matrix in spin block notation
-        # orthogonalise the Fock matrix
-        f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-        f_o = s_12_o @ f @ s_12_o.T
-        eigenval, eigenvec = la.eigh(f_o)
-        coeff = s_12_o @ eigenvec
-        #print(coeff)
-        fock_o.append(f)
+        def exchange(density_block):
+            """
+            Calculate the exchange integrals.
+            """
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3))
 
+        def fock_block(sigma, tau, p):
+            """
+            :param sigma: Can be either 'a' for alpha or 'b' for beta.
+            :param tau: Can be either 'a' for alpha or 'b' for beta.
+            :param p: a complete density matrix
+            :return: one of the four blocks of the fock matrix, depending on the sigma and tau values.
+            """
+            # define d as a Cronecker delta, which will be usefull when creating the blocks.
+            if sigma == tau:
+                d = 1
+            else:
+                d = 0
+            # determine the dimension of 1 block.
+            dim = int(np.shape(p)[0] / 2)
+            # split the density matrix in it's four spin-blocks: aa, ab, ba and bb.
+            p_aa = p[0:dim, 0:dim]
+            p_ab = p[dim:2 * dim, 0:dim]
+            p_ba = p[0:dim, dim:2 * dim]
+            p_bb = p[dim:2 * dim, dim:2 * dim]
+            # Calculate the one_electron integrals.
+            h_st = self.get_one_e()
+            # calculate the coulomb and exchange integrals, needed for each of the spin-blocks in the Fock matrix.
+            j_aa = coulomb(p_aa)
+            j_bb = coulomb(p_bb)
+            k_aa = exchange(p_aa)
+            k_ab = exchange(p_ab)
+            k_ba = exchange(p_ba)
+            k_bb = exchange(p_bb)
+            # depending on which block of the Fock matrix you're making, use the needed J & K values.
+            if sigma == 'a' and tau == 'a':  # aa-block
+                return d * h_st + d * (j_aa + j_bb) - k_aa
+            if sigma == 'a' and tau == 'b':  # ab-block
+                return d * h_st + d * (j_aa + j_bb) - k_ab
+            if sigma == 'b' and tau == 'a':  # ba-block
+                return d * h_st + d * (j_aa + j_bb) - k_ba
+            if sigma == 'b' and tau == 'b':  # bb-block
+                return d * h_st + d * (j_aa + j_bb) - k_bb
 
-        # Create the new density matrix
-        new_p1 = density_block(f_o, 'a', 'a')
-        new_p2 = density_block(f_o, 'a', 'b')
-        new_p3 = density_block(f_o, 'b', 'a')
-        new_p4 = density_block(f_o, 'b', 'b')
+        # The function that will calculate the energy value according to the GHF algorithm.
+        def scf_e(dens, fock):
+            """
+           Calculates the scf energy for the GHF method
+            """
+            return np.sum(dens * (expand_matrix(self.get_one_e()) + fock)) / 2
 
-        #p_new = spin_blocked(new_p1, new_p2, new_p3, new_p4)
-        p_new = density(f_o)
-
-
-        densities.append(p_new)
-
-        energies.append(scf_e(densities[-1], f, c_ham))
-        delta_e.append(energies[-1] - energies[-2])
-
-    iter()
-    i = 1
-    while abs(delta_e[-1]) >= 1e-12 and i<5000:
-        iter()
-        i += 1
-
-    print(i)
-    print(energies[-1] + nuclear_repulsion)
-    #print(energies + nuclear_repulsion)
-    #plt.plot(energies + nuclear_repulsion)
-    #plt.show()
-
-    f_aa = fock_block('a', 'a', densities[-1])
-    f_ab = fock_block('a', 'b', densities[-1])
-    f_ba = fock_block('b', 'a', densities[-1])
-    f_bb = fock_block('b', 'b', densities[-1])
-    f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-
-    dim = int(np.shape(f)[0])
-
-    f_o = s_12_o.T @ f @ s_12_o
-    val, vec = la.eigh(f_o)
-    coeff = s_12_o @ vec
-
-    val2, vec2 = la.eigh(coeff)
-    #print(val2)
-    #print(np.trace(coeff))
-    #print(la.det(coeff))
-    #print(coeff)
-
-
-    def generate_g():
-        total_orbitals = c_ham.shape[0]
-        n_occ = number_of_electrons
-        n_vir = int(total_orbitals - number_of_electrons)
-        occ_indx = np.arange(number_of_electrons)
-        vir_indx = np.arange(total_orbitals)[number_of_electrons:]
-        occ_orb = coeff[:, occ_indx]
-        vir_orb = coeff[:, vir_indx]
-
-
-        fock_init = f
-        fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
-
-
-        fock_occ = fock_ao[occ_indx[:, None], occ_indx]
-        fock_vir = fock_ao[vir_indx[:, None], vir_indx]
-
-
-        g = fock_ao[vir_indx[:, None], occ_indx]
-        h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
-
-        def h_op(x):
-            x = x.reshape(n_vir, n_occ)
-            x2 = np.einsum('ps,sq->pq', fock_vir, x)
-            x2 -= np.einsum('ps,rp->rs', fock_occ, x)
-            d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))
-            dm1 = d1 + d1.conj().T
-
-            def vind(dm1):
-                vj, vk = scf.hf.get_jk(molecule, dm1, hermi=1)
-                return vj - vk
-            v1 = vind(dm1)
-            x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))
-            return x2.ravel()
-
-        def h_op_2(x):
-            x = x.reshape(n_vir, n_occ)
-            x2 = np.einsum('ps,sq->pq', fock_vir, x)
-            x2 -= np.einsum('ps,rp->rs', fock_occ, x)
-            d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))
-            dm1 = d1 + d1.conj().T
-
-            def vind(dm1):
-                vj, vk = scf.hf.get_jk(molecule, dm1, hermi=1)
-                return vj - vk
-            v1 = vind(dm1)
-            x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))
-            bottom_right = np.zeros((np.shape(x2)[0], np.shape(x2)[0]))
-            top_left = np.zeros((np.shape(x2)[1], np.shape(x2)[1]))
-            top = np.hstack((top_left, x2.T))
-            bottom = np.hstack((x2, bottom_right))
-            hess = np.vstack((top, bottom))
-            return hess
-
-        return g.reshape(-1), h_op, h_diag.reshape(-1)
-
-    def internal_stability():
-        g, hop, hdiag = generate_g()
-        hdiag *= 2
-
-        def precond(dx, e, x0):
-            hdiagd = hdiag - e
-            hdiagd[abs(hdiagd) < 1e-8] = 1e-8
-            return dx / hdiagd
-
-        def hessian_x(x):
-            return hop(x).real * 2
-
-        def uniq_variable_indices(mo_occ):
-            occ_indx_a = mo_occ > 0  # indices of occupied alpha orbitals
-            occ_indx_b = mo_occ == 2  # indices of occupied beta orbitals
-            vir_indx_a = ~occ_indx_a  # indices of virtual (unoccupied) alpha orbitals, done with bitwise operator: ~ (negation)
-            vir_indx_b = ~occ_indx_b  # indices of virtual (unoccupied) beta orbitals, done with bitwise operator: ~ (negation)
-            # & and | are bitwise operators for 'and' and 'or'
-            # each bit position is the result of the logical 'and' or 'or' of the bits in the corresponding position of the operands
-            unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:,
-                                                           None] & occ_indx_b)  # determine the unique variable indices, by use of bitwise operators
-            return unique
-
-        def unpack_uniq_variables(dx, mo_occ):
-            nmo = len(mo_occ)
-            idx = uniq_variable_indices(mo_occ)
-            #print(np.shape(idx))
-            #idx2 = np.ravel(idx[0:number_of_electrons, number_of_electrons:2 * nmo])
-            #print(np.shape(idx2))
-            x1 = np.zeros((nmo, nmo), dtype=dx.dtype)
-            x1[idx] = dx
-            #print(np.shape(dx))
-            return x1 - x1.conj().T
-
-        def rotate_mo(mo_coeff, mo_occ, dx):
-            dr = unpack_uniq_variables(dx, mo_occ)
-            u = scipy.linalg.expm(dr)  # computes the matrix exponential
-            return np.dot(mo_coeff, u)
-
-        x0 = np.zeros_like(g)
-        x0[g != 0] = 1. / hdiag[g != 0]
-        #print(hessian_x(x0))
-        #print(np.shape(hessian_x(x0)))
-        #hess = hessian_x(x0)
-        e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
-        #e, v = la.eigh(hess)
-        #print(e)
-        if e < -1e-5:
-            print('yes')
-            mo_occ = np.zeros(dim,)
-            for i in range(number_of_electrons):
-                mo_occ[i] = 1
-            mo = rotate_mo(coeff, mo_occ, v)
-        else:
-            print('no')
-            mo = coeff
-        return mo
-
-    #mf = scf.GHF(molecule).run()
-    #mf.stability()
-    #mo1 = internal_stability()
-    #dm1 = mf.make_rdm1(mo1, mf.mo_occ)
-
-    for i in range(10):
-        new_guess = internal_stability()
-        coeff_r = new_guess[:, 0:number_of_electrons]
-        guess_dens = np.einsum('ij,kj->ik', coeff_r, coeff_r)
-        imp_dens = [guess_dens]
-
-        electronic_e = scf_e(imp_dens[-1], c_ham, c_ham)
-        new_energies = [electronic_e]
+        # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
+        # Create an array to store the energy values and another to store the energy differences.
+        electronic_e = scf_e(p_g, initial_guess)
+        energies = [electronic_e]
         delta_e = []
 
-        def new_iter():
+        def iteration():
+            """
+            This creates an iteration process to converge to the minimun energy.
+            """
             # create the four spin blocks of the Fock matrix
-            f_aa = fock_block('a', 'a', imp_dens[-1])
-            f_ab = fock_block('a', 'b', imp_dens[-1])
-            f_ba = fock_block('b', 'a', imp_dens[-1])
-            f_bb = fock_block('b', 'b', imp_dens[-1])
+            f_aa = fock_block('a', 'a', densities[-1])
+            f_ab = fock_block('a', 'b', densities[-1])
+            f_ba = fock_block('b', 'a', densities[-1])
+            f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
             # orthogonalise the Fock matrix
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            f_o = s_12_o @ f @ s_12_o.T
+            f_o = s_12_o.T @ f @ s_12_o
 
-            # p_new = spin_blocked(new_p1, new_p2, new_p3, new_p4)
+            # Create the new density matrix from the Orthogonalised Fock matrix.
+            # Add the new density matrix to the densities array.
             p_new = density(f_o)
-            imp_dens.append(p_new)
+            densities.append(p_new)
 
-            new_energies.append(scf_e(imp_dens[-1], f, c_ham))
-            delta_e.append(new_energies[-1] - new_energies[-2])
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies.append(scf_e(densities[-1], f))
+            delta_e.append(energies[-1] - energies[-2])
 
-        new_iter()
+        iteration()
         i = 1
         while abs(delta_e[-1]) >= 1e-12 and i < 5000:
-            new_iter()
+            iteration()
             i += 1
 
+        # A function that gives the last density matrix of the scf procedure.
+        # Then set the last_dens value of the class object to this density matrix.
+        def last_dens():
+            return densities[-1]
+        self.last_dens = last_dens()
 
-    scf_e = new_energies[-1] + nuclear_repulsion
+        # A function that returns the last Fock matrix of the scf procedure.
+        # Then, set the last_fock value of the GHF object to this Fock matrix.
+        def last_fock():
+            # Create the 4 individual spin-blocks of the last Fock matrix.
+            f_aa = fock_block('a', 'a', densities[-2])
+            f_ab = fock_block('a', 'b', densities[-2])
+            f_ba = fock_block('b', 'a', densities[-2])
+            f_bb = fock_block('b', 'b', densities[-2])
+            # Add the blocks together.
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            # Return the orthogonalised last Fock matrix.
+            return s_12_o.T @ f @ s_12_o
+        self.last_fock = last_fock()
 
-    print("Number of iterations: " + str(i))
-    print("Converged SCF energy in Hartree: " + str(scf_e) + " (real GHF)")
+        # A function that calculates the MO's from the last needed Fock matrix in the scf calculation.
+        def get_mo():
+            # Get the last Fock matrix.
+            last_f = last_fock()
+            # Diagonalise the Fock matrix.
+            val, vec = la.eigh(last_f)
+            # calculate the coefficients.
+            coeff = s_12_o @ vec
+            return coeff
+        self.mo = get_mo()
 
-    #plt.plot(np.real(new_energies + nuclear_repulsion))
-    #plt.show()
-    return scf_e
+        # Calculate the final scf energy (electronic + nuclear repulsion)
+        scf_e = energies[-1] + self.nuc_rep()
+        self.energy = scf_e
+
+        return scf_e, i, get_mo(), last_dens(), last_fock()
+
+    def get_scf_solution(self, guess=None):
+        """
+        Prints the number of iterations and the converged scf energy.
+
+        :return: The converged scf energy.
+        """
+        scf_values = self.scf(guess)
+        print("Number of iterations: " + str(scf_values[1]))
+        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (Real GHF)")
+        return self.energy
+
+    def get_mo_coeff(self):
+        """
+        Gets the mo coefficients of the converged solution.
+
+        :return: The mo coefficients
+        """
+        return self.mo
+
+    def get_last_dens(self):
+        """
+        Gets the last density matrix of the converged solution.
+
+        :return: The last density matrix.
+        """
+        return self.last_dens
+
+    def get_last_fock(self):
+        """
+        Gets the last fock matrix of the converged solution.
+
+        :return: The last Fock matrix.
+        """
+        return self.last_fock
+
+    def stability(self):
+        """
+        Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
+        value of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
+        of the lowest eigenvalue. These new MO's can then be used to start a new scf procedure.
+
+        To perform a stability analysis, use the following syntax:
+        :return: New and improved MO's.
+        """
+        # Calculate the original coefficients after the scf calculation.
+        coeff = self.get_mo_coeff()
+        dim = np.shape(coeff)[0]
+
+        # the generate_g() function returns 3 values
+        # - the gradient, g
+        # - the result of h_op, the trial vector
+        # - the diagonal of the Hessian matrix, h_diag
+        def generate_g():
+            total_orbitals = dim  # total number of orbitals = number of basis functions
+            n_occ = self.number_of_electrons  # Number of occupied orbitals
+            n_vir = int(total_orbitals - n_occ)  # number of virtual/unoccupied orbitals
+            occ_indx = np.arange(n_occ)  # indices of the occupied orbitals
+            vir_indx = np.arange(total_orbitals)[n_occ:]  # indices of the virtual/unoccupied orbitals.
+            occ_orb = coeff[:, occ_indx]  # the occupied orbitals
+            vir_orb = coeff[:, vir_indx]  # The virtual/unoccupied orbitals
+
+            # Use the last Fock matrix of the scf procedure as the initial Fock matrix for the stability analysis.
+            # Transform the Fock matrix to AO basis
+            fock_init = self.get_last_fock()
+            fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
+
+            # Split the Fock matrix in the occupied and virtual parts.
+            fock_occ = fock_ao[occ_indx[:, None], occ_indx]
+            fock_vir = fock_ao[vir_indx[:, None], vir_indx]
+
+            # Calculate the Gradient and the Hessian diagonal.
+            g = fock_ao[vir_indx[:, None], occ_indx]
+            h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
+
+            # h_op is the Hessian operator, which will return the useful block (occupied-virtual rotation)
+            # of the Hessian matrix.
+            def h_op(x):
+                x = x.reshape(n_vir, n_occ)  # Set the dimensions
+                x2 = np.einsum('ps,sq->pq', fock_vir, x)  # Add the virtual fock matrix
+                x2 -= np.einsum('ps,rp->rs', fock_occ, x)  # Add the occupied Fock matrix
+                d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))  # vir_orb @ x @ occ_orb.T
+                dm1 = d1 + d1.conj().T  # determine a density matrix
+
+                # A function to calculate the coulomb and exchange integrals
+                def vind(dm_1):
+                    vj, vk = scf.hf.get_jk(self.molecule, dm_1, hermi=1)
+                    return vj - vk
+
+                v1 = vind(dm1)  # Get Coulomb - Exchange
+                x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))  # vir_orb.T @ v1 @ occ_orb
+                return x2.ravel()  # Unravel the matrix into a 1D array.
+
+            return g.reshape(-1), h_op, h_diag.reshape(-1)
+
+        # This function will check whether or not there is an internal instability,
+        # and if there is one, it will calculate new and improved coefficients.
+        def internal_stability():
+            g, hop, hdiag = generate_g()
+            hdiag *= 2
+
+            # this function prepares for the conditions needed to use a davidson solver later on
+            def precond(dx, z, x0):
+                hdiagd = hdiag - z
+                hdiagd[abs(hdiagd) < 1e-8] = 1e-8
+                return dx / hdiagd
+
+            # The overall Hessian for internal rotation is x2 + x2.T.conj().
+            # This is the reason we apply (.real * 2)
+            def hessian_x(x):
+                return hop(x).real * 2
+
+            # Find the unique indices of the variables
+            # in this function, bitwise operators are used.
+            # They treat each operand as a sequence of binary digits and operate on them bit by bit
+            def uniq_variable_indices(occ_mo):
+                # indices of occupied alpha orbitals
+                # indices of occupied beta orbitals
+                occ_indx_a = occ_mo > 0
+                occ_indx_b = occ_mo == 2
+                # indices of virtual (unoccupied) alpha orbitals, done with bitwise operator: ~ (negation)
+                # indices of virtual (unoccupied) beta orbitals, done with bitwise operator: ~ (negation)
+                vir_indx_a = ~occ_indx_a
+                vir_indx_b = ~occ_indx_b
+                # & and | are bitwise operators for 'and' and 'or'
+                # each bit position is the result of the logical 'and' or 'or' of the bits in the
+                # corresponding position of the operands
+                # determine the unique variable indices, by use of bitwise operators
+                unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:, None] & occ_indx_b)
+                return unique
+
+            # put the unique variables in a new matrix used later to create a rotation matrix.
+            def unpack_uniq_variables(dx, occ_mo):
+                nmo = len(occ_mo)
+                idx = uniq_variable_indices(occ_mo)
+                # print(np.shape(idx))
+                # idx2 = np.ravel(idx[0:number_of_electrons, number_of_electrons:2 * nmo])
+                # print(np.shape(idx2))
+                x1 = np.zeros((nmo, nmo), dtype=dx.dtype)
+                x1[idx] = dx
+                # print(np.shape(dx))
+                return x1 - x1.conj().T
+
+            # A function to apply a rotation on the given coefficients
+            def rotate_mo(mo_coeff, occ_mo, dx):
+                dr = unpack_uniq_variables(dx, occ_mo)
+                u = la2.expm(dr)  # computes the matrix exponential
+                return np.dot(mo_coeff, u)
+
+            x0 = np.zeros_like(g)  # like returns a matrix of the same shape as the argument given
+            x0[g != 0] = 1. / hdiag[g != 0]  # create initial guess for davidson solver
+            # use the davidson solver to find the eigenvalues and eigenvectors
+            # needed to determine an internal instability
+            e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
+            if e < -1e-5:  # this points towards an internal instability
+                print("There is an internal instability in the real GHF wave function.")
+                mo_occ = np.zeros(dim, )  # total number of basis functions
+                # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
+                for i in range(self.number_of_electrons):
+                    mo_occ[i] = 1
+                # create new orbitals by rotating the old ones
+                mo = rotate_mo(coeff, mo_occ, v)
+                self.instability = True
+            else:
+                # in the case where no instability is present
+                print("There is no internal instability in the real GHF wave function.")
+                mo = coeff
+                self.instability = False
+            return mo
+        return internal_stability()
