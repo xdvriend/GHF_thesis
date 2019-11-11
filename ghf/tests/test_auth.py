@@ -18,11 +18,11 @@ h4 = gto.M(atom = 'h 0 0.707107 0; h 0.707107 0 0; h 0 -0.707107 0; h -0.707107 
 
 def test_RHF():
     """
-    test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^16.
+    test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^11.
 
     """
     x = RHF(h4, 4)
-    assert x.get_scf_solution() == -1.9403598392831243
+    assert -1.940359839282 <= x.get_scf_solution() <= -1.940359839283
 
 
 def test_UHF():
