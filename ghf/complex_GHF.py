@@ -1,6 +1,6 @@
 """
 Complex generalised Hartree Fock, by means of SCF procedure
-=========================================================
+============================================================
 
 
 This class creates a generalised Hartree-Fock object which can be used for scf calculations. Different initial guesses
