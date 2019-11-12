@@ -96,6 +96,7 @@ class RealGHF:
         >>> x = RealGHF(h3, 3)
         >>> guess = x.unitary_rotation_guess()
         >>> x.get_scf_solution(guess)
+
         :return: A rotated guess matrix.
         """
         c_ham = expand_matrix(self.get_one_e())
@@ -103,6 +104,7 @@ class RealGHF:
         def unitary_rotation(coefficient_matrix):
             """
             Perform a unitary transformation on the given coefficient matrix.
+
             :param coefficient_matrix: The initial coefficient matrix, most often the core hamiltonian.
             :return: The rotated coefficient matrix.
             """
@@ -131,6 +133,7 @@ class RealGHF:
         >>> x = RealGHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
+
         :return: A random hermitian matrix.
         """
         dim = int(np.shape(self.get_ovlp())[0] * 2)
@@ -152,9 +155,9 @@ class RealGHF:
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
         in the real class, all values throughout are real. For complex, see the "complex_GHF" class.
-        :param guess: The initial guess to start the calculation. Different options are integrated within the class.
-        If no guess is specified, the core hamiltonian will be used.
-        :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices.
+
+        :param guess: Initial guess to start SCF. If none is given, core hamiltonian will be used.
+        :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
         # Also define the core Hamiltonian matrix in it's spin-blocked notation.

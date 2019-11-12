@@ -20,8 +20,8 @@ from functools import reduce
 
 class ComplexGHF:
     """
-    Calculate the real GHF energy.
-    --------------------------------
+    Calculate the complex GHF energy.
+    ----------------------------------
     Input is a molecule and the number of electrons.
 
     Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -32,7 +32,7 @@ class ComplexGHF:
 
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
     >>> x = ComplexGHF(h3, 3)
-    >>> x. get_scf_solution()
+    >>> x.loop_calculations()
     """
     def __init__(self, molecule, number_of_electrons):
         """
@@ -99,6 +99,7 @@ class ComplexGHF:
         >>> x = ComplexGHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
+
         :return: A random hermitian matrix.
         """
         dim = int(np.shape(self.get_ovlp())[0] * 2)
@@ -118,9 +119,9 @@ class ComplexGHF:
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
         in the complex GHF class, all values throughout are complex.
-        :param guess: The initial guess to start the calculation. Different options are integrated within the class.
-        If no guess is specified, the core hamiltonian will be used, and rotated with a complex unitary matrix.
-        :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices.
+
+        :param guess: Initial guess for scf. If none is given, a unitary rotation on the core Hamiltonian is used.
+        :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         s_min_12 = trans_matrix(self.get_ovlp()).astype(complex)
         s_12_o = expand_matrix(s_min_12).astype(complex)
@@ -504,6 +505,7 @@ class ComplexGHF:
         correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
         from different random guesses and returning the lowest value of all the different calculations. The loops will
         automatically perform a stability analysis until there is no more instability in the wave function.
+
         :param number_of_loops: The amount of times you want to repeat the scf + stability procedure.
         :param guess: The guess used for the scf procedure.
         :return: The scf energy after the loops.

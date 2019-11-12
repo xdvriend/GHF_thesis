@@ -560,8 +560,12 @@ To use this guess:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{:return: A random hermitian matrix.}
 \end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+A random hermitian matrix.
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -571,9 +575,14 @@ To use this guess:
 \phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}}{}
 This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
 in the real class, all values throughout are real. For complex, see the “complex\_GHF” class.
-:param guess: The initial guess to start the calculation. Different options are integrated within the class.
-If no guess is specified, the core hamiltonian will be used.
-:return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess to start SCF. If none is given, core hamiltonian will be used.
+
+\item[{Returns}] \leavevmode
+scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -619,8 +628,12 @@ To use this guess:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{unitary\PYGZus{}rotation\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{:return: A rotated guess matrix.}
 \end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+A rotated guess matrix.
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -650,7 +663,7 @@ For a normal scf calculation your input looks like the following example:
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{ComplexGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.} \PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{loop\PYGZus{}calculations}\PYG{p}{(}\PYG{p}{)}
 \end{sphinxVerbatim}
 \index{get\_last\_dens() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
 
@@ -745,9 +758,20 @@ This function is specifically catered to the random guess method. Since it is ha
 correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
 from different random guesses and returning the lowest value of all the different calculations. The loops will
 automatically perform a stability analysis until there is no more instability in the wave function.
-:param number\_of\_loops: The amount of times you want to repeat the scf + stability procedure.
-:param guess: The guess used for the scf procedure.
-:return: The scf energy after the loops.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{number\_of\_loops}} \textendash{} The amount of times you want to repeat the scf + stability procedure.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The guess used for the scf procedure.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The scf energy after the loops.
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -779,8 +803,12 @@ To use this guess:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{ComplexGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{:return: A random hermitian matrix.}
 \end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+A random hermitian matrix.
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -790,9 +818,14 @@ To use this guess:
 \phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}}{}
 This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
 in the complex GHF class, all values throughout are complex.
-:param guess: The initial guess to start the calculation. Different options are integrated within the class.
-If no guess is specified, the core hamiltonian will be used, and rotated with a complex unitary matrix.
-:return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for scf. If none is given, a unitary rotation on the core Hamiltonian is used.
+
+\item[{Returns}] \leavevmode
+scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
