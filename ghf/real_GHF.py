@@ -91,7 +91,7 @@ class RealGHF:
         matrix.
 
         To use this guess:
-        
+
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
         >>> x = RealGHF(h3, 3)
         >>> guess = x.unitary_rotation_guess()
@@ -137,6 +137,7 @@ class RealGHF:
 
         def random_hermitian_matrix(dimension):
             # fill a matrix of the given dimensions with random numbers.
+            np.random.seed(2)
             x = np.random.rand(dimension, dimension)
             # Make the matrix symmetric by adding it's transpose.
             # Get the eigenvectors to use them, since they form a hermitian matrix.
@@ -212,7 +213,7 @@ class RealGHF:
             :param p: a complete density matrix
             :return: one of the four blocks of the fock matrix, depending on the sigma and tau values.
             """
-            # define d as a Cronecker delta, which will be usefull when creating the blocks.
+            # define d as a Cronecker delta, which will be useful when creating the blocks.
             if sigma == tau:
                 d = 1
             else:
@@ -258,7 +259,7 @@ class RealGHF:
 
         def iteration():
             """
-            This creates an iteration process to converge to the minimun energy.
+            This creates an iteration process to converge to the minimum energy.
             """
             # create the four spin blocks of the Fock matrix
             f_aa = fock_block('a', 'a', densities[-1])
@@ -361,8 +362,8 @@ class RealGHF:
 
     def stability(self):
         """
-        Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
-        value of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
+        Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest
+        eigenvalue of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
         of the lowest eigenvalue. These new MO's can then be used to start a new scf procedure.
 
         To perform a stability analysis, use the following syntax, this will continue the analysis until there is
