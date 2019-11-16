@@ -482,7 +482,7 @@ class ComplexGHF:
             # needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
             if e < -1e-5:  # this points towards an internal instability
-                print("There is an internal instability in the real GHF wave function.")
+                print("There is an internal instability in the complex GHF wave function.")
                 mo_occ = np.zeros(dim, )  # total number of basis functions
                 # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
                 for i in range(self.number_of_electrons):
@@ -492,7 +492,7 @@ class ComplexGHF:
                 self.instability = True
             else:
                 # in the case where no instability is present
-                print("There is no internal instability in the real GHF wave function.")
+                print("There is no internal instability in the complex GHF wave function.")
                 mo = coeff
                 self.instability = False
             return mo
