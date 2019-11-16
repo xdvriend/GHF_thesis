@@ -51,6 +51,7 @@ class RealGHF:
         self.mo = None
         self.last_dens = None
         self.last_fock = None
+        self.iterations = None
         self.instability = None
 
     # Get the overlap integrals of the given molecule
@@ -290,6 +291,7 @@ class RealGHF:
         while abs(delta_e[-1]) >= 1e-12 and i < 5000:
             iteration()
             i += 1
+        self.iterations = i
 
         # A function that gives the last density matrix of the scf procedure.
         # Then set the last_dens value of the class object to this density matrix.

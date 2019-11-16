@@ -48,6 +48,7 @@ class UHF:
         self.mo = None
         self.last_dens = None
         self.last_fock = None
+        self.iterations = None
         if number_of_electrons % 2 == 0:
             self.n_a = int(number_of_electrons / 2)
             self.n_b = int(number_of_electrons / 2)
@@ -104,9 +105,19 @@ class UHF:
             guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
             guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
         else:
-            guess_density_a = initial_guess[0]
-            guess_density_b = initial_guess[1]
+            # Make the coefficients orthogonal in the correct basis.
+            coeff_a = s_12 @ initial_guess[0]
+            coeff_b = s_12 @ initial_guess[1]
 
+            # Get C_alpha and C_beta
+            coeff_r_a = coeff_a[:, 0:self.n_a]
+            coeff_r_b = coeff_b[:, 0:self.n_b]
+
+            # Create the guess density matrices from the given coefficients
+            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+
+        # Store the density matrices in an array
         densities_a = [guess_density_a]
         densities_b = [guess_density_b]
 
@@ -147,6 +158,7 @@ class UHF:
         while abs(delta_e[-1]) >= 1e-12:
             iteration()
             i += 1
+        self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure, both for alpha and beta
         def last_dens():
@@ -172,9 +184,9 @@ class UHF:
             # Orthogonalise both sets of eigenvectors to get the mo coefficients
             val_a, vec_a = la.eigh(fock_a_)
             val_b, vec_b = la.eigh(fock_b_)
-            coeff_a = s_12 @ vec_a
-            coeff_b = s_12 @ vec_b
-            return coeff_a, coeff_b
+            coefficient_a = s_12 @ vec_a
+            coefficient_b = s_12 @ vec_b
+            return coefficient_a, coefficient_b
         self.mo = get_mo()
 
         # Calculate the final scf energy (electronic + nuclear repulsion)
@@ -295,18 +307,18 @@ class UHF:
         # Now that the test system has converged, we use the last calculated density matrices
         # to calculate new orbital coefficients. These coefficients can then be used to start a new scf procedure.
         # for both alpha and beta
-        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
-        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
+        fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], one_electron_t, two_electron_t)
+        fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], one_electron_t, two_electron_t)
 
         # orthogonalize both fock matrices
-        fock_orth_a = s_12_t.T.dot(fock_a).dot(s_12_t)
-        fock_orth_b = s_12_t.T.dot(fock_b).dot(s_12_t)
+        fock_orth_a = s_12_t.T @ fock_a @ s_12_t
+        fock_orth_b = s_12_t.T @ fock_b @ s_12_t
 
         val_a, vec_a = la.eigh(fock_orth_a)
         val_b, vec_b = la.eigh(fock_orth_b)
 
-        coeff_a = s_12_t.dot(vec_a)
-        coeff_b = s_12_t.dot(vec_b)
+        coeff_a = vec_a @ s_12_t
+        coeff_b = vec_b @ s_12_t
 
         # Remove the added electrons from the system and reset the system to the original molecule.
         self.molecule.nelectron = self.n_a + self.n_b
