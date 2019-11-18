@@ -524,6 +524,7 @@ class ComplexGHF:
             iterations.append(self.iterations)
         e = np.amin(energy)
         i = iterations[energy.index(e)]
+        self.energy = e
         # Print the resulting energy.
         if abs(np.imag(e)) > 1e-12:
             print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
