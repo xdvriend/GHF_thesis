@@ -84,7 +84,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="real_GHF.html">Real generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
@@ -153,23 +153,118 @@
             
   <span class="target" id="module-ghf.RHF"></span><div class="section" id="restricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Restricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#restricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
-<p>This function calculates the RHF energy of a given molecule and the number of occupied orbitals.
+<p>This class is used to calculate the RHF energy of a given molecule and the number of electrons.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)</p>
-<p>number of occupied orbitals:
-number of doubly occupied orbitals (1 for H_2, 2 for H_4,…)</p>
-<p>The function prints the number of iterations and the converged SCF energy, while also returning the energy value
-for eventual subsequent calculations</p>
-<dl class="function">
+<dl class="class">
 <dt id="ghf.RHF.RHF">
-<code class="sig-prename descclassname">ghf.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_occupied_orbitals</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF" title="Permalink to this definition">¶</a></dt>
-<dd><p>Input is a molecule and the number of occupied orbitals.</p>
-<p>Molecules are made in pySCF, eg.:</p>
+<em class="property">class </em><code class="sig-prename descclassname">ghf.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input is a molecule and the number of electrons.</p>
+<p>Molecules are made in pySCF and calculations are performed as follows, eg.:
+The following snippet prints and returns RHF energy of h_2
+and the number of iterations needed to get this value.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">RHF</span><span class="p">(</span><span class="n">h_2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="p">(</span><span class="n">h_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
+<span class="go">Number of iterations: 109</span>
+<span class="go">Converged SCF energy in Hartree: -1.9403598392831243 (RHF)</span>
 </pre></div>
 </div>
-<p>prints and returns RHF energy of h_2</p>
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_last_dens">
+<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last density matrix of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last density matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_last_fock">
+<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last fock matrix of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last Fock matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_mo_coeff">
+<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns mo coefficients of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mo coefficients</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_one_e">
+<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_one_e" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The one electron integral matrix: T + V</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_ovlp">
+<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_ovlp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The overlap matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_scf_solution">
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the number of iterations and the converged scf energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The converged scf energy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.get_two_e">
+<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_two_e" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The electron repulsion interaction tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.nuc_rep">
+<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The nuclear repulsion value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.RHF.RHF.scf">
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.scf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a self consistent field calculation to find the lowest RHF energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
