@@ -29,26 +29,27 @@ def trans_matrix(overlap):
     """
     eigenvalues, eigenvectors = la.eigh(overlap)  # calculate eigenvalues & eigenvectors of the overlap matrix
     diag_matrix = diag(eigenvalues)  # create a diagonal matrix from the eigenvalues of the overlap
-    X = eigenvectors.dot(np.sqrt(la.inv(diag_matrix))).dot(eigenvectors.T)
-    return X
+    x = eigenvectors.dot(np.sqrt(la.inv(diag_matrix))).dot(eigenvectors.conj().T)
+    return x
 
 
 def density_matrix(f_matrix, occ, trans):
     """
     - density() creates a density matrix from a fock matrix and the number of occupied orbitals.
-    - Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF. And
-    a transformation matrix X.
+    - Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.
+      And a transformation matrix X.
+
     """
     f_eigenvalues, f_eigenvectors = la.eigh(f_matrix)  # eigenvalues are initial orbital energies
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
-    return np.einsum('ij,kj->ik', coefficients_r, coefficients_r)  # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
+    # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
+    return np.einsum('ij,kj->ik', coefficients_r, coefficients_r)
 
 
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
     """
     - calculate a fock matrix from a given alpha and beta density matrix
-
     - fock alpha if 1 = alpha and 2 = beta and vice versa
     - input is the density matrix for alpha and beta, a one electron matrix and a two electron tensor.
     """
@@ -61,9 +62,11 @@ def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electr
 
 def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_electron):
     """
-    - calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta, so 4 matrices in total
+    - calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta,
+      so 4 matrices in total.
     - then calculate the initial electronic energy and put it into an array
-    - input is the density matrices for alpha and beta, the fock matrices for alpha and beta and lastly a one electron matrix
+    - input is the density matrices for alpha and beta, the fock matrices for alpha and beta and lastly a one electron
+      matrix.
     """
     scf_e = np.einsum('ij, ij->', density_matrix_a + density_matrix_b,
                       one_electron)  # np.einsum here is used to add all the matrix values together
@@ -71,6 +74,7 @@ def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_elect
     scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
     scf_e *= 0.5  # divide by two, since the summation technically adds the alpha and beta values twice
     return scf_e
+
 
 def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     """
@@ -86,13 +90,38 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb)) # Basically (alpha orbitals).T * S * (beta orbitals)
-    ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s) # = S^2_x + S^2_y
-    ss_z = (occ_b - occ_a)**2 * 0.25 # = S^2_z
-    ss = (ss_xy + ss_z).real # = S^2_total
-    s_z = (occ_a - occ_b) / 2 # = S_z
-    multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1 # = 2S+1
-    print("<S^2> = " + str(ss) + ", <S_z> = " + str(s_z) + ", Multiplicity = " + str(multiplicity))
+    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))  # Basically (alpha orbitals).T * S * (beta orbitals)
+    ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)  # = S^2_x + S^2_y
+    ss_z = (occ_b - occ_a)**2 * 0.25  # = S^2_z
+    ss = (ss_xy + ss_z).real  # = S^2_total
+    s_z = (occ_a - occ_b) / 2  # = S_z
+    multiplicity = 2 * (np.sqrt(ss + 0.25) - 0.5) + 1  # = 2S+1
     return ss, s_z, multiplicity
 
 
+def expand_matrix(matrix):
+    """
+    :param matrix:
+    :return: a matrix double the size, where blocks of zero's are added top right and bottom left.
+    """
+    # get the shape of the matrix you want to expand
+    # create a zero-matrix with the same shape
+    shape = np.shape(matrix)
+    zero = np.zeros(shape)
+    # create the top part of the expanded matrix by putting the matrix and zero-matrix together
+    # create the bottom part of the expanded matrix by putting the matrix and zero-matrix together
+    top = np.hstack((matrix, zero))
+    bottom = np.hstack((zero, matrix))
+    # Add top and bottom part together.
+    return np.vstack((top, bottom))
+
+
+def spin_blocked(block_1, block_2, block_3, block_4):
+    """
+    When creating the blocks of the density or fock matrix separately, this function is used to add them together,
+    and create the total density or Fock matrix in spin Blocked notation.
+    :return: a density matrix in the spin-blocked notation
+    """
+    top = np.hstack((block_1, block_2))
+    bottom = np.hstack((block_3, block_4))
+    return np.vstack((top, bottom))
