@@ -7,6 +7,8 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 """
 
 from ghf.SCF_functions import *
+import collections as c
+from scipy import linalg as lina
 
 
 class RHF:
@@ -177,3 +179,150 @@ class RHF:
         :return: The last Fock matrix.
         """
         return self.last_fock
+
+    def diis(self):
+        """
+        When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
+        :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
+        """
+        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        core_guess = s_12.T @ self.get_one_e() @ s_12  # orthogonalise the transformation matrix.
+        guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+
+        def rhf_fock_matrix(dens_matrix):
+            """calculate a fock matrix from a given density matrix"""
+            # jk_integrals = coulomb - exchange
+            jk_integrals = 2 * self.get_two_e() - self.get_two_e().transpose(0, 2, 1, 3)
+            # double summation of density matrix * (coulomb - exchange)
+            return self.get_one_e() + np.einsum('kl,ijkl->ij', dens_matrix, jk_integrals)
+
+        def error_matrix(density):
+            """
+            Function that calculates the error matrix for the DIIS algorithm
+            :param density:
+            :return: a value that should be zero and a fock matrix
+            """
+            fock = rhf_fock_matrix(density)
+            return (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock), fock
+
+        # Create a list to store the errors
+        # create a list to store the fock matrices
+        # deque is used as a high performance equivalent of an array
+        error_list = c.deque(maxlen=6)
+        fock_list = c.deque(maxlen=6)
+
+        def build_b_matrix(dens):
+            """
+            A function to build the B matrix from the error matrix and the density matrix.
+            :param dens: density matrix
+            :return:  the B matrix
+            """
+            # Get the error and fock matrices
+            # add them to their respective lists
+            error, fock = error_matrix(dens)
+            error_list.append(error)
+            fock_list.append(fock)
+
+            # Determine the dimensions of the B matrix
+            m = len(error_list)
+            n = np.shape(self.get_ovlp())[0]
+
+            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
+            error = np.array(list(error_list) * m).reshape(m, m, n, n)
+            return np.einsum('ijkl, jilk->ij', error, error)
+
+        def coefficients(dens):
+            # Calculate the B matrix with the function above
+            b_matrix = build_b_matrix(dens)
+
+            # Determine matrix dimensions
+            length = len(fock_list)
+
+            # Create the needed matrices for the linear equation that results in the coefficients
+            p = np.full((1, length), -1)
+            q = np.full((length + 1, 1), -1)
+            a = np.append(b_matrix, p, axis=0)
+            a = np.append(a, q, axis=1)
+            a[-1][-1] = 0
+            b = np.zeros((length + 1, 1))
+            b[length][0] = -1
+
+            # Solve the linear equation (using a scipy solver)
+            x = lina.solve(a, b)
+            return np.array(x[:-1])
+
+        def new_fock_matrix(dens):
+            """
+            Create a new fock matrix
+            :param dens: density matrix
+            :return: a new fock matrix
+            """
+            coeff = coefficients(dens)
+            f = coeff.reshape((len(fock_list), 1, 1)) * fock_list
+            return np.sum(f, 0)
+
+        def rhf_scf_energy(dens_matrix, fock):
+            """calculate the scf energy value from a given density matrix and a given fock matrix"""
+            return np.sum(dens_matrix * (self.get_one_e() + fock))
+
+        # Calculate the guess electronic energy
+        electronic_e = np.sum(guess_density * self.get_one_e() * 2)  # calculate the initial energy, using the guess
+
+        # Create the necessary arrays to perform an iterative diis procedure
+        densities_diis = [guess_density]
+        energies_diis = [electronic_e]
+        delta_e_diis = []
+
+        def iteration_diis():
+            f = new_fock_matrix(densities_diis[-1])
+            f_orth = s_12.T @ f @ s_12
+
+            new_density = density_matrix(f_orth, self.occupied, s_12)
+            densities_diis.append(new_density)
+
+            energies_diis.append(rhf_scf_energy(new_density, f))
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+        # Let the process iterate until the energy difference is smaller than 10e-12
+        iteration_diis()
+        i = 1
+        while abs(delta_e_diis[-1]) >= 1e-12:
+            iteration_diis()
+            i += 1
+
+        # a function that gives the last density matrix of the scf procedure
+        def last_dens():
+            return densities_diis[-1]
+
+        self.last_dens = last_dens()
+
+        # a function that gives the last Fock matrix of the scf procedure
+        def last_fock():
+            return rhf_fock_matrix(densities_diis[-2])
+
+        self.last_fock = last_fock()
+
+        # A function that returns the converged mo coefficients
+        def get_mo():
+            last_f = rhf_fock_matrix(densities_diis[-2])  # get the last fock matrix
+            f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
+            coeff = s_12.dot(f_eigenvectors)  # transform to mo basis
+            return coeff
+
+        self.mo = get_mo()
+
+        # calculate the total energy, taking nuclear repulsion into account
+        scf_e = energies_diis[-1] + self.nuc_rep()
+        self.energy = scf_e
+
+        return scf_e, i, get_mo(), last_dens(), last_fock()
+
+    def get_scf_solution_diis(self):
+        """
+        Prints the number of iterations and the converged DIIS energy.
+
+        :return: The converged scf energy, using DIIS.
+        """
+        print("Number of iterations: " + str(self.diis()[1]))
+        print("Converged SCF energy in Hartree: " + str(self.diis()[0]) + " (RHF)")
+        return self.energy

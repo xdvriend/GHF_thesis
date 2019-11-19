@@ -337,8 +337,10 @@ class RealGHF:
         :return: The converged scf energy.
         """
         scf_values = self.scf(guess)
+        #s_values = ghf_spin(self.get_mo_coeff(), self.get_ovlp())
         print("Number of iterations: " + str(scf_values[1]))
         print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (Real GHF)")
+        #print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
     def get_mo_coeff(self):
