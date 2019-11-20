@@ -24,8 +24,8 @@ class RHF:
         >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
         >>> x = RHF(h_2, 2)
         >>> x.get_scf_solution()
-        Number of iterations: 109
-        Converged SCF energy in Hartree: -1.9403598392831243 (RHF)
+        Number of iterations: 17
+        Converged SCF energy in Hartree: -1.100153764878324 (RHF)
         """
     def __init__(self, molecule, number_of_electrons):
         """
@@ -40,6 +40,7 @@ class RHF:
         self.mo = None
         self.last_dens = None
         self.last_fock = None
+        self.iterations = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
         if number_of_electrons % 2 == 0:
@@ -121,6 +122,7 @@ class RHF:
         while abs(delta_e[-1]) >= 1e-12:
             iteration()
             i += 1
+        self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure
         def last_dens():
@@ -183,6 +185,7 @@ class RHF:
     def diis(self):
         """
         When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
+
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -234,7 +237,6 @@ class RHF:
         def coefficients(dens):
             # Calculate the B matrix with the function above
             b_matrix = build_b_matrix(dens)
-
             # Determine matrix dimensions
             length = len(fock_list)
 
@@ -289,6 +291,7 @@ class RHF:
         while abs(delta_e_diis[-1]) >= 1e-12:
             iteration_diis()
             i += 1
+        self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure
         def last_dens():
@@ -319,7 +322,14 @@ class RHF:
 
     def get_scf_solution_diis(self):
         """
-        Prints the number of iterations and the converged DIIS energy.
+        Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
+        a normal scf, but the energy value will be the same. Example:
+
+        >>> h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
+        >>> x = RHF(h2, 2)
+        >>> x.get_scf_solution_diis()
+        Number of iterations: 9
+        Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
         :return: The converged scf energy, using DIIS.
         """

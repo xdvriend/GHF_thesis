@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Nov 12, 2019}
+\date{Nov 20, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -108,9 +108,22 @@ and the number of iterations needed to get this value.
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 109}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.9403598392831243 (RHF)}
+\PYG{g+go}{Number of iterations: 17}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.100153764878324 (RHF)}
 \end{sphinxVerbatim}
+\index{diis() (ghf.RHF.RHF method)@\spxentry{diis()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{}{}
+When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{get\_last\_dens() (ghf.RHF.RHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
@@ -185,6 +198,28 @@ The converged scf energy.
 
 \end{fulllineitems}
 
+\index{get\_scf\_solution\_diis() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.RHF.RHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{}{}
+Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
+a normal scf, but the energy value will be the same. Example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{p}{(}\PYG{n}{h2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 9}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.100153764878446 (RHF)}
+\end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The converged scf energy, using DIIS.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{get\_two\_e() (ghf.RHF.RHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
@@ -250,6 +285,19 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202681235 (UHF)}
 \PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 0.7735672504295973, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.5, Multiplicity = 2.023430009098014}
 \end{sphinxVerbatim}
+\index{diis() (ghf.UHF.UHF method)@\spxentry{diis()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}}{}
+When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{extra\_electron\_guess() (ghf.UHF.UHF method)@\spxentry{extra\_electron\_guess()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
@@ -349,6 +397,20 @@ Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multipli
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution\_diis() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}}{}
+Prints the number of iterations and the converged diis energy.
+Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The converged diis energy.
 
 \end{description}\end{quote}
 

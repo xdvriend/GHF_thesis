@@ -125,3 +125,28 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     top = np.hstack((block_1, block_2))
     bottom = np.hstack((block_3, block_4))
     return np.vstack((top, bottom))
+
+def ghf_spin(mo_coeff, overlap):
+    number_of_orbitals = mo_coeff.shape[0] // 2
+    mo_a = mo_coeff[:number_of_orbitals]
+    mo_b = mo_coeff[number_of_orbitals:]
+    saa = mo_a.conj().T @ overlap @ mo_a
+    sbb = mo_b.conj().T @ overlap @ mo_b
+    sab = mo_a.conj().T @ overlap @ mo_b
+    sba = mo_b.conj().T @ overlap @ mo_a
+    number_occ_a = saa.trace()
+    print(number_occ_a)
+    number_occ_b = sbb.trace()
+    print(number_occ_b)
+    ss_xy = (number_occ_a + number_occ_b) * .5
+    ss_xy += sba.trace() * sab.trace() - np.einsum('ij,ji->', sba, sab)
+    print(ss_xy)
+    ss_z = (number_occ_a + number_occ_b) * .25
+    ss_z += (number_occ_a - number_occ_b) ** 2 * .25
+    tmp = saa - sbb
+    ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
+    print(ss_z)
+    s_z = 1
+    ss = (ss_xy + ss_z).real
+    s = np.sqrt(ss + .25) - .5
+    return ss, s_z, s * 2 + 1

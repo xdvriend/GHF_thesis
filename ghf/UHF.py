@@ -10,6 +10,7 @@ from ghf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg as la
+import collections as c
 
 
 class UHF:
@@ -555,3 +556,239 @@ class UHF:
                 print('There is no internal instability in the UHF wave function.')
             return new_orbitals
         return internal_stability()
+
+    def diis(self, initial_guess=None):
+        """
+        When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
+
+        :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
+        """
+        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        # If no initial guess is given, use the orthogonalised core Hamiltonian
+        # Else, use the given initial guess.
+        # create guess density matrix from core guess, separate for alpha and beta and put them into an array
+        if initial_guess is None:
+            initial_guess = s_12.T @ self.get_one_e() @ s_12
+            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+        else:
+            # Make the coefficients orthogonal in the correct basis.
+            coeff_a = s_12 @ initial_guess[0]
+            coeff_b = s_12 @ initial_guess[1]
+
+            # Get C_alpha and C_beta
+            coeff_r_a = coeff_a[:, 0:self.n_a]
+            coeff_r_b = coeff_b[:, 0:self.n_b]
+
+            # Create the guess density matrices from the given coefficients
+            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+
+        def uhf_fock(density_matrix_1, density_matrix_2):
+            """
+            - calculate a fock matrix from a given alpha and beta density matrix
+            - fock alpha if 1 = alpha and 2 = beta and vice versa
+            - input is the density matrix for alpha and beta, a one electron matrix and a two electron tensor.
+            """
+            jk_integrals = self.get_two_e() - self.get_two_e().transpose(0, 2, 1, 3)  # exchange and coulomb integrals
+            jk_a = np.einsum('kl,ijkl->ij', density_matrix_1,
+                             jk_integrals)  # double summation of density matrix * (coulomb - exchange)
+            j_b = np.einsum('kl, ijkl->ij', density_matrix_2,
+                            self.get_two_e())  # double summation of density matrix * exchange
+            return self.get_one_e() + jk_a + j_b
+
+        def error_matrix(density_a, density_b):
+            """
+            Calculates the error matrices for alpha and beta
+            :param density_a: alpha density matrix
+            :param density_b: beta density matrix
+            :return: error matrices for alpha and beta
+            """
+            fock_a = uhf_fock(density_a, density_b)
+            fock_b = uhf_fock(density_b, density_a)
+            a = fock_a @ density_a @ self.get_ovlp() - self.get_ovlp() @ density_a @ fock_a
+            b = fock_b @ density_b @ self.get_ovlp() - self.get_ovlp() @ density_b @ fock_b
+            return a, b
+
+        # Create a list to store the errors
+        # create a list to store the fock matrices
+        # deque is used as a high performance equivalent of an array
+        error_list_a = c.deque(maxlen=6)
+        error_list_b = c.deque(maxlen=6)
+
+        fock_list_a = c.deque(maxlen=6)
+        fock_list_b = c.deque(maxlen=6)
+
+        def build_b_matrix(density_a, density_b):
+            """
+            Build the B matrix for both the alpha and beta orbitals
+            :param density_a: alpha density matrix
+            :param density_b: beta density matrix
+            :return: B matrix for alpha and beta orbitals
+            """
+            # Get the error and fock matrices
+            # add them to their respective lists
+            error_a, error_b = error_matrix(density_a, density_b)
+            error_list_a.append(error_a)
+            error_list_b.append(error_b)
+
+            fock_a = uhf_fock(density_a, density_b)
+            fock_b = uhf_fock(density_b, density_a)
+
+            fock_list_a.append(fock_a)
+            fock_list_b.append(fock_b)
+
+            # Determine the dimensions of the B matrix
+            m = len(error_list_a)
+            print(m)
+            o = len(error_list_b)
+            print(o)
+            n = np.shape(self.get_ovlp())[0]
+
+            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
+            error_a = np.array(list(error_list_a) * m).reshape(m, m, n, n)
+            error_b = np.array(list(error_list_b) * m).reshape(o, o, n, n)
+            return np.einsum('ijkl, jilk->ij', error_a, error_a), np.einsum('ijkl, jilk->ij', error_b, error_b)
+
+        def coefficients(density_a, density_b):
+            # Calculate the B matrix with the function above
+            b_matrix_a = build_b_matrix(density_a, density_b)[0]
+            b_matrix_b = build_b_matrix(density_a, density_b)[1]
+            print(b_matrix_a, b_matrix_b)
+
+            # Determine matrix dimensions
+            length_a = len(fock_list_a)
+            length_b = len(fock_list_b)
+            print(length_a, length_b)
+
+            # Create the needed matrices for the linear equation that results in the coefficients
+            p = np.full((1, length_a), -1)
+            q = np.full((length_a + 1, 1), -1)
+
+            # alpha coefficients
+            a = np.append(b_matrix_a, p, axis=0)
+            a = np.append(a, q, axis=1)
+            a[-1][-1] = 0
+            b = np.zeros((length_a + 1, 1))
+            b[length_a][0] = -1
+            print(a, b)
+
+            # Create the needed matrices for the linear equation that results in the coefficients
+            y = np.full((1, length_b), -1)
+            z = np.full((length_b + 1, 1), -1)
+
+            # beta coefficients
+            e = np.append(b_matrix_b, y, axis=0)
+            e = np.append(e, z, axis=1)
+            e[-1][-1] = 0
+            f = np.zeros((length_b + 1, 1))
+            f[length_b][0] = -1
+            print(e, f)
+
+            # Solve the linear equation (using a scipy solver)
+            x_a = la.solve(a, b)
+            x_b = la.solve(e, f)
+            return np.array(x_a[:-1]), np.array(x_b[:-1])
+
+        def new_fock_matrix(density_a, density_b):
+            """
+            Creates new fock matrices
+            :param density_a: alpha density matrix
+            :param density_b: beta density matrix
+            :return:
+            """
+            c_a = coefficients(density_a, density_b)[0]
+            c_b = coefficients(density_a, density_b)[1]
+            f_a = c_a[0].reshape((len(fock_list_a), 1, 1)) * fock_list_a
+            f_b = c_b[1].reshape((len(fock_list_b), 1, 1)) * fock_list_b
+            return np.sum(f_a, 0), np.sum(f_b, 0)
+
+        # Calculate the guess electronic energy
+        # calculate the initial energy, using the guess
+        electronic_e = uhf_scf_energy(guess_density_a, guess_density_b, self.get_one_e(), self.get_one_e(),
+                                      self.get_one_e())
+
+        # Create the necessary arrays to perform an iterative diis procedure
+        densities_diis_a = [guess_density_a]
+        densities_diis_b = [guess_density_b]
+        energies_diis = [electronic_e]
+        delta_e_diis = []
+
+        def iteration_diis():
+            f_a = new_fock_matrix(densities_diis_a[-1], densities_diis_b[-1])[0]
+            f_b = new_fock_matrix(densities_diis_a[-1], densities_diis_b[-1])[1]
+
+            f_orth_a = s_12.T @ f_a @ s_12
+            f_orth_b = s_12.T @ f_b @ s_12
+
+            new_density_a = density_matrix(f_orth_a, self.n_a, s_12)
+            new_density_b = density_matrix(f_orth_b, self.n_b, s_12)
+
+            densities_diis_a.append(new_density_a)
+            densities_diis_b.append(new_density_b)
+
+            energies_diis.append(uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b, self.get_one_e()))
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+        # Let the process iterate until the energy difference is smaller than 10e-12
+        iteration_diis()
+        i = 1
+        while abs(delta_e_diis[-1]) >= 1e-12:
+            iteration_diis()
+            i += 1
+
+        # a function that gives the last density matrix of the scf procedure
+        def last_dens():
+            return densities_diis_a[-1], densities_diis_b[-1]
+
+        self.last_dens = last_dens()
+
+        # a function that gives the last Fock matrix of the scf procedure
+        def last_fock():
+            last_fock_a = uhf_fock_matrix(densities_diis_a[-2], densities_diis_b[-2],
+                                          self.get_one_e(), self.get_two_e())
+            last_fock_b = uhf_fock_matrix(densities_diis_b[-2], densities_diis_a[-2],
+                                          self.get_one_e(), self.get_two_e())
+            return s_12.T @ last_fock_a @ s_12, s_12.T @ last_fock_b @ s_12
+
+        self.last_fock = last_fock()
+
+        # A function that returns the converged mo coefficients
+        def get_mo():
+            # Calculate the last fock matrix for both alpha and beta
+            fock_a = uhf_fock_matrix(densities_diis_a[-2], densities_diis_b[-2], self.get_one_e(), self.get_two_e())
+            fock_b = uhf_fock_matrix(densities_diis_b[-2], densities_diis_a[-2], self.get_one_e(), self.get_two_e())
+
+            # orthogonalize both fock matrices
+            fock_a_ = s_12.T.dot(fock_a).dot(s_12)
+            fock_b_ = s_12.T.dot(fock_b).dot(s_12)
+
+            # Calculate the eigenvectors of both Fock matrices
+            # Orthogonalise both sets of eigenvectors to get the mo coefficients
+            val_a, vec_a = la.eigh(fock_a_)
+            val_b, vec_b = la.eigh(fock_b_)
+            coefficient_a = s_12 @ vec_a
+            coefficient_b = s_12 @ vec_b
+            return coefficient_a, coefficient_b
+
+        self.mo = get_mo()
+
+        # calculate the total energy, taking nuclear repulsion into account
+        scf_e = energies_diis[-1] + self.nuc_rep()
+        self.energy = scf_e
+
+        return scf_e, i, get_mo(), last_dens(), last_fock()
+
+    def get_scf_solution_diis(self, guess=None):
+        """
+        Prints the number of iterations and the converged diis energy.
+        Also prints the expectation value of S_z, S^2 and the multiplicity.
+
+        :return: The converged diis energy.
+        """
+        scf_values = self.diis(guess)
+        s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
+        print("Number of iterations: " + str(scf_values[1]))
+        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (UHF)")
+        print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        return self.energy
