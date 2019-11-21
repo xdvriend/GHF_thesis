@@ -15,6 +15,7 @@ import numpy as np
 from numpy import linalg as la
 from scipy import linalg as la2
 from functools import reduce
+import collections as c
 
 
 class RealGHF:
@@ -511,3 +512,267 @@ class RealGHF:
                 self.instability = False
             return mo
         return internal_stability()
+
+    def diis(self, guess=None):
+        """
+        The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
+        find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
+        done as well.
+        :param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
+        :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
+        """
+        # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
+        # Also define the core Hamiltonian matrix in it's spin-blocked notation.
+        s_min_12 = trans_matrix(self.get_ovlp())
+        s_12_o = expand_matrix(s_min_12)
+        c_ham = expand_matrix(self.get_one_e())
+
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.T
+
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
+        else:
+            initial_guess = guess
+
+        def density(fock):
+            """
+            :param fock: a fock matrix
+            :return: one big density matrix
+            """
+            # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
+            eigenval, eigenvec = la.eigh(fock)
+            coeff = s_12_o @ eigenvec
+            coeff_r = coeff[:, 0:self.number_of_electrons]
+            # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
+            return np.einsum('ij,kj->ik', coeff_r, coeff_r)
+
+        # Calculate the guess density from the given initial guess and put it in an array.
+        p_g = density(initial_guess)
+        densities_diis = [p_g]
+
+        # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
+        # Fock matrix in it's spin-blocked notation.
+        def coulomb(density_block):
+            """
+            Calculate the coulomb integrals.
+            """
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e())
+
+        def exchange(density_block):
+            """
+            Calculate the exchange integrals.
+            """
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3))
+
+        def fock_block(sigma, tau, p):
+            """
+            :param sigma: Can be either 'a' for alpha or 'b' for beta.
+            :param tau: Can be either 'a' for alpha or 'b' for beta.
+            :param p: a complete density matrix
+            :return: one of the four blocks of the fock matrix, depending on the sigma and tau values.
+            """
+            # define d as a Cronecker delta, which will be useful when creating the blocks.
+            if sigma == tau:
+                d = 1
+            else:
+                d = 0
+            # determine the dimension of 1 block.
+            dim = int(np.shape(p)[0] / 2)
+            # split the density matrix in it's four spin-blocks: aa, ab, ba and bb.
+            p_aa = p[0:dim, 0:dim]
+            p_ab = p[dim:2 * dim, 0:dim]
+            p_ba = p[0:dim, dim:2 * dim]
+            p_bb = p[dim:2 * dim, dim:2 * dim]
+            # Calculate the one_electron integrals.
+            h_st = self.get_one_e()
+            # calculate the coulomb and exchange integrals, needed for each of the spin-blocks in the Fock matrix.
+            j_aa = coulomb(p_aa)
+            j_bb = coulomb(p_bb)
+            k_aa = exchange(p_aa)
+            k_ab = exchange(p_ab)
+            k_ba = exchange(p_ba)
+            k_bb = exchange(p_bb)
+            # depending on which block of the Fock matrix you're making, use the needed J & K values.
+            if sigma == 'a' and tau == 'a':  # aa-block
+                return d * h_st + d * (j_aa + j_bb) - k_aa
+            if sigma == 'a' and tau == 'b':  # ab-block
+                return d * h_st + d * (j_aa + j_bb) - k_ab
+            if sigma == 'b' and tau == 'a':  # ba-block
+                return d * h_st + d * (j_aa + j_bb) - k_ba
+            if sigma == 'b' and tau == 'b':  # bb-block
+                return d * h_st + d * (j_aa + j_bb) - k_bb
+
+        def error_matrix(dens):
+            """
+            Function that calculates the error matrix for the DIIS algorithm
+            :param dens: given density matrix
+            :return: a value that should be zero and a fock matrix
+            """
+            f_aa = fock_block('a', 'a', dens)
+            f_ab = fock_block('a', 'b', dens)
+            f_ba = fock_block('b', 'a', dens)
+            f_bb = fock_block('b', 'b', dens)
+            fock = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            return (fock @ dens @ expand_matrix(self.get_ovlp()) - expand_matrix(self.get_ovlp()) @ dens @ fock), fock
+
+        # Create a list to store the errors
+        # create a list to store the fock matrices
+        # deque is used as a high performance equivalent of an array
+        error_list = c.deque(maxlen=6)
+        fock_list = c.deque(maxlen=6)
+
+        def build_b_matrix(dens):
+            """
+            A function to build the B matrix from the error matrix and the density matrix.
+            :param dens: density matrix
+            :return:  the B matrix
+            """
+            # Get the error and fock matrices
+            # add them to their respective lists
+            error, fock = error_matrix(dens)
+            error_list.append(error)
+            fock_list.append(fock)
+
+            # Determine the dimensions of the B matrix
+            m = len(error_list)
+            n = np.shape(s_12_o)[0]
+
+            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
+            error = np.array(list(error_list) * m).reshape(m, m, n, n)
+            return np.einsum('ijkl, jilk->ij', error, error)
+
+        def coefficients(dens):
+            # Calculate the B matrix with the function above
+            b_matrix = build_b_matrix(dens)
+            # Determine matrix dimensions
+            length = len(fock_list)
+
+            # Create the needed matrices for the linear equation that results in the coefficients
+            p = np.full((1, length), -1)
+            q = np.full((length + 1, 1), -1)
+            a = np.append(b_matrix, p, axis=0)
+            a = np.append(a, q, axis=1)
+            a[-1][-1] = 0
+            b = np.zeros((length + 1, 1))
+            b[length][0] = -1
+
+            # Solve the linear equation (using a scipy solver)
+            x = la2.solve(a, b)
+            return np.array(x[:-1])
+
+        def new_fock_matrix(dens):
+            """
+            Create a new fock matrix
+            :param dens: density matrix
+            :return: a new fock matrix
+            """
+            coeff = coefficients(dens)
+            f = coeff.reshape((len(fock_list), 1, 1)) * fock_list
+            return np.sum(f, 0)
+
+        # The function that will calculate the energy value according to the GHF algorithm.
+        def scf_e(dens, fock):
+            """
+            Calculates the scf energy for the GHF method
+            """
+            return np.sum(dens * (expand_matrix(self.get_one_e()) + fock)) / 2
+
+        # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
+        # Create an array to store the energy values and another to store the energy differences.
+        electronic_e = scf_e(p_g, initial_guess)
+        energies_diis = [electronic_e]
+        delta_e_diis = []
+
+        def iteration_diis():
+            # Add them together to form the total Fock matrix in spin block notation
+            # orthogonalise the Fock matrix
+            f = new_fock_matrix(densities_diis[-1])
+            f_o = s_12_o.T @ f @ s_12_o
+
+            # Create the new density matrix from the Orthogonalised Fock matrix.
+            # Add the new density matrix to the densities array.
+            p_new = density(f_o)
+            densities_diis.append(p_new)
+
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies_diis.append(scf_e(densities_diis[-1], f))
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+        iteration_diis()
+        i = 1
+        while abs(delta_e_diis[-1]) >= 1e-12 and i < 5000:
+            iteration_diis()
+            i += 1
+        self.iterations = i
+
+        # A function that gives the last density matrix of the scf procedure.
+        # Then set the last_dens value of the class object to this density matrix.
+        def last_dens():
+            return densities_diis[-1]
+
+        self.last_dens = last_dens()
+
+        # A function that returns the last Fock matrix of the scf procedure.
+        # Then, set the last_fock value of the GHF object to this Fock matrix.
+        def last_fock():
+            # Create the 4 individual spin-blocks of the last Fock matrix.
+            f_aa = fock_block('a', 'a', densities_diis[-2])
+            f_ab = fock_block('a', 'b', densities_diis[-2])
+            f_ba = fock_block('b', 'a', densities_diis[-2])
+            f_bb = fock_block('b', 'b', densities_diis[-2])
+            # Add the blocks together.
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            # Return the orthogonalised last Fock matrix.
+            return s_12_o.T @ f @ s_12_o
+
+        self.last_fock = last_fock()
+
+        # A function that calculates the MO's from the last needed Fock matrix in the scf calculation.
+        def get_mo():
+            # Get the last Fock matrix.
+            last_f = last_fock()
+            # Diagonalise the Fock matrix.
+            val, vec = la.eigh(last_f)
+            # calculate the coefficients.
+            coeff = s_12_o @ vec
+            return coeff
+
+        self.mo = get_mo()
+
+        # Calculate the final scf energy (electronic + nuclear repulsion)
+        scf_e = energies_diis[-1] + self.nuc_rep()
+        self.energy = scf_e
+
+        return scf_e, i, get_mo(), last_dens(), last_fock()
+
+    def get_scf_solution_diis(self, guess=None):
+        """
+        Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
+        just like with a normal scf calculation.
+
+        Example:
+
+        >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+        >>> x = RealGHF(h3, 3)
+        >>> guess = x.random_guess()
+        >>> x.get_scf_solution_diis(guess)
+        Number of iterations: 37
+        Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)
+
+        Without DIIS, 82 iterations are needed to find this solution.
+
+        :return: The converged scf energy.
+        """
+        scf_values = self.diis(guess)
+        print("Number of iterations: " + str(scf_values[1]))
+        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (Real GHF)")
+        return self.energy

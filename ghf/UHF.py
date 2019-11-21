@@ -597,18 +597,17 @@ class UHF:
                             self.get_two_e())  # double summation of density matrix * exchange
             return self.get_one_e() + jk_a + j_b
 
-        def error_matrix(density_a, density_b):
+        def error_matrix(density1, density2):
             """
-            Calculates the error matrices for alpha and beta
-            :param density_a: alpha density matrix
-            :param density_b: beta density matrix
-            :return: error matrices for alpha and beta
+            calculates an error matrix. if density 1 is alpha and density 2 is beta, the alpha error matrix is found
+            and vice versa.
+            :param density1: either the alpha or beta density matrix
+            :param density2: either the alpha or beta density matrix
+            :return: an error matrix
             """
-            fock_a = uhf_fock(density_a, density_b)
-            fock_b = uhf_fock(density_b, density_a)
-            a = fock_a @ density_a @ self.get_ovlp() - self.get_ovlp() @ density_a @ fock_a
-            b = fock_b @ density_b @ self.get_ovlp() - self.get_ovlp() @ density_b @ fock_b
-            return a, b
+            fock = uhf_fock(density1, density2)
+            e = fock @ density1 @ self.get_ovlp() - self.get_ovlp() @ density1 @ fock
+            return e
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -619,47 +618,59 @@ class UHF:
         fock_list_a = c.deque(maxlen=6)
         fock_list_b = c.deque(maxlen=6)
 
-        def build_b_matrix(density_a, density_b):
+        def build_b_matrix_a(density_a, density_b):
             """
-            Build the B matrix for both the alpha and beta orbitals
+            Build the B matrix for the alpha orbitals
             :param density_a: alpha density matrix
             :param density_b: beta density matrix
-            :return: B matrix for alpha and beta orbitals
+            :return: B matrix for alpha orbitals
             """
-            # Get the error and fock matrices
+            # Get the error and fock matrix for alpha
             # add them to their respective lists
-            error_a, error_b = error_matrix(density_a, density_b)
+            error_a = error_matrix(density_a, density_b)
             error_list_a.append(error_a)
-            error_list_b.append(error_b)
 
-            fock_a = uhf_fock(density_a, density_b)
-            fock_b = uhf_fock(density_b, density_a)
-
-            fock_list_a.append(fock_a)
-            fock_list_b.append(fock_b)
+            fock_list_a.append(uhf_fock(density_a, density_b))
 
             # Determine the dimensions of the B matrix
             m = len(error_list_a)
-            print(m)
-            o = len(error_list_b)
-            print(o)
             n = np.shape(self.get_ovlp())[0]
 
             # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
             error_a = np.array(list(error_list_a) * m).reshape(m, m, n, n)
-            error_b = np.array(list(error_list_b) * m).reshape(o, o, n, n)
-            return np.einsum('ijkl, jilk->ij', error_a, error_a), np.einsum('ijkl, jilk->ij', error_b, error_b)
+            return np.einsum('ijkl, jilk->ij', error_a, error_a)
+
+        def build_b_matrix_b(density_a, density_b):
+            """
+            Build the B matrix for the beta orbitals
+            :param density_a: alpha density matrix
+            :param density_b: beta density matrix
+            :return: B matrix for beta orbitals
+            """
+            # Get the error and fock matrix for beta
+            # add them to their respective lists
+            error_b = error_matrix(density_b, density_a)
+            error_list_b.append(error_b)
+
+            fock_list_b.append(uhf_fock(density_a, density_b))
+
+            # Determine the dimensions of the B matrix
+            o = len(error_list_b)
+            n = np.shape(self.get_ovlp())[0]
+
+            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
+            error_b = np.array(list(error_list_b) * o).reshape(o, o, n, n)
+            return np.einsum('ijkl, jilk->ij', error_b, error_b)
 
         def coefficients(density_a, density_b):
             # Calculate the B matrix with the function above
-            b_matrix_a = build_b_matrix(density_a, density_b)[0]
-            b_matrix_b = build_b_matrix(density_a, density_b)[1]
+            b_matrix_a = build_b_matrix_a(density_a, density_b)
+            b_matrix_b = build_b_matrix_b(density_a, density_b)
             print(b_matrix_a, b_matrix_b)
 
             # Determine matrix dimensions
             length_a = len(fock_list_a)
             length_b = len(fock_list_b)
-            print(length_a, length_b)
 
             # Create the needed matrices for the linear equation that results in the coefficients
             p = np.full((1, length_a), -1)
@@ -671,7 +682,6 @@ class UHF:
             a[-1][-1] = 0
             b = np.zeros((length_a + 1, 1))
             b[length_a][0] = -1
-            print(a, b)
 
             # Create the needed matrices for the linear equation that results in the coefficients
             y = np.full((1, length_b), -1)
@@ -683,7 +693,6 @@ class UHF:
             e[-1][-1] = 0
             f = np.zeros((length_b + 1, 1))
             f[length_b][0] = -1
-            print(e, f)
 
             # Solve the linear equation (using a scipy solver)
             x_a = la.solve(a, b)

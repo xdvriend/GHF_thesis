@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Nov 20, 2019}
+\date{Nov 21, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -512,6 +512,18 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+go}{Number of iterations: 82}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202607725 (Real GHF)}
 \end{sphinxVerbatim}
+\index{diis() (ghf.real\_GHF.RealGHF method)@\spxentry{diis()}\spxextra{ghf.real\_GHF.RealGHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}}{}
+The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
+find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
+done as well.
+:param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
+:return: scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+
+\end{fulllineitems}
+
 \index{get\_last\_dens() (ghf.real\_GHF.RealGHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
@@ -578,6 +590,33 @@ The overlap matrix
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}}{}
 Prints the number of iterations and the converged scf energy.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution\_diis() (ghf.real\_GHF.RealGHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.real\_GHF.RealGHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}}{}
+Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
+just like with a normal scf calculation.
+
+Example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\PYG{g+go}{Number of iterations: 37}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202915496 (Real GHF)}
+\end{sphinxVerbatim}
+
+Without DIIS, 82 iterations are needed to find this solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The converged scf energy.
