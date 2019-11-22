@@ -116,11 +116,12 @@ class ComplexGHF:
             return vec
         return random_hermitian_matrix(dim)
 
-    def scf(self, guess=None):
+    def scf(self, guess=None, convergence=1e-12):
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
         in the complex GHF class, all values throughout are complex.
 
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param guess: Initial guess for scf. If none is given, a unitary rotation on the core Hamiltonian is used.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
@@ -268,7 +269,7 @@ class ComplexGHF:
 
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= 1e-12:
+        while abs(delta_e[-1]) >= convergence and i < 5000:
             iteration()
             i += 1
         self.iterations = i
@@ -313,13 +314,15 @@ class ComplexGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None):
+    def get_scf_solution(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged scf energy.
 
+        :param guess: The initial scf guess. None specified: core Hamiltonian unitarily rotated with complex U matrix.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy.
         """
-        scf_values = self.scf(guess)
+        scf_values = self.scf(guess, convergence=convergence)
         e = scf_values[0]
         i = scf_values[1]
         if abs(np.imag(e)) > 1e-12:
@@ -500,13 +503,14 @@ class ComplexGHF:
 
         return internal_stability()
 
-    def diis(self, guess=None):
+    def diis(self, guess=None, convergence=1e-12):
         """
         The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
         find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
         done as well.
-        :param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is unitarily
-        rotated and used as the initial guess.
+
+        :param guess: The initial guess matrix, if none is specified: expanded core Hamiltonian unitarily rotated.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
@@ -715,7 +719,7 @@ class ComplexGHF:
 
         iteration_diis()
         i = 1
-        while abs(delta_e_diis[-1]) >= 1e-12 and i < 5000:
+        while abs(delta_e_diis[-1]) >= convergence and i < 5000:
             iteration_diis()
             i += 1
         self.iterations = i
@@ -760,7 +764,7 @@ class ComplexGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
         just like with a normal scf calculation.
@@ -772,9 +776,11 @@ class ComplexGHF:
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
 
+        :param guess: Initial scf guess. None specified: core HAmiltonian unitarily rotated with complex U matrix.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy.
         """
-        scf_values = self.diis(guess)
+        scf_values = self.diis(guess, convergence=convergence)
         e = scf_values[0]
         i = scf_values[1]
         if abs(np.imag(e)) > 1e-12:
@@ -783,7 +789,7 @@ class ComplexGHF:
             print("Number of iterations: " + str(i))
             print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
 
-    def loop_calculations(self, number_of_loops, guess=None):
+    def loop_calculations(self, number_of_loops, guess=None, convergence=1e-12):
         """
         This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
         correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
@@ -792,6 +798,7 @@ class ComplexGHF:
 
         :param number_of_loops: The amount of times you want to repeat the scf + stability procedure.
         :param guess: The guess used for the scf procedure.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The scf energy after the loops.
         """
         # Create the needed arrays.
@@ -799,11 +806,11 @@ class ComplexGHF:
         iterations = []
         # Loop the scf calculation + stability analysis
         for i in range(number_of_loops):
-            self.scf(guess)
+            self.scf(guess, convergence=convergence)
             self.stability()
             while self.instability:
                 new_guess = self.stability()
-                self.scf(new_guess)
+                self.scf(new_guess, convergence=convergence)
             energy.append(self.energy)
             iterations.append(self.iterations)
         e = np.amin(energy)
@@ -817,7 +824,7 @@ class ComplexGHF:
             print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
         return self.energy
 
-    def loop_calculations_diis(self, number_of_loops, guess=None):
+    def loop_calculations_diis(self, number_of_loops, guess=None, convergence=1e-12):
         """
         This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
         correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
@@ -827,6 +834,7 @@ class ComplexGHF:
 
         :param number_of_loops: The amount of times you want to repeat the DIIS + stability procedure.
         :param guess: The guess used for the DIIS procedure.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The energy after the loops.
         """
         # Create the needed arrays.
@@ -834,11 +842,11 @@ class ComplexGHF:
         iterations = []
         # Loop the scf calculation + stability analysis
         for i in range(number_of_loops):
-            self.diis(guess)
+            self.diis(guess, convergence=convergence)
             self.stability()
             while self.instability:
                 new_guess = self.stability()
-                self.diis(new_guess)
+                self.diis(new_guess, convergence=convergence)
             energy.append(self.energy)
             iterations.append(self.iterations)
         e = np.amin(energy)

@@ -89,11 +89,12 @@ class UHF:
         """
         return self.integrals[3]
 
-    def scf(self, initial_guess=None):
+    def scf(self, initial_guess=None, convergence=1e-12):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
         :param initial_guess: A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
@@ -156,7 +157,7 @@ class UHF:
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= 1e-12:
+        while abs(delta_e[-1]) >= convergence:
             iteration()
             i += 1
         self.iterations = i
@@ -196,17 +197,19 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None):
+    def get_scf_solution(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
+        :param guess: The initial guess for the scf procedure. If none is given: core Hamiltonian.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy.
         """
-        scf_values = self.scf(guess)
+        self.scf(guess, convergence=convergence)
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(scf_values[1]))
-        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (UHF)")
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
@@ -557,10 +560,12 @@ class UHF:
             return new_orbitals
         return internal_stability()
 
-    def diis(self, initial_guess=None):
+    def diis(self, initial_guess=None, convergence=1e-12):
         """
         When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
 
+        :param initial_guess: Initial guess for the scf procedure. None specified: core Hamiltonian.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -652,7 +657,7 @@ class UHF:
             error_b = error_matrix(density_b, density_a)
             error_list_b.append(error_b)
 
-            fock_list_b.append(uhf_fock(density_a, density_b))
+            fock_list_b.append(uhf_fock(density_b, density_a))
 
             # Determine the dimensions of the B matrix
             o = len(error_list_b)
@@ -682,6 +687,7 @@ class UHF:
             a[-1][-1] = 0
             b = np.zeros((length_a + 1, 1))
             b[length_a][0] = -1
+            print(a, b)
 
             # Create the needed matrices for the linear equation that results in the coefficients
             y = np.full((1, length_b), -1)
@@ -693,6 +699,7 @@ class UHF:
             e[-1][-1] = 0
             f = np.zeros((length_b + 1, 1))
             f[length_b][0] = -1
+            print(e, f)
 
             # Solve the linear equation (using a scipy solver)
             x_a = la.solve(a, b)
@@ -742,7 +749,7 @@ class UHF:
         # Let the process iterate until the energy difference is smaller than 10e-12
         iteration_diis()
         i = 1
-        while abs(delta_e_diis[-1]) >= 1e-12:
+        while abs(delta_e_diis[-1]) >= convergence:
             iteration_diis()
             i += 1
 
@@ -788,16 +795,18 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged diis energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
+        :param guess: The initial guess. If none is specified, core Hamiltonian.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged diis energy.
         """
-        scf_values = self.diis(guess)
+        self.diis(guess, convergence=convergence)
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(scf_values[1]))
-        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (UHF)")
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy

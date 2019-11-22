@@ -175,11 +175,17 @@ and the number of iterations needed to get this value.</p>
 </div>
 <dl class="method">
 <dt id="ghf.UHF.UHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_guess</strong> – Initial guess for the scf procedure. None specified: core Hamiltonian.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix</p>
 </dd>
 </dl>
 </dd></dl>
@@ -264,24 +270,36 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The converged scf energy.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guess</strong> – The initial guess for the scf procedure. If none is given: core Hamiltonian.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converged scf energy.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The converged diis energy.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guess</strong> – The initial guess. If none is specified, core Hamiltonian.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converged diis energy.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -308,11 +326,14 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest UHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>initial_guess</strong> – A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_guess</strong> – A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices</p>

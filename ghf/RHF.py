@@ -76,10 +76,11 @@ class RHF:
         """
         return self.integrals[3]  # Get the nuclear repulsion value of the given molecule
 
-    def scf(self):
+    def scf(self, convergence=1e-12):
         """
         Performs a self consistent field calculation to find the lowest RHF energy.
 
+        :param convergence: Convergence criterion. If none is specified, 1e-12 is used.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -119,7 +120,7 @@ class RHF:
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= 1e-12:
+        while abs(delta_e[-1]) >= convergence:
             iteration()
             i += 1
         self.iterations = i
@@ -148,14 +149,16 @@ class RHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self):
+    def get_scf_solution(self, convergence=1e-12):
         """
         Prints the number of iterations and the converged scf energy.
 
-        :return: The converged scf energy.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :return: the converged energy
         """
-        print("Number of iterations: " + str(self.scf()[1]))
-        print("Converged SCF energy in Hartree: " + str(self.scf()[0]) + " (RHF)")
+        self.scf(convergence=convergence)
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (RHF)")
         return self.energy
 
     def get_mo_coeff(self):
@@ -182,10 +185,11 @@ class RHF:
         """
         return self.last_fock
 
-    def diis(self):
+    def diis(self, convergence=1e-12):
         """
         When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -288,7 +292,7 @@ class RHF:
         # Let the process iterate until the energy difference is smaller than 10e-12
         iteration_diis()
         i = 1
-        while abs(delta_e_diis[-1]) >= 1e-12:
+        while abs(delta_e_diis[-1]) >= convergence:
             iteration_diis()
             i += 1
         self.iterations = i
@@ -320,7 +324,7 @@ class RHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self):
+    def get_scf_solution_diis(self, convergence=1e-12):
         """
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
@@ -331,8 +335,10 @@ class RHF:
         Number of iterations: 9
         Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy, using DIIS.
         """
-        print("Number of iterations: " + str(self.diis()[1]))
-        print("Converged SCF energy in Hartree: " + str(self.diis()[0]) + " (RHF)")
+        self.diis(convergence=convergence)
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (RHF)")
         return self.energy

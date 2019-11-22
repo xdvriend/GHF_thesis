@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Nov 21, 2019}
+\date{Nov 22, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -114,9 +114,12 @@ and the number of iterations needed to get this value.
 \index{diis() (ghf.RHF.RHF method)@\spxentry{diis()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{convergence=1e-12}}{}
 When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
 \item[{Returns}] \leavevmode
 scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
 
@@ -188,11 +191,14 @@ The overlap matrix
 \index{get\_scf\_solution() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
 \item[{Returns}] \leavevmode
-The converged scf energy.
+the converged energy
 
 \end{description}\end{quote}
 
@@ -201,7 +207,7 @@ The converged scf energy.
 \index{get\_scf\_solution\_diis() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:
 
@@ -213,6 +219,9 @@ a normal scf, but the energy value will be the same. Example:
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.100153764878446 (RHF)}
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
 \item[{Returns}] \leavevmode
 The converged scf energy, using DIIS.
 
@@ -245,9 +254,12 @@ The nuclear repulsion value
 \index{scf() (ghf.RHF.RHF method)@\spxentry{scf()}\spxextra{ghf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}}{}
 Performs a self consistent field calculation to find the lowest RHF energy.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Convergence criterion. If none is specified, 1e-12 is used.
+
 \item[{Returns}] \leavevmode
 number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
 
@@ -288,9 +300,18 @@ For a normal scf calculation your input looks like the following example:
 \index{diis() (ghf.UHF.UHF method)@\spxentry{diis()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}}{}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}}{}
 When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{initial\_guess}} \textendash{} Initial guess for the scf procedure. None specified: core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
 
@@ -391,10 +412,19 @@ The overlap matrix
 \index{get\_scf\_solution() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial guess for the scf procedure. If none is given: core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 The converged scf energy.
 
@@ -405,10 +435,19 @@ The converged scf energy.
 \index{get\_scf\_solution\_diis() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial guess. If none is specified, core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 The converged diis energy.
 
@@ -441,11 +480,17 @@ The nuclear repulsion value
 \index{scf() (ghf.UHF.UHF method)@\spxentry{scf()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}}{}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}}{}
 Performs a self consistent field calculation to find the lowest UHF energy.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{initial\_guess}} \textendash{} A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
 
 \item[{Returns}] \leavevmode
 The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
@@ -515,12 +560,24 @@ For a normal scf calculation your input looks like the following example:
 \index{diis() (ghf.real\_GHF.RealGHF method)@\spxentry{diis()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
 find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
 done as well.
-:param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
-:return: scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -588,9 +645,18 @@ The overlap matrix
 \index{get\_scf\_solution() (ghf.real\_GHF.RealGHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for scf. If none is specified: expanded core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 The converged scf energy.
 
@@ -601,7 +667,7 @@ The converged scf energy.
 \index{get\_scf\_solution\_diis() (ghf.real\_GHF.RealGHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
 just like with a normal scf calculation.
 
@@ -618,6 +684,15 @@ Example:
 
 Without DIIS, 82 iterations are needed to find this solution.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for scf. None specified: expanded core Hamiltonian
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 The converged scf energy.
 
@@ -673,12 +748,18 @@ A random hermitian matrix.
 \index{scf() (ghf.real\_GHF.RealGHF method)@\spxentry{scf()}\spxextra{ghf.real\_GHF.RealGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
 in the real class, all values throughout are real. For complex, see the “complex\_GHF” class.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess to start SCF. If none is given, core hamiltonian will be used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
 
 \item[{Returns}] \leavevmode
 scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
@@ -766,6 +847,30 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{ComplexGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{loop\PYGZus{}calculations}\PYG{p}{(}\PYG{p}{)}
 \end{sphinxVerbatim}
+\index{diis() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{diis()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
+The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
+find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
+done as well.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial guess matrix, if none is specified: expanded core Hamiltonian unitarily rotated.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{get\_last\_dens() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
 
 \begin{fulllineitems}
@@ -830,9 +935,50 @@ The overlap matrix
 \index{get\_scf\_solution() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial scf guess. None specified: core Hamiltonian unitarily rotated with complex U matrix.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution\_diis() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
+Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
+just like with a normal scf calculation.
+
+Example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{ComplexGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial scf guess. None specified: core HAmiltonian unitarily rotated with complex U matrix.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 The converged scf energy.
 
@@ -854,7 +1000,7 @@ The electron repulsion interaction tensor
 \index{loop\_calculations() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{loop\_calculations()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.loop_calculations}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{loop\_calculations}}}{\emph{number\_of\_loops}, \emph{guess=None}}{}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.loop_calculations}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{loop\_calculations}}}{\emph{number\_of\_loops}, \emph{guess=None}, \emph{convergence=1e-12}}{}
 This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
 correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
 from different random guesses and returning the lowest value of all the different calculations. The loops will
@@ -867,10 +1013,42 @@ automatically perform a stability analysis until there is no more instability in
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The guess used for the scf procedure.
 
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
 \end{itemize}
 
 \item[{Returns}] \leavevmode
 The scf energy after the loops.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{loop\_calculations\_diis() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{loop\_calculations\_diis()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.loop_calculations_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{loop\_calculations\_diis}}}{\emph{number\_of\_loops}, \emph{guess=None}, \emph{convergence=1e-12}}{}
+This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
+correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
+from different random guesses and returning the lowest value of all the different calculations. The loops will
+automatically perform a stability analysis until there is no more instability in the wave function. This option
+uses the DIIS iteration so that convergence is generally reached faster.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{number\_of\_loops}} \textendash{} The amount of times you want to repeat the DIIS + stability procedure.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The guess used for the DIIS procedure.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The energy after the loops.
 
 \end{description}\end{quote}
 
@@ -916,12 +1094,18 @@ A random hermitian matrix.
 \index{scf() (ghf.complex\_GHF.ComplexGHF method)@\spxentry{scf()}\spxextra{ghf.complex\_GHF.ComplexGHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}}{}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
 This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
 in the complex GHF class, all values throughout are complex.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for scf. If none is given, a unitary rotation on the core Hamiltonian is used.
+
+\end{itemize}
 
 \item[{Returns}] \leavevmode
 scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matrix

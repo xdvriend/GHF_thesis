@@ -153,12 +153,13 @@ class RealGHF:
 
         return random_hermitian_matrix(dim)
 
-    def scf(self, guess=None):
+    def scf(self, guess=None, convergence=1e-12):
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
         in the real class, all values throughout are real. For complex, see the "complex_GHF" class.
 
         :param guess: Initial guess to start SCF. If none is given, core hamiltonian will be used.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
@@ -289,7 +290,7 @@ class RealGHF:
 
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= 1e-12 and i < 5000:
+        while abs(delta_e[-1]) >= convergence and i < 5000:
             iteration()
             i += 1
         self.iterations = i
@@ -331,16 +332,18 @@ class RealGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None):
+    def get_scf_solution(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged scf energy.
 
+        :param guess: Initial guess for scf. If none is specified: expanded core Hamiltonian.
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy.
         """
-        scf_values = self.scf(guess)
+        self.scf(guess, convergence=convergence)
         #s_values = ghf_spin(self.get_mo_coeff(), self.get_ovlp())
-        print("Number of iterations: " + str(scf_values[1]))
-        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (Real GHF)")
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
         #print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
@@ -513,11 +516,13 @@ class RealGHF:
             return mo
         return internal_stability()
 
-    def diis(self, guess=None):
+    def diis(self, guess=None, convergence=1e-12):
         """
         The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
         find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
         done as well.
+
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
@@ -709,7 +714,7 @@ class RealGHF:
 
         iteration_diis()
         i = 1
-        while abs(delta_e_diis[-1]) >= 1e-12 and i < 5000:
+        while abs(delta_e_diis[-1]) >= convergence and i < 5000:
             iteration_diis()
             i += 1
         self.iterations = i
@@ -754,7 +759,7 @@ class RealGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
         """
         Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
         just like with a normal scf calculation.
@@ -770,9 +775,11 @@ class RealGHF:
 
         Without DIIS, 82 iterations are needed to find this solution.
 
+        :param guess: Initial guess for scf. None specified: expanded core Hamiltonian
+        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: The converged scf energy.
         """
-        scf_values = self.diis(guess)
-        print("Number of iterations: " + str(scf_values[1]))
-        print("Converged SCF energy in Hartree: " + str(scf_values[0]) + " (Real GHF)")
+        self.diis(guess, convergence=convergence)
+        print("Number of iterations: " + str(self.iterations))
+        print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
         return self.energy
