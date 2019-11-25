@@ -46,7 +46,8 @@ class RHF:
         if number_of_electrons % 2 == 0:
             self.occupied = int(number_of_electrons/2)
         else:
-            print('Number of electrons has to be even for a closed shell calculation.')
+            raise Exception('Number of electrons has to be even for a closed shell calculation. Given number of '
+                            'electrons was {}.'.format(number_of_electrons))
 
     def get_ovlp(self):
         """
@@ -90,9 +91,9 @@ class RHF:
 
         def rhf_scf_energy(dens_matrix, fock):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.sum(dens_matrix * (self.get_one_e() + fock))
+            return np.einsum('pq, pq->', (self.get_one_e() + fock), dens_matrix)
 
-        electronic_e = np.sum(guess_density * self.get_one_e() * 2)  # calculate the initial energy, using the guess
+        electronic_e = rhf_scf_energy(guess_density, core_guess)  # calculate the initial energy, using the guess
         energies = [electronic_e]  # create an electronic energy array
 
         def rhf_fock_matrix(dens_matrix):
@@ -210,7 +211,7 @@ class RHF:
             :return: a value that should be zero and a fock matrix
             """
             fock = rhf_fock_matrix(density)
-            return (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock), fock
+            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T, fock
 
         # Create a list to store the errors
         # create a list to store the fock matrices
