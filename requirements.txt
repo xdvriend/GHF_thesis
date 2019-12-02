@@ -9,7 +9,7 @@ more-itertools==7.2.0
 numpy==1.15.4
 packaging==19.2
 pluggy==0.13.0
-psi4==1.3.2+ecbda83
+psi4==1.3.2
 py==1.8.0
 pycodestyle==2.5.0
 pyflakes==2.1.1
