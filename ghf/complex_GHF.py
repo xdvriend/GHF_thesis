@@ -17,6 +17,7 @@ import math as m
 from scipy import linalg as la2
 from functools import reduce
 import collections as c
+from ghf.UHF import UHF
 
 
 class ComplexGHF:
@@ -35,18 +36,25 @@ class ComplexGHF:
     >>> x = ComplexGHF(h3, 3)
     >>> x.loop_calculations()
     """
-    def __init__(self, molecule, number_of_electrons):
+    def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
         Initiate an instance of a complex GHF class.
 
         :param molecule: The molecule on which to perform the calculations, made in PySCF.
         :param number_of_electrons: The amount of electrons present in the system.
+        :param int_method: method to calculate the integrals. pyscf and psi4 are supported.
         """
         # Set the molecule, the integrals, the mo coefficients, the number of electrons,
         # the energy, the last fock and the last density matrices as class parameters.
         self.molecule = molecule
         self.number_of_electrons = number_of_electrons
-        self.integrals = get_integrals(molecule)
+        if int_method == 'pyscf':
+            self.integrals = get_integrals_pyscf(molecule)
+        elif int_method == 'psi4':
+            self.integrals = get_integrals_psi4(molecule)
+        else:
+            raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
+                            'Make sure the molecule instance matches the method.')
         self.energy = None
         self.mo = None
         self.last_dens = None
@@ -115,6 +123,16 @@ class ComplexGHF:
             val, vec = la.eigh(y)
             return vec
         return random_hermitian_matrix(dim)
+
+    def mixed_ghf_guess(self, ghf, constant):
+        mo = ghf.get_mo_coeff()
+        guess = mo + mo * 1j * constant
+
+        def gs(X):
+            Q, R = np.linalg.qr(X)
+            return Q
+
+        return gs(guess)
 
     def scf(self, guess=None, convergence=1e-12):
         """
@@ -253,19 +271,20 @@ class ComplexGHF:
             f_bb = fock_block('b', 'b', densities[-1]).astype(complex)
 
             # Add them together to form the total Fock matrix in spin block notation
-            # orthogonalise the Fock matrix
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb).astype(complex)
+
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies.append(scf_e(densities[-1], f))
+            delta_e.append(energies[-1] - energies[-2])
+
+            # orthogonalise the Fock matrix
             f_o = s_12_o @ f @ s_12_o.conj().T
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
             p_new = density(f_o).astype(complex)
             densities.append(p_new)
-
-            # Calculate the new energy and add it to the energies array.
-            # Calculate the energy difference and add it to the delta_e array.
-            energies.append(scf_e(densities[-1], f))
-            delta_e.append(energies[-1] - energies[-2])
 
         iteration()
         i = 1
@@ -486,7 +505,7 @@ class ComplexGHF:
             # needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
             if e < -1e-5:  # this points towards an internal instability
-                print("There is an internal instability in the complex GHF wave function.")
+                print("There is an instability in the complex GHF wave function.")
                 mo_occ = np.zeros(dim, )  # total number of basis functions
                 # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
                 for i in range(self.number_of_electrons):
@@ -496,7 +515,7 @@ class ComplexGHF:
                 self.instability = True
             else:
                 # in the case where no instability is present
-                print("There is no internal instability in the complex GHF wave function.")
+                print("There is no instability in the complex GHF wave function.")
                 mo = coeff
                 self.instability = False
             return mo

@@ -36,18 +36,25 @@ class RealGHF:
     Number of iterations: 82
     Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
     """
-    def __init__(self, molecule, number_of_electrons):
+    def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
         Initiate an instance of a real GHF class.
 
         :param molecule: The molecule on which to perform the calculations, made in PySCF.
         :param number_of_electrons: The amount of electrons present in the system.
+        :param int_method: method to calculate the integrals. pyscf and psi4 are supported.
         """
         # Set the molecule, the integrals, the mo coefficients, the number of electrons,
         # the energy, the last fock and the last density matrices as class parameters.
         self.molecule = molecule
         self.number_of_electrons = number_of_electrons
-        self.integrals = get_integrals(molecule)
+        if int_method == 'pyscf':
+            self.integrals = get_integrals_pyscf(molecule)
+        elif int_method == 'psi4':
+            self.integrals = get_integrals_psi4(molecule)
+        else:
+            raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
+                            'Make sure the molecule instance matches the method.')
         self.energy = None
         self.mo = None
         self.last_dens = None
@@ -259,8 +266,7 @@ class RealGHF:
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
-        electronic_e = scf_e(p_g, initial_guess)
-        energies = [electronic_e]
+        energies = [0.0]
         delta_e = []
 
         def iteration():
@@ -274,19 +280,20 @@ class RealGHF:
             f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            # orthogonalise the Fock matrix
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies.append(scf_e(densities[-1], f))
+            delta_e.append(energies[-1] - energies[-2])
+
+            # orthogonalise the Fock matrix
             f_o = s_12_o.T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
             p_new = density(f_o)
             densities.append(p_new)
-
-            # Calculate the new energy and add it to the energies array.
-            # Calculate the energy difference and add it to the delta_e array.
-            energies.append(scf_e(densities[-1], f))
-            delta_e.append(energies[-1] - energies[-2])
 
         iteration()
         i = 1
@@ -329,6 +336,7 @@ class RealGHF:
         # Calculate the final scf energy (electronic + nuclear repulsion)
         scf_e = energies[-1] + self.nuc_rep()
         self.energy = scf_e
+        print(energies)
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
@@ -500,7 +508,7 @@ class RealGHF:
             # needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
             if e < -1e-5:  # this points towards an internal instability
-                print("There is an internal instability in the real GHF wave function.")
+                print("There is an instability in the real GHF wave function.")
                 mo_occ = np.zeros(dim, )  # total number of basis functions
                 # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
                 for i in range(self.number_of_electrons):
@@ -510,7 +518,7 @@ class RealGHF:
                 self.instability = True
             else:
                 # in the case where no instability is present
-                print("There is no internal instability in the real GHF wave function.")
+                print("There is no instability in the real GHF wave function.")
                 mo = coeff
                 self.instability = False
             return mo

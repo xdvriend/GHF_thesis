@@ -27,15 +27,22 @@ class RHF:
         Number of iterations: 17
         Converged SCF energy in Hartree: -1.100153764878324 (RHF)
         """
-    def __init__(self, molecule, number_of_electrons):
+    def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
         Initiate the RHF instance by specifying the molecule in question with pyscf and the total number of electrons.
 
         :param molecule: The molecule on which to perform the calculations
         :param number_of_electrons: The total number of electrons in the system
+        :param int_method: method to calculate the integrals. pyscf and psi4 are supported.
         """
         self.molecule = molecule
-        self.integrals = get_integrals(molecule)
+        if int_method == 'pyscf':
+            self.integrals = get_integrals_pyscf(molecule)
+        elif int_method == 'psi4':
+            self.integrals = get_integrals_psi4(molecule)
+        else:
+            raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
+                            'Make sure the molecule instance matches the method.')
         self.energy = None
         self.mo = None
         self.last_dens = None
@@ -85,16 +92,16 @@ class RHF:
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        core_guess = s_12.T @ self.get_one_e() @ s_12  # orthogonalise the transformation matrix.
+        core_guess = s_12 @ self.get_one_e() @ s_12.T  # orthogonalise the transformation matrix.
         guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+
         densities = [guess_density]  # put the guess density in an array
 
         def rhf_scf_energy(dens_matrix, fock):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
             return np.einsum('pq, pq->', (self.get_one_e() + fock), dens_matrix)
 
-        electronic_e = rhf_scf_energy(guess_density, core_guess)  # calculate the initial energy, using the guess
-        energies = [electronic_e]  # create an electronic energy array
+        energies = [0.0]
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -109,14 +116,16 @@ class RHF:
             """create an iteration procedure, calculate fock from density,
             orthogonalise, new density from new fock,..."""
             fock = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
-            fock_orth = s_12.T.dot(fock).dot(s_12)  # orthogonalize the new fock matrix
-            new_density = density_matrix(fock_orth, self.occupied,
-                                         s_12)  # calculate density matrix from the new fock matrix
-            densities.append(new_density)  # put new density matrix in the densities array
-            energies.append(
-                rhf_scf_energy(new_density, fock))  # calculate the electronic energy and put it into the energies array
-            delta_e.append(
-                energies[-1] - energies[-2])  # calculate the energy difference and add it to the correct array
+            # calculate the electronic energy and put it into the energies array
+            energies.append(rhf_scf_energy(densities[-1], fock) + self.nuc_rep())
+            # calculate the energy difference and add it to the correct array
+            delta_e.append(energies[-1] - energies[-2])
+            # orthogonalize the new fock matrix
+            # calculate density matrix from the new fock matrix
+            fock_orth = s_12.T.dot(fock).dot(s_12)
+            new_density = density_matrix(fock_orth, self.occupied, s_12)
+            # put new density matrix in the densities array
+            densities.append(new_density)
 
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
         iteration()
@@ -145,7 +154,7 @@ class RHF:
         self.mo = get_mo()
 
         # calculate the total energy, taking nuclear repulsion into account
-        scf_e = energies[-1] + self.nuc_rep()
+        scf_e = energies[-1]
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
@@ -270,25 +279,28 @@ class RHF:
 
         def rhf_scf_energy(dens_matrix, fock):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.sum(dens_matrix * (self.get_one_e() + fock))
-
-        # Calculate the guess electronic energy
-        electronic_e = np.sum(guess_density * self.get_one_e() * 2)  # calculate the initial energy, using the guess
+            return np.einsum('pq, pq->', (self.get_one_e() + fock), dens_matrix)
 
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis = [guess_density]
-        energies_diis = [electronic_e]
+        energies_diis = [0.0]
         delta_e_diis = []
 
         def iteration_diis():
+            # Calculate new Fock matrix
             f = new_fock_matrix(densities_diis[-1])
+
+            # Calculate energy and store the difference
+            energies_diis.append(rhf_scf_energy(densities_diis[-1], f) + self.nuc_rep())
+            print(rhf_scf_energy(densities_diis[-1], f) + self.nuc_rep())
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+            # Orthogonalise the Fock matrix
             f_orth = s_12.T @ f @ s_12
 
+            # Calculate and store the new density
             new_density = density_matrix(f_orth, self.occupied, s_12)
             densities_diis.append(new_density)
-
-            energies_diis.append(rhf_scf_energy(new_density, f))
-            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
 
         # Let the process iterate until the energy difference is smaller than 10e-12
         iteration_diis()
@@ -320,7 +332,8 @@ class RHF:
         self.mo = get_mo()
 
         # calculate the total energy, taking nuclear repulsion into account
-        scf_e = energies_diis[-1] + self.nuc_rep()
+        scf_e = energies_diis[-1]
+        print(energies_diis)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()

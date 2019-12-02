@@ -9,9 +9,10 @@ import numpy as np
 from numpy import linalg as la
 from scipy import diag
 from functools import reduce
+import psi4
 
 
-def get_integrals(molecule):
+def get_integrals_pyscf(molecule):
     """
     A function to calculate your integrals & nuclear repulsion with pyscf.
     """
@@ -19,6 +20,21 @@ def get_integrals(molecule):
     one_electron = molecule.intor('int1e_nuc') + molecule.intor('int1e_kin')
     two_electron = molecule.intor('int2e')
     nuclear_repulsion = gto.mole.energy_nuc(molecule)
+    return overlap, one_electron, two_electron, nuclear_repulsion
+
+
+def get_integrals_psi4(mol):
+    """
+    A function to calculate your integrals & nuclear repulsion with psi4.
+    :param mol: Psi4 instance
+    :return: overlap, core hamiltonian, eri tensor and nuclear repulsion
+    """
+    wfn = psi4.core.Wavefunction.build(mol, psi4.core.get_global_option('basis'))
+    mints = psi4.core.MintsHelper(wfn.basisset())
+    overlap = np.asarray(mints.ao_overlap())
+    one_electron = np.asarray(mints.ao_potential()) + np.asarray(mints.ao_kinetic())
+    two_electron = np.asarray(mints.ao_eri())
+    nuclear_repulsion = mol.nuclear_repulsion_energy()
     return overlap, one_electron, two_electron, nuclear_repulsion
 
 
@@ -44,7 +60,9 @@ def density_matrix(f_matrix, occ, trans):
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
     # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-    return np.einsum('ij,kj->ik', coefficients_r, coefficients_r)
+    #density = coefficients_r @ coefficients_r.T
+    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r, optimize=True)
+    return density
 
 
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
@@ -125,6 +143,7 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     top = np.hstack((block_1, block_2))
     bottom = np.hstack((block_3, block_4))
     return np.vstack((top, bottom))
+
 
 def ghf_spin(mo_coeff, overlap):
     number_of_orbitals = mo_coeff.shape[0] // 2
