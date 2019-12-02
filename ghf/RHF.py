@@ -21,11 +21,11 @@ class RHF:
         The following snippet prints and returns RHF energy of h_2
         and the number of iterations needed to get this value.
 
-        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
+        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'sto-3g')
         >>> x = RHF(h_2, 2)
         >>> x.get_scf_solution()
-        Number of iterations: 17
-        Converged SCF energy in Hartree: -1.100153764878324 (RHF)
+        Number of iterations: 2
+        Converged SCF energy in Hartree: -1.0661086493179357 (RHF)
         """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """

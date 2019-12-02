@@ -33,7 +33,7 @@ class RealGHF:
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
     >>> x = RealGHF(h3, 3)
     >>> x. get_scf_solution()
-    Number of iterations: 82
+    Number of iterations: 81
     Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
@@ -336,7 +336,6 @@ class RealGHF:
         # Calculate the final scf energy (electronic + nuclear repulsion)
         scf_e = energies[-1] + self.nuc_rep()
         self.energy = scf_e
-        print(energies)
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
@@ -706,19 +705,20 @@ class RealGHF:
 
         def iteration_diis():
             # Add them together to form the total Fock matrix in spin block notation
-            # orthogonalise the Fock matrix
             f = new_fock_matrix(densities_diis[-1])
+
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies_diis.append(scf_e(densities_diis[-1], f))
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+            # orthogonalise the Fock matrix
             f_o = s_12_o.T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
             p_new = density(f_o)
             densities_diis.append(p_new)
-
-            # Calculate the new energy and add it to the energies array.
-            # Calculate the energy difference and add it to the delta_e array.
-            energies_diis.append(scf_e(densities_diis[-1], f))
-            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
 
         iteration_diis()
         i = 1
@@ -778,10 +778,10 @@ class RealGHF:
         >>> x = RealGHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
-        Number of iterations: 37
+        Number of iterations: 23
         Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)
 
-        Without DIIS, 82 iterations are needed to find this solution.
+        Without DIIS, 81 iterations are needed to find this solution.
 
         :param guess: Initial guess for scf. None specified: expanded core Hamiltonian
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.

@@ -28,8 +28,8 @@ class UHF:
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
     >>> x = UHF(h3, 3)
     >>> x.get_scf_solution()
-    Number of iterations: 62
-    Converged SCF energy in Hartree: -1.5062743202681235 (UHF)
+    Number of iterations: 47
+    Converged SCF energy in Hartree: -1.506274320261134 (UHF)
     <S^2> = 0.7735672504295973, <S_z> = 0.5, Multiplicity = 2.023430009098014
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
@@ -251,13 +251,15 @@ class UHF:
         This method adds two electrons to the system in order to get coefficients that can be used as a better guess
         for the scf procedure. This essentially forces the system into it's <S_z> = 0 state.
 
+        !!!IMPORTANT!!! Only supported with pyscf.
+
         To perform a calculation with this method, you will have to work as follows:
 
         >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
         >>> x = UHF(h4, 4)
         >>> guess = x.extra_electron_guess()
         >>> x.get_scf_solution(guess)
-        Number of iterations: 74
+        Number of iterations: 60
         Converged SCF energy in Hartree: -2.0210882477030547 (UHF)
         <S^2> = 1.0565277001056579, <S_z> = 0.0, Multiplicity = 2.2860688529487976
 
@@ -268,9 +270,9 @@ class UHF:
         self.molecule.build()
 
         # calculate the integrals for the new test system (_t)
-        overlap_t = get_integrals(self.molecule)[0]
-        one_electron_t = get_integrals(self.molecule)[1]
-        two_electron_t = get_integrals(self.molecule)[2]
+        overlap_t = get_integrals_pyscf(self.molecule)[0]
+        one_electron_t = get_integrals_pyscf(self.molecule)[1]
+        two_electron_t = get_integrals_pyscf(self.molecule)[2]
 
         # Calculate the orthogonalisation matrix and the core guess for the new test system (_t)
         s_12_t = trans_matrix(overlap_t)
@@ -349,7 +351,7 @@ class UHF:
         >>> guess = x.stability()
         >>> x.get_scf_solution(guess)
         There is an internal instability in the UHF wave function.
-        Number of iterations: 78
+        Number of iterations: 66
         Converged SCF energy in Hartree: -2.0210882477030716 (UHF)
         <S^2> = 1.056527700105677, <S_z> = 0.0, Multiplicity = 2.2860688529488145
 
