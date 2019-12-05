@@ -176,7 +176,7 @@ class UHF:
         def last_fock():
             last_fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
             last_fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
-            return s_12.T @ last_fock_a @ s_12, s_12.T @ last_fock_b @ s_12
+            return last_fock_a, last_fock_b
         self.last_fock = last_fock()
 
         def get_mo():
