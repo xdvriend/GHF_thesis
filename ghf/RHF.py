@@ -213,14 +213,14 @@ class RHF:
             # double summation of density matrix * (coulomb - exchange)
             return self.get_one_e() + np.einsum('kl,ijkl->ij', dens_matrix, jk_integrals)
 
-        def error_matrix(density):
+        def residual(density, fock):
             """
             Function that calculates the error matrix for the DIIS algorithm
-            :param density:
+            :param density: density matrix
+            :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            fock = rhf_fock_matrix(density)
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T, fock
+            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -228,54 +228,27 @@ class RHF:
         error_list = c.deque(maxlen=6)
         fock_list = c.deque(maxlen=6)
 
-        def build_b_matrix(dens):
-            """
-            A function to build the B matrix from the error matrix and the density matrix.
-            :param dens: density matrix
-            :return:  the B matrix
-            """
-            # Get the error and fock matrices
-            # add them to their respective lists
-            error, fock = error_matrix(dens)
-            error_list.append(error)
-            fock_list.append(fock)
+        def diis_fock(focks, residuals):
+            dim = len(focks) + 1
 
-            # Determine the dimensions of the B matrix
-            m = len(error_list)
-            n = np.shape(self.get_ovlp())[0]
+            b = np.empty((dim, dim))
+            b[-1, :] = -1
+            b[:, -1] = -1
+            b[-1, -1] = 0
 
-            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
-            error = np.array(list(error_list) * m).reshape(m, m, n, n)
-            return np.einsum('ijkl, jilk->ij', error, error)
+            for k in range(len(focks)):
+                for l in range(len(focks)):
+                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
-        def coefficients(dens):
-            # Calculate the B matrix with the function above
-            b_matrix = build_b_matrix(dens)
-            # Determine matrix dimensions
-            length = len(fock_list)
+            res_vec = np.zeros(dim)
+            res_vec[-1] = -1
 
-            # Create the needed matrices for the linear equation that results in the coefficients
-            p = np.full((1, length), -1)
-            q = np.full((length + 1, 1), -1)
-            a = np.append(b_matrix, p, axis=0)
-            a = np.append(a, q, axis=1)
-            a[-1][-1] = 0
-            b = np.zeros((length + 1, 1))
-            b[length][0] = -1
+            coeff = np.linalg.solve(b, res_vec)
 
-            # Solve the linear equation (using a scipy solver)
-            x = lina.solve(a, b)
-            return np.array(x[:-1])
-
-        def new_fock_matrix(dens):
-            """
-            Create a new fock matrix
-            :param dens: density matrix
-            :return: a new fock matrix
-            """
-            coeff = coefficients(dens)
-            f = coeff.reshape((len(fock_list), 1, 1)) * fock_list
-            return np.sum(f, 0)
+            fock = np.zeros(focks[0].shape)
+            for x in range(coeff.shape[0] - 1):
+                fock += coeff[x] * focks[x]
+            return fock
 
         def rhf_scf_energy(dens_matrix, fock):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
@@ -284,29 +257,33 @@ class RHF:
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis = [guess_density]
         energies_diis = [0.0]
-        delta_e_diis = []
+        delta_e = []
 
-        def iteration_diis():
-            # Calculate new Fock matrix
-            f = new_fock_matrix(densities_diis[-1])
+        def diis_iteration(number_of_iterations):
+            fock = rhf_fock_matrix(densities_diis[-1])
+            resid = residual(densities_diis[-1], fock)
 
-            # Calculate energy and store the difference
-            energies_diis.append(rhf_scf_energy(densities_diis[-1], f) + self.nuc_rep())
-            print(rhf_scf_energy(densities_diis[-1], f) + self.nuc_rep())
-            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+            fock_list.append(fock)
+            error_list.append(resid)
 
-            # Orthogonalise the Fock matrix
-            f_orth = s_12.T @ f @ s_12
+            energies_diis.append(rhf_scf_energy(densities_diis[-1], fock) + self.nuc_rep())
+            delta_e.append(energies_diis[-1] - energies_diis[-2])
 
-            # Calculate and store the new density
-            new_density = density_matrix(f_orth, self.occupied, s_12)
+            if number_of_iterations >= 2:
+                fock = diis_fock(fock_list, error_list)
+
+            # orthogonalize the new fock matrix
+            # calculate density matrix from the new fock matrix
+            fock_orth = s_12.T.dot(fock).dot(s_12)
+            new_density = density_matrix(fock_orth, self.occupied, s_12)
+
+            # put new density matrix in the densities array
             densities_diis.append(new_density)
 
-        # Let the process iterate until the energy difference is smaller than 10e-12
-        iteration_diis()
         i = 1
-        while abs(delta_e_diis[-1]) >= convergence:
-            iteration_diis()
+        diis_iteration(i)
+        while abs(delta_e[-1]) >= convergence:
+            diis_iteration(i)
             i += 1
         self.iterations = i
 
@@ -318,13 +295,13 @@ class RHF:
 
         # a function that gives the last Fock matrix of the scf procedure
         def last_fock():
-            return rhf_fock_matrix(densities_diis[-2])
+            return fock_list[-1]
 
         self.last_fock = last_fock()
 
         # A function that returns the converged mo coefficients
         def get_mo():
-            last_f = rhf_fock_matrix(densities_diis[-2])  # get the last fock matrix
+            last_f = last_fock()  # get the last fock matrix
             f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
             coeff = s_12.dot(f_eigenvectors)  # transform to mo basis
             return coeff
@@ -333,7 +310,6 @@ class RHF:
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies_diis[-1]
-        print(energies_diis)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()

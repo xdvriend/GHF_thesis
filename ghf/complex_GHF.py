@@ -639,18 +639,15 @@ class ComplexGHF:
             if sigma == 'b' and tau == 'b':  # bb-block
                 return d * h_st + d * (j_aa + j_bb) - k_bb
 
-        def error_matrix(dens):
+        def residual(dens, fock):
             """
             Function that calculates the error matrix for the DIIS algorithm
-            :param dens: given density matrix
+            :param dens: density matrix
+            :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            f_aa = fock_block('a', 'a', dens).astype(complex)
-            f_ab = fock_block('a', 'b', dens).astype(complex)
-            f_ba = fock_block('b', 'a', dens).astype(complex)
-            f_bb = fock_block('b', 'b', dens).astype(complex)
-            fock = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            return (fock @ dens @ expand_matrix(self.get_ovlp()) - expand_matrix(self.get_ovlp()) @ dens @ fock), fock
+            return s_12_o @ (fock @ dens @ expand_matrix(self.get_ovlp()) -
+                             expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -658,54 +655,27 @@ class ComplexGHF:
         error_list = c.deque(maxlen=6)
         fock_list = c.deque(maxlen=6)
 
-        def build_b_matrix(dens):
-            """
-            A function to build the B matrix from the error matrix and the density matrix.
-            :param dens: density matrix
-            :return:  the B matrix
-            """
-            # Get the error and fock matrices
-            # add them to their respective lists
-            error, fock = error_matrix(dens)
-            error_list.append(error)
-            fock_list.append(fock)
+        def diis_fock(focks, residuals):
+            dim = len(focks) + 1
 
-            # Determine the dimensions of the B matrix
-            o = len(error_list)
-            n = np.shape(s_12_o)[0]
+            b = np.empty((dim, dim)).astype(complex)
+            b[-1, :] = -1
+            b[:, -1] = -1
+            b[-1, -1] = 0
 
-            # Create and return the B-matrix: B_ij = e_i * e_j (product of error matrices)
-            error = np.array(list(error_list) * o).reshape(o, o, n, n).astype(complex)
-            return np.einsum('ijkl, jilk->ij', error, error)
+            for k in range(len(focks)):
+                for l in range(len(focks)):
+                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
-        def coefficients(dens):
-            # Calculate the B matrix with the function above
-            b_matrix = build_b_matrix(dens)
-            # Determine matrix dimensions
-            length = len(fock_list)
+            res_vec = np.zeros(dim).astype(complex)
+            res_vec[-1] = -1
 
-            # Create the needed matrices for the linear equation that results in the coefficients
-            p = np.full((1, length), -1)
-            q = np.full((length + 1, 1), -1)
-            a = np.append(b_matrix, p, axis=0)
-            a = np.append(a, q, axis=1)
-            a[-1][-1] = 0
-            b = np.zeros((length + 1, 1))
-            b[length][0] = -1
+            coeff = np.linalg.solve(b, res_vec)
 
-            # Solve the linear equation (using a scipy solver)
-            x = la2.solve(a, b)
-            return np.array(x[:-1]).astype(complex)
-
-        def new_fock_matrix(dens):
-            """
-            Create a new fock matrix
-            :param dens: density matrix
-            :return: a new fock matrix
-            """
-            coeff = coefficients(dens).astype(complex)
-            f = coeff.reshape((len(fock_list), 1, 1)) * fock_list
-            return np.sum(f, 0).astype(complex)
+            fock = np.zeros(focks[0].shape).astype(complex)
+            for x in range(coeff.shape[0] - 1):
+                fock += coeff[x] * focks[x]
+            return fock.astype(complex)
 
         # The function that will calculate the energy value according to the GHF algorithm.
         def scf_e(dens, fock):
@@ -720,10 +690,32 @@ class ComplexGHF:
         energies_diis = [electronic_e]
         delta_e_diis = []
 
-        def iteration_diis():
+        def iteration_diis(number_of_iterations):
+            # create the four spin blocks of the Fock matrix
+            f_aa = fock_block('a', 'a', densities_diis[-1]).astype(complex)
+            f_ab = fock_block('a', 'b', densities_diis[-1]).astype(complex)
+            f_ba = fock_block('b', 'a', densities_diis[-1]).astype(complex)
+            f_bb = fock_block('b', 'b', densities_diis[-1]).astype(complex)
+
             # Add them together to form the total Fock matrix in spin block notation
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb).astype(complex)
+
+            # Calculate the residual
+            resid = residual(densities_diis[-1], f).astype(complex)
+
+            # Add them to the arrays
+            fock_list.append(f)
+            error_list.append(resid)
+
+            # Calculate the new energy and add it to the energies array.
+            # Calculate the energy difference and add it to the delta_e array.
+            energies_diis.append(scf_e(densities_diis[-1], f))
+            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
+
+            if number_of_iterations >= 2:
+                f = diis_fock(fock_list, error_list)
+
             # orthogonalise the Fock matrix
-            f = new_fock_matrix(densities_diis[-1]).astype(complex)
             f_o = s_12_o.T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
@@ -731,15 +723,10 @@ class ComplexGHF:
             p_new = density(f_o).astype(complex)
             densities_diis.append(p_new)
 
-            # Calculate the new energy and add it to the energies array.
-            # Calculate the energy difference and add it to the delta_e array.
-            energies_diis.append(scf_e(densities_diis[-1], f))
-            delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
-
-        iteration_diis()
         i = 1
+        iteration_diis(i)
         while abs(delta_e_diis[-1]) >= convergence and i < 5000:
-            iteration_diis()
+            iteration_diis(i)
             i += 1
         self.iterations = i
 

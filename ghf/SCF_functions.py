@@ -60,7 +60,6 @@ def density_matrix(f_matrix, occ, trans):
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
     # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-    #density = coefficients_r @ coefficients_r.T
     density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r, optimize=True)
     return density
 
