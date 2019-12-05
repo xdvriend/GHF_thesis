@@ -801,22 +801,28 @@ class UHF:
         fock_list_b = c.deque(maxlen=6)
 
         def diis_fock(focks, residuals):
+            # Dimensions
             dim = len(focks) + 1
 
+            # Create the empty B matrix
             b = np.empty((dim, dim))
             b[-1, :] = -1
             b[:, -1] = -1
             b[-1, -1] = 0
 
+            # Fill the B matrix: ei * ej, with e the errors
             for k in range(len(focks)):
                 for l in range(len(focks)):
                     b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
+            # Create the residual vector
             res_vec = np.zeros(dim)
             res_vec[-1] = -1
 
+            # Solve the pulay equation to get the coefficients
             coeff = np.linalg.solve(b, res_vec)
 
+            # Create a fock as a linear combination of previous focks
             fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
@@ -829,30 +835,38 @@ class UHF:
         delta_e_diis = []
 
         def iteration_diis(number_of_iterations):
+            # Create the alpha and beta fock matrices
             f_a = uhf_fock(densities_diis_a[-1], densities_diis_b[-1])
             f_b = uhf_fock(densities_diis_b[-1], densities_diis_a[-1])
 
+            # Calculate the residuals from both
             resid_a = residual(densities_diis_a[-1], f_a)
             resid_b = residual(densities_diis_b[-1], f_b)
 
+            # Add everything to their respective list
             fock_list_a.append(f_a)
             fock_list_b.append(f_b)
             error_list_a.append(resid_a)
             error_list_b.append(resid_b)
 
+            # Calculate the energy and energy difference
             energies_diis.append(uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b, self.get_one_e()))
             delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
 
+            # Starting at two iterations, use the DIIS acceleration
             if number_of_iterations >= 2:
                 f_a = diis_fock(fock_list_a, error_list_a)
                 f_b = diis_fock(fock_list_b, error_list_b)
 
+            # Orthogonalise the fock matrices
             f_orth_a = s_12.T @ f_a @ s_12
             f_orth_b = s_12.T @ f_b @ s_12
 
+            # Calculate the new density matrices
             new_density_a = density_matrix(f_orth_a, self.n_a, s_12)
             new_density_b = density_matrix(f_orth_b, self.n_b, s_12)
 
+            # Add them to their respective lists
             densities_diis_a.append(new_density_a)
             densities_diis_b.append(new_density_b)
 

@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Nov 25, 2019}
+\date{Dec 05, 2019}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -97,7 +97,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 \index{RHF (class in ghf.RHF)@\spxentry{RHF}\spxextra{class in ghf.RHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -105,11 +105,11 @@ The following snippet prints and returns RHF energy of h\_2
 and the number of iterations needed to get this value.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{sto\PYGZhy{}3g}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 17}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.100153764878324 (RHF)}
+\PYG{g+go}{Number of iterations: 2}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.0661086493179357 (RHF)}
 \end{sphinxVerbatim}
 \index{diis() (ghf.RHF.RHF method)@\spxentry{diis()}\spxextra{ghf.RHF.RHF method}}
 
@@ -280,7 +280,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 \index{UHF (class in ghf.UHF)@\spxentry{UHF}\spxextra{class in ghf.UHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -293,8 +293,8 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 62}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202681235 (UHF)}
+\PYG{g+go}{Number of iterations: 47}
+\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.506274320261134 (UHF)}
 \PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 0.7735672504295973, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.5, Multiplicity = 2.023430009098014}
 \end{sphinxVerbatim}
 \index{diis() (ghf.UHF.UHF method)@\spxentry{diis()}\spxextra{ghf.UHF.UHF method}}
@@ -326,6 +326,8 @@ scf energy, number of iterations, mo coefficients, last density matrix, last foc
 This method adds two electrons to the system in order to get coefficients that can be used as a better guess
 for the scf procedure. This essentially forces the system into it’s \textless{}S\_z\textgreater{} = 0 state.
 
+!!!IMPORTANT!!! Only supported with pyscf.
+
 To perform a calculation with this method, you will have to work as follows:
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -333,7 +335,7 @@ To perform a calculation with this method, you will have to work as follows:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{extra\PYGZus{}electron\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 74}
+\PYG{g+go}{Number of iterations: 60}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030547 (UHF)}
 \PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.0565277001056579, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529487976}
 \end{sphinxVerbatim}
@@ -342,6 +344,15 @@ To perform a calculation with this method, you will have to work as follows:
 A new guess matrix to use for the scf procedure.
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_hessian() (ghf.UHF.UHF method)@\spxentry{get\_hessian()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
+Get the Hessian matrix after performing a stability analysis.
+:return: The hessian matrix
 
 \end{fulllineitems}
 
@@ -466,6 +477,22 @@ The electron repulsion interaction tensor
 
 \end{fulllineitems}
 
+\index{internal\_stability\_analysis() (ghf.UHF.UHF method)@\spxentry{internal\_stability\_analysis()}\spxextra{ghf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.internal_stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{internal\_stability\_analysis}}}{\emph{step\_size=1e-05}}{}
+Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
+function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
+in the direction of the lowest eigenvector of the (A’ + B’) part of the Hessian, resulting in improved MO’s and
+hopefully a stable wave function.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+New and improved MO’s
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{nuc\_rep() (ghf.UHF.UHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.UHF.UHF method}}
 
 \begin{fulllineitems}
@@ -515,7 +542,7 @@ To perform a stability analysis, use the following syntax:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
 \PYG{g+go}{There is an internal instability in the UHF wave function.}
-\PYG{g+go}{Number of iterations: 78}
+\PYG{g+go}{Number of iterations: 66}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030716 (UHF)}
 \PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.056527700105677, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529488145}
 \end{sphinxVerbatim}
@@ -541,7 +568,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 \index{RealGHF (class in ghf.real\_GHF)@\spxentry{RealGHF}\spxextra{class in ghf.real\_GHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.real\_GHF.}}\sphinxbfcode{\sphinxupquote{RealGHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+\phantomsection\label{\detokenize{Real_GHF:ghf.real_GHF.RealGHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.real\_GHF.}}\sphinxbfcode{\sphinxupquote{RealGHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -554,7 +581,7 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.} \PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 82}
+\PYG{g+go}{Number of iterations: 81}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202607725 (Real GHF)}
 \end{sphinxVerbatim}
 \index{diis() (ghf.real\_GHF.RealGHF method)@\spxentry{diis()}\spxextra{ghf.real\_GHF.RealGHF method}}
@@ -678,11 +705,11 @@ Example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RealGHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 37}
+\PYG{g+go}{Number of iterations: 23}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202915496 (Real GHF)}
 \end{sphinxVerbatim}
 
-Without DIIS, 82 iterations are needed to find this solution.
+Without DIIS, 81 iterations are needed to find this solution.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -833,7 +860,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 \index{ComplexGHF (class in ghf.complex\_GHF)@\spxentry{ComplexGHF}\spxextra{class in ghf.complex\_GHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.complex\_GHF.}}\sphinxbfcode{\sphinxupquote{ComplexGHF}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+\phantomsection\label{\detokenize{Complex_GHF:ghf.complex_GHF.ComplexGHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.complex\_GHF.}}\sphinxbfcode{\sphinxupquote{ComplexGHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -1179,10 +1206,20 @@ a matrix double the size, where blocks of zero’s are added top right and botto
 
 \end{fulllineitems}
 
-\index{get\_integrals() (in module ghf.SCF\_functions)@\spxentry{get\_integrals()}\spxextra{in module ghf.SCF\_functions}}
+\index{get\_integrals\_psi4() (in module ghf.SCF\_functions)@\spxentry{get\_integrals\_psi4()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals}}}{\emph{molecule}}{}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_psi4}}}{\emph{mol}}{}
+A function to calculate your integrals \& nuclear repulsion with psi4.
+:param mol: Psi4 instance
+:return: overlap, core hamiltonian, eri tensor and nuclear repulsion
+
+\end{fulllineitems}
+
+\index{get\_integrals\_pyscf() (in module ghf.SCF\_functions)@\spxentry{get\_integrals\_pyscf()}\spxextra{in module ghf.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals_pyscf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_pyscf}}}{\emph{molecule}}{}
 A function to calculate your integrals \& nuclear repulsion with pyscf.
 
 \end{fulllineitems}

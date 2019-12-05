@@ -159,7 +159,7 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.</p>
 <dl class="class">
 <dt id="ghf.UHF.UHF">
-<em class="property">class </em><code class="sig-prename descclassname">ghf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">ghf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns UHF energy of h_3
@@ -168,8 +168,8 @@ and the number of iterations needed to get this value.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
-<span class="go">Number of iterations: 62</span>
-<span class="go">Converged SCF energy in Hartree: -1.5062743202681235 (UHF)</span>
+<span class="go">Number of iterations: 47</span>
+<span class="go">Converged SCF energy in Hartree: -1.506274320261134 (UHF)</span>
 <span class="go">&lt;S^2&gt; = 0.7735672504295973, &lt;S_z&gt; = 0.5, Multiplicity = 2.023430009098014</span>
 </pre></div>
 </div>
@@ -195,12 +195,13 @@ and the number of iterations needed to get this value.</p>
 <code class="sig-name descname">extra_electron_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.extra_electron_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method adds two electrons to the system in order to get coefficients that can be used as a better guess
 for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt; = 0 state.</p>
+<p>!!!IMPORTANT!!! Only supported with pyscf.</p>
 <p>To perform a calculation with this method, you will have to work as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h4</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0&#39;</span> <span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">extra_electron_guess</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
-<span class="go">Number of iterations: 74</span>
+<span class="go">Number of iterations: 60</span>
 <span class="go">Converged SCF energy in Hartree: -2.0210882477030547 (UHF)</span>
 <span class="go">&lt;S^2&gt; = 1.0565277001056579, &lt;S_z&gt; = 0.0, Multiplicity = 2.2860688529487976</span>
 </pre></div>
@@ -210,6 +211,13 @@ for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt
 <dd class="field-odd"><p>A new guess matrix to use for the scf procedure.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ghf.UHF.UHF.get_hessian">
+<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_hessian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Hessian matrix after performing a stability analysis.
+:return: The hessian matrix</p>
 </dd></dl>
 
 <dl class="method">
@@ -315,6 +323,20 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ghf.UHF.UHF.internal_stability_analysis">
+<code class="sig-name descname">internal_stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">step_size=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.internal_stability_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
+function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
+in the direction of the lowest eigenvector of the (A’ + B’) part of the Hessian, resulting in improved MO’s and
+hopefully a stable wave function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New and improved MO’s</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="ghf.UHF.UHF.nuc_rep">
 <code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -353,7 +375,7 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
 <span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">stability</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
 <span class="go">There is an internal instability in the UHF wave function.</span>
-<span class="go">Number of iterations: 78</span>
+<span class="go">Number of iterations: 66</span>
 <span class="go">Converged SCF energy in Hartree: -2.0210882477030716 (UHF)</span>
 <span class="go">&lt;S^2&gt; = 1.056527700105677, &lt;S_z&gt; = 0.0, Multiplicity = 2.2860688529488145</span>
 </pre></div>

@@ -229,22 +229,28 @@ class RHF:
         fock_list = c.deque(maxlen=6)
 
         def diis_fock(focks, residuals):
+            # Dimensions
             dim = len(focks) + 1
 
+            # Create the empty B matrix
             b = np.empty((dim, dim))
             b[-1, :] = -1
             b[:, -1] = -1
             b[-1, -1] = 0
 
+            # Fill the B matrix: ei * ej, with e the errors
             for k in range(len(focks)):
                 for l in range(len(focks)):
                     b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
+            # Create the residual vector
             res_vec = np.zeros(dim)
             res_vec[-1] = -1
 
+            # Solve the pulay equation to get the coefficients
             coeff = np.linalg.solve(b, res_vec)
 
+            # Create a fock as a linear combination of previous focks
             fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
@@ -260,15 +266,19 @@ class RHF:
         delta_e = []
 
         def diis_iteration(number_of_iterations):
+            # Calculate the fock matrix and the residual
             fock = rhf_fock_matrix(densities_diis[-1])
             resid = residual(densities_diis[-1], fock)
 
+            # Add them to their respective lists
             fock_list.append(fock)
             error_list.append(resid)
 
+            # Calculate the energy and the energy difference
             energies_diis.append(rhf_scf_energy(densities_diis[-1], fock) + self.nuc_rep())
             delta_e.append(energies_diis[-1] - energies_diis[-2])
 
+            # Starting at two iterations, use the DIIS acceleration
             if number_of_iterations >= 2:
                 fock = diis_fock(fock_list, error_list)
 
