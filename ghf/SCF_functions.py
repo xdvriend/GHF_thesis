@@ -9,9 +9,10 @@ import numpy as np
 from numpy import linalg as la
 from scipy import diag
 from functools import reduce
+import psi4
 
 
-def get_integrals(molecule):
+def get_integrals_pyscf(molecule):
     """
     A function to calculate your integrals & nuclear repulsion with pyscf.
     """
@@ -19,6 +20,21 @@ def get_integrals(molecule):
     one_electron = molecule.intor('int1e_nuc') + molecule.intor('int1e_kin')
     two_electron = molecule.intor('int2e')
     nuclear_repulsion = gto.mole.energy_nuc(molecule)
+    return overlap, one_electron, two_electron, nuclear_repulsion
+
+
+def get_integrals_psi4(mol):
+    """
+    A function to calculate your integrals & nuclear repulsion with psi4.
+    :param mol: Psi4 instance
+    :return: overlap, core hamiltonian, eri tensor and nuclear repulsion
+    """
+    wfn = psi4.core.Wavefunction.build(mol, psi4.core.get_global_option('basis'))
+    mints = psi4.core.MintsHelper(wfn.basisset())
+    overlap = np.asarray(mints.ao_overlap())
+    one_electron = np.asarray(mints.ao_potential()) + np.asarray(mints.ao_kinetic())
+    two_electron = np.asarray(mints.ao_eri())
+    nuclear_repulsion = mol.nuclear_repulsion_energy()
     return overlap, one_electron, two_electron, nuclear_repulsion
 
 
@@ -44,7 +60,8 @@ def density_matrix(f_matrix, occ, trans):
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
     # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-    return np.einsum('ij,kj->ik', coefficients_r, coefficients_r)
+    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r, optimize=True)
+    return density
 
 
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
@@ -125,3 +142,29 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     top = np.hstack((block_1, block_2))
     bottom = np.hstack((block_3, block_4))
     return np.vstack((top, bottom))
+
+
+def ghf_spin(mo_coeff, overlap):
+    number_of_orbitals = mo_coeff.shape[0] // 2
+    mo_a = mo_coeff[:number_of_orbitals]
+    mo_b = mo_coeff[number_of_orbitals:]
+    saa = mo_a.conj().T @ overlap @ mo_a
+    sbb = mo_b.conj().T @ overlap @ mo_b
+    sab = mo_a.conj().T @ overlap @ mo_b
+    sba = mo_b.conj().T @ overlap @ mo_a
+    number_occ_a = saa.trace()
+    print(number_occ_a)
+    number_occ_b = sbb.trace()
+    print(number_occ_b)
+    ss_xy = (number_occ_a + number_occ_b) * .5
+    ss_xy += sba.trace() * sab.trace() - np.einsum('ij,ji->', sba, sab)
+    print(ss_xy)
+    ss_z = (number_occ_a + number_occ_b) * .25
+    ss_z += (number_occ_a - number_occ_b) ** 2 * .25
+    tmp = saa - sbb
+    ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
+    print(ss_z)
+    s_z = 1
+    ss = (ss_xy + ss_z).real
+    s = np.sqrt(ss + .25) - .5
+    return ss, s_z, s * 2 + 1
