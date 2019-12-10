@@ -6,7 +6,9 @@ Simple tests to check whether or not the functions return the correct value.
 """
 from ghf.RHF import RHF
 from ghf.UHF import UHF
+import numpy as np
 from pyscf import *
+import psi4
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -14,6 +16,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
 
 h4 = gto.M(atom = 'h 0 0.707107 0; h 0.707107 0 0; h 0 -0.707107 0; h -0.707107 0 0' ,spin = 2, basis = 'cc-pvdz')
+
+h2o = gto.M(atom ='O 0.000000000000 -0.143225816552 0.000000000000; H 1.638036840407 1.136548822547 -0.000000000000; '
+                  'H -1.638036840407 1.136548822547 -0.000000000000', unit = 'bohr', basis = 'cc-pvdz')
+
+h2o_psi4 = psi4.geometry("""
+O 0.000000000000 -0.143225816552 0.000000000000 
+H 1.638036840407 1.136548822547 -0.000000000000
+H -1.638036840407 1.136548822547 -0.000000000000
+units bohr
+symmetry c1
+""")
+
+psi4.set_options({'basis':'cc-pvdz'})
 
 
 def test_RHF():
@@ -50,5 +65,16 @@ def test_stability():
     x = UHF(h4, 4)
     guess = x.stability()
     assert -2.021089 <= x.get_scf_solution(guess) <= -2.021088
+
+
+def test_overlap():
+    """
+    Test whether or not psi4 and pyscf give the same overlap integrals.
+    :return:
+    """
+    x = RHF(h2o, 10)
+    y = RHF(h2o_psi4, 10, psi4)
+    assert np.allclose(x.get_ovlp(), y.get_ovlp()) == True
+
 
 

@@ -661,12 +661,9 @@ class UHF:
         ab = off_diagonal_blocks(self.get_two_e(), 'ab')
         print(ab)
         print(ab.shape)
-        #print(np.allclose(ab, ab.T))
-        #ba = off_diagonal_blocks(self.get_two_e(), 'ba')
         ba = off_diagonal_blocks(self.get_two_e(), 'ba')
         print(ba)
         print(ba.shape)
-        #print(np.allclose(ba, ba.T))
 
         stability_matrix = spin_blocked(aa, ab, ba, bb)
         print(stability_matrix.shape)
