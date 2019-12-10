@@ -18,7 +18,7 @@ h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = '
 h4 = gto.M(atom = 'h 0 0.707107 0; h 0.707107 0 0; h 0 -0.707107 0; h -0.707107 0 0' ,spin = 2, basis = 'cc-pvdz')
 
 h2o = gto.M(atom ='O 0.000000000000 -0.143225816552 0.000000000000; H 1.638036840407 1.136548822547 -0.000000000000; '
-                  'H -1.638036840407 1.136548822547 -0.000000000000', unit = 'bohr', basis = 'cc-pvdz')
+                  'H -1.638036840407 1.136548822547 -0.000000000000', unit = 'bohr', basis = 'sto-3g')
 
 h2o_psi4 = psi4.geometry("""
 O 0.000000000000 -0.143225816552 0.000000000000 
@@ -28,7 +28,7 @@ units bohr
 symmetry c1
 """)
 
-psi4.set_options({'basis':'cc-pvdz'})
+psi4.set_options({'basis':'sto-3g'})
 
 
 def test_RHF():
@@ -86,17 +86,21 @@ def test_one_e():
     """
     x = RHF(h2o, 10)
     y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(np.sum(x.get_one_e()), np.sum(y.get_one_e())) == True
+    one_e_1 = np.sum(x.get_one_e())
+    one_e_2 = np.sum(y.get_one_e())
+    assert np.isclose(one_e_1, one_e_2) == True
 
 
 def test_two_e():
     """
-    Test whether or not psi4 and pyscf give the same overlap integrals.
+    Test whether or not psi4 and pyscf give the same two electron integrals.
     :return:
     """
     x = RHF(h2o, 10)
     y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(np.sum(x.get_two_e()), np.sum(y.get_two_e())) == True
+    two_e_1 = np.sum(x.get_two_e())
+    two_e_2 = np.sum(y.get_two_e())
+    assert np.isclose(two_e_1, two_e_2) == True
 
 
 
