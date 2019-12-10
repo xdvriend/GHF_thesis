@@ -74,7 +74,7 @@ def test_overlap():
     """
     x = RHF(h2o, 10)
     y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(np.sum(x.get_ovlp()), np.sum(y.get_ovlp())) == True
+    assert np.isclose(np.sum(x.get_ovlp()), np.sum(y.get_ovlp()), atol=1e-5) == True
 
 
 def test_one_e():
@@ -84,7 +84,7 @@ def test_one_e():
     """
     x = RHF(h2o, 10)
     y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(np.sum(x.get_one_e()), np.sum(y.get_one_e())) == True
+    assert np.isclose(np.sum(x.get_one_e()), np.sum(y.get_one_e()), atol=1e-5) == True
 
 
 def test_two_e():
@@ -94,7 +94,7 @@ def test_two_e():
     """
     x = RHF(h2o, 10)
     y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(np.sum(x.get_two_e()), np.sum(y.get_two_e())) == True
+    assert np.isclose(np.sum(x.get_two_e()), np.sum(y.get_two_e()), atol=1e-5) == True
 
 
 
