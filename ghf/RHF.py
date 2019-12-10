@@ -41,7 +41,7 @@ class RHF:
             self.integrals = get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
-                            'Make sure the molecule instance matches the method.')
+                            'Make sure the molecule instance matches the method and is gives as a string.')
         self.energy = None
         self.mo = None
         self.last_dens = None

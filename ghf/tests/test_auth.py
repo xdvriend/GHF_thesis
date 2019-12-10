@@ -73,7 +73,27 @@ def test_overlap():
     :return:
     """
     x = RHF(h2o, 10)
-    y = RHF(h2o_psi4, 10, psi4)
+    y = RHF(h2o_psi4, 10, 'psi4')
+    assert np.allclose(x.get_ovlp(), y.get_ovlp()) == True
+
+
+def test_one_e():
+    """
+    Test whether or not psi4 and pyscf give the same core Hamiltonian integrals.
+    :return:
+    """
+    x = RHF(h2o, 10)
+    y = RHF(h2o_psi4, 10, 'psi4')
+    assert np.allclose(x.get_one_e(), y.get_one_e()) == True
+
+
+def test_two_e():
+    """
+    Test whether or not psi4 and pyscf give the same overlap integrals.
+    :return:
+    """
+    x = RHF(h2o, 10)
+    y = RHF(h2o_psi4, 10, 'psi4')
     assert np.allclose(x.get_ovlp(), y.get_ovlp()) == True
 
 
