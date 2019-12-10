@@ -8,7 +8,6 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 
 from ghf.SCF_functions import *
 import collections as c
-from scipy import linalg as lina
 
 
 class RHF:
@@ -21,10 +20,10 @@ class RHF:
         The following snippet prints and returns RHF energy of h_2
         and the number of iterations needed to get this value.
 
-        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'sto-3g')
+        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
         >>> x = RHF(h_2, 2)
         >>> x.get_scf_solution()
-        Number of iterations: 2
+        Number of iterations: 6
         Converged SCF energy in Hartree: -1.0661086493179357 (RHF)
         """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
@@ -332,7 +331,7 @@ class RHF:
         >>> h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
         >>> x = RHF(h2, 2)
         >>> x.get_scf_solution_diis()
-        Number of iterations: 9
+        Number of iterations: 5
         Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
