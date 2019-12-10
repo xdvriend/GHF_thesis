@@ -103,4 +103,25 @@ def test_two_e():
     assert np.isclose(two_e_1, two_e_2) == True
 
 
+def test_pyscf_vs_psi4():
+    """
+    Test a pyscf energy calculation vs a psi4 energy calculation.
+    :return:
+    """
+    x = RHF(h2o, 10)
+    y = RHF(h2o_psi4, 10, 'psi4')
+    assert np.isclose(x.scf(convergence=1e-6)[0], y.scf(convergence=1e-6)[0])
+    assert np.isclose(x.scf(convergence=1e-6)[1], y.scf(convergence=1e-6)[1])
+
+
+def test_diis():
+    """
+    Test whether diis gives the same energy in fewer iterations.
+    :return:
+    """
+    x = RHF(h2o, 10)
+    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
+    assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]
+
+
 
