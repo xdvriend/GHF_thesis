@@ -10,6 +10,7 @@ from numpy import linalg as la
 from scipy import diag
 from functools import reduce
 import psi4
+import math as m
 
 
 def get_integrals_pyscf(molecule):
@@ -60,7 +61,7 @@ def density_matrix(f_matrix, occ, trans):
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
     # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r, optimize=True)
+    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj(), optimize=True)
     return density
 
 
@@ -107,7 +108,7 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))  # Basically (alpha orbitals).T * S * (beta orbitals)
+    s = reduce(np.dot, (occ_a_orb.conj().T, overlap, occ_b_orb))  # Basically (alpha orbitals).T * S * (beta orbitals)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)  # = S^2_x + S^2_y
     ss_z = (occ_b - occ_a)**2 * 0.25  # = S^2_z
     ss = (ss_xy + ss_z).real  # = S^2_total
@@ -144,27 +145,33 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     return np.vstack((top, bottom))
 
 
-def ghf_spin(mo_coeff, overlap):
-    number_of_orbitals = mo_coeff.shape[0] // 2
-    mo_a = mo_coeff[:number_of_orbitals]
-    mo_b = mo_coeff[number_of_orbitals:]
+def ghf_spin(coeff, overlap, number_of_electrons):
+    number_of_orbitals = coeff.shape[0] // 2
+    mo_occ = np.arange(number_of_electrons)
+    coeff_a = coeff[0][:, mo_occ[0] > 0]
+    coeff_b = coeff[1][:, mo_occ[1] > 0]
+    mo_a = coeff_a[:, number_of_orbitals]
+    mo_b = coeff_b[number_of_orbitals, :]
+    print(coeff)
+    #print(mo_coeff_a)
+    #print(mo_coeff_b)
+    #mo_a = mo_coeff_a[:number_of_orbitals].reshape(number_of_orbitals, 1)
+    #mo_b = mo_coeff_b[number_of_orbitals:].reshape(number_of_orbitals, 1)
+    print(mo_a, mo_b)
+    print(mo_a.shape, mo_b.shape)
     saa = mo_a.conj().T @ overlap @ mo_a
     sbb = mo_b.conj().T @ overlap @ mo_b
     sab = mo_a.conj().T @ overlap @ mo_b
     sba = mo_b.conj().T @ overlap @ mo_a
     number_occ_a = saa.trace()
-    print(number_occ_a)
     number_occ_b = sbb.trace()
-    print(number_occ_b)
     ss_xy = (number_occ_a + number_occ_b) * .5
     ss_xy += sba.trace() * sab.trace() - np.einsum('ij,ji->', sba, sab)
-    print(ss_xy)
     ss_z = (number_occ_a + number_occ_b) * .25
     ss_z += (number_occ_a - number_occ_b) ** 2 * .25
     tmp = saa - sbb
     ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
-    print(ss_z)
-    s_z = 1
+    s_z = (number_occ_a - number_occ_b) / 2
     ss = (ss_xy + ss_z).real
     s = np.sqrt(ss + .25) - .5
     return ss, s_z, s * 2 + 1

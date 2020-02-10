@@ -83,16 +83,24 @@ class RHF:
         """
         return self.integrals[3]  # Get the nuclear repulsion value of the given molecule
 
-    def scf(self, convergence=1e-12):
+    def scf(self, convergence=1e-12, complex_method=False):
         """
         Performs a self consistent field calculation to find the lowest RHF energy.
 
         :param convergence: Convergence criterion. If none is specified, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        core_guess = s_12 @ self.get_one_e() @ s_12.T  # orthogonalise the transformation matrix.
-        guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+        if complex_method:
+            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+            core_guess = core_guess.astype(complex)
+            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density[0, :] += 0.1j
+            guess_density[:, 0] -= 0.1j
+        else:
+            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+            guess_density = density_matrix(core_guess, self.occupied, s_12)
 
         densities = [guess_density]  # put the guess density in an array
 
@@ -121,7 +129,7 @@ class RHF:
             delta_e.append(energies[-1] - energies[-2])
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
-            fock_orth = s_12.T.dot(fock).dot(s_12)
+            fock_orth = s_12.conj().T.dot(fock).dot(s_12)
             new_density = density_matrix(fock_orth, self.occupied, s_12)
             # put new density matrix in the densities array
             densities.append(new_density)
@@ -154,20 +162,30 @@ class RHF:
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies[-1]
+        print(energies)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, convergence=1e-12):
+    def get_scf_solution(self, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: the converged energy
         """
-        self.scf(convergence=convergence)
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (RHF)")
+        self.scf(convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex RHF)")
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF)")
         return self.energy
 
     def get_mo_coeff(self):
@@ -194,16 +212,24 @@ class RHF:
         """
         return self.last_fock
 
-    def diis(self, convergence=1e-12):
+    def diis(self, convergence=1e-12, complex_method=False):
         """
         When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        core_guess = s_12.T @ self.get_one_e() @ s_12  # orthogonalise the transformation matrix.
-        guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+        if complex_method:
+            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+            core_guess = core_guess.astype(complex)
+            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density[0, :] += 0.1j
+            guess_density[:, 0] -= 0.1j
+        else:
+            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+            guess_density = density_matrix(core_guess, self.occupied, s_12)
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -219,7 +245,7 @@ class RHF:
             :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T
+            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -238,9 +264,15 @@ class RHF:
             b[-1, -1] = 0
 
             # Fill the B matrix: ei * ej, with e the errors
-            for k in range(len(focks)):
-                for l in range(len(focks)):
-                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            if complex_method:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b = b.astype(complex)
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            else:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
             # Create the residual vector
             res_vec = np.zeros(dim)
@@ -250,7 +282,10 @@ class RHF:
             coeff = np.linalg.solve(b, res_vec)
 
             # Create a fock as a linear combination of previous focks
-            fock = np.zeros(focks[0].shape)
+            if complex_method:
+                fock = np.zeros(focks[0].shape).astype(complex)
+            else:
+                fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
             return fock
@@ -283,7 +318,7 @@ class RHF:
 
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
-            fock_orth = s_12.T.dot(fock).dot(s_12)
+            fock_orth = s_12.conj().T.dot(fock).dot(s_12)
             new_density = density_matrix(fock_orth, self.occupied, s_12)
 
             # put new density matrix in the densities array
@@ -319,11 +354,12 @@ class RHF:
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies_diis[-1]
+        print(energies_diis)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, convergence=1e-12):
+    def get_scf_solution_diis(self, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
@@ -335,9 +371,18 @@ class RHF:
         Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy, using DIIS.
         """
-        self.diis(convergence=convergence)
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (RHF)")
+        self.diis(convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex RHF, DIIS)")
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy

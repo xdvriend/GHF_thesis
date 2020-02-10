@@ -6,7 +6,7 @@ Simple tests to check whether or not the functions return the correct value.
 """
 from ghf.RHF import RHF
 from ghf.UHF import UHF
-from ghf.real_GHF import RealGHF
+from ghf.GHF import GHF
 import numpy as np
 from pyscf import *
 import psi4
@@ -138,6 +138,6 @@ def test_diis_real_ghf():
     """
     Test whether diis gives the same energy in fewer iterations.
     """
-    x = RealGHF(h2o, 10)
+    x = GHF(h2o, 10)
     assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
     assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]

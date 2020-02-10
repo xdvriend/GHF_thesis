@@ -2,7 +2,7 @@
 Unrestricted Hartree Fock, by means of SCF procedure
 ====================================================
 This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
-Several options are available to make sure you get the lowest energy from your calculation, as well as some usefull
+Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
@@ -98,12 +98,13 @@ class UHF:
         """
         return self.integrals[3]
 
-    def scf(self, initial_guess=None, convergence=1e-12):
+    def scf(self, initial_guess=None, convergence=1e-12, complex_method=False):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
         :param initial_guess: A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
@@ -112,9 +113,20 @@ class UHF:
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
         if initial_guess is None:
-            initial_guess = s_12.T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            if complex_method:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                initial_guess = initial_guess.astype(complex)
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a[0, :] += 0.1j
+                guess_density_a[:, 0] -= 0.1j
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b[0, :] += 0.1j
+                guess_density_b[:, 0] -= 0.1j
+            else:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+
         else:
             # Make the coefficients orthogonal in the correct basis.
             coeff_a = s_12 @ initial_guess[0]
@@ -124,9 +136,13 @@ class UHF:
             coeff_r_a = coeff_a[:, 0:self.n_a]
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
-            # Create the guess density matrices from the given coefficients
-            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
-            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+            if complex_method:
+                # Create the guess density matrices from the given coefficients
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+            else:
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
 
         # Store the density matrices in an array
         densities_a = [guess_density_a]
@@ -149,8 +165,8 @@ class UHF:
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalize both fock matrices
-            fock_orth_a = s_12.T.dot(fock_a).dot(s_12)
-            fock_orth_b = s_12.T.dot(fock_b).dot(s_12)
+            fock_orth_a = s_12.conj().T.dot(fock_a).dot(s_12)
+            fock_orth_b = s_12.conj().T.dot(fock_b).dot(s_12)
 
             # create a new alpha and beta density matrix
             new_density_a = density_matrix(fock_orth_a, self.n_a, s_12)
@@ -203,20 +219,32 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None, convergence=1e-12):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
         :param guess: The initial guess for the scf procedure. If none is given: core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy.
         """
-        self.scf(guess, convergence=convergence)
+        self.scf(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
-        print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (complex UHF)")
+                print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                      ", Multiplicity = " + str(s_values[2]))
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (real UHF)")
+            print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                  ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -625,16 +653,17 @@ class UHF:
             eigval_vir, eigvec_vir = la.eigh(fock_vir)
             diagonal = np.einsum('i, j->ij', eigval_vir, -1 * eigval_occ).ravel()
             ea_ei = np.diag(diagonal)
-            print(ea_ei)
+            #print(ea_ei)
+            print(np.shape(ea_ei))
             print(np.allclose(ea_ei, ea_ei.T))
-            aj_ib = eri.transpose(1, 3, 0, 2)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            print(aj_ib)
+            aj_ib = eri.transpose(0, 3, 1, 2)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
+            #print(aj_ib)
             print(np.allclose(aj_ib, aj_ib.T))
-            aj_bi = eri.transpose(1, 3, 2, 0)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            print(aj_bi)
+            aj_bi = eri.transpose(0, 3, 2, 1)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
+            #print(aj_bi)
             print(np.allclose(aj_bi, aj_bi.T))
-            ab_ji = eri.transpose(1, 2, 3, 0)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            print(ab_ji)
+            ab_ji = eri.transpose(0, 2, 3, 1)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
+            #print(ab_ji)
             print(np.allclose(ab_ji, ab_ji.T))
             return ea_ei + 2 * aj_ib - aj_bi - ab_ji
 
@@ -647,7 +676,7 @@ class UHF:
             """
             dim_a = (n_occ_a * n_vir_a)
             dim_b = (n_occ_b * n_vir_b)
-            aj_ib = eri.transpose(1, 3, 0, 2)[n_occ_a:, :n_occ_b, :n_occ_a, n_occ_b:].reshape(dim_a, dim_b)
+            aj_ib = eri.transpose(0, 3, 1, 2)[n_occ_a:, :n_occ_b, :n_occ_a, n_occ_b:].reshape(dim_a, dim_b)
             print(np.shape(aj_ib))
             if which_block == 'ab':
                 return 2 * aj_ib
@@ -655,19 +684,19 @@ class UHF:
                 return (2 * aj_ib).T
 
         aa = diagonal_blocks(self.get_two_e(), fock_occ_a, fock_vir_a, n_occ_a, n_vir_a)
-        print(aa)
+        #print(aa)
         bb = diagonal_blocks(self.get_two_e(), fock_occ_b, fock_vir_b, n_occ_b, n_vir_b)
-        print(bb)
+        #print(bb)
         ab = off_diagonal_blocks(self.get_two_e(), 'ab')
-        print(ab)
+        #print(ab)
         print(ab.shape)
         ba = off_diagonal_blocks(self.get_two_e(), 'ba')
-        print(ba)
+        #print(ba)
         print(ba.shape)
 
         stability_matrix = spin_blocked(aa, ab, ba, bb)
         print(stability_matrix.shape)
-        print(stability_matrix)
+        #print(stability_matrix)
         print(np.allclose(stability_matrix, stability_matrix.T))
         self.hessian = stability_matrix
 
@@ -704,12 +733,13 @@ class UHF:
         """
         return self.hessian
 
-    def diis(self, initial_guess=None, convergence=1e-12):
+    def diis(self, initial_guess=None, convergence=1e-12, complex_method=False):
         """
         When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
 
         :param initial_guess: Initial guess for the scf procedure. None specified: core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -717,9 +747,20 @@ class UHF:
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
         if initial_guess is None:
-            initial_guess = s_12.T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            if complex_method:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                initial_guess = initial_guess.astype(complex)
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a[0, :] += 0.1j
+                guess_density_a[:, 0] -= 0.1j
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b[0, :] += 0.1j
+                guess_density_b[:, 0] -= 0.1j
+            else:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+
         else:
             # Make the coefficients orthogonal in the correct basis.
             coeff_a = s_12 @ initial_guess[0]
@@ -729,9 +770,13 @@ class UHF:
             coeff_r_a = coeff_a[:, 0:self.n_a]
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
-            # Create the guess density matrices from the given coefficients
-            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
-            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+            if complex_method:
+                # Create the guess density matrices from the given coefficients
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+            else:
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
 
         def uhf_fock(density_matrix_1, density_matrix_2):
             """
@@ -752,7 +797,7 @@ class UHF:
             :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T
+            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -774,9 +819,15 @@ class UHF:
             b[-1, -1] = 0
 
             # Fill the B matrix: ei * ej, with e the errors
-            for k in range(len(focks)):
-                for l in range(len(focks)):
-                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            if complex_method:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b = b.astype(complex)
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            else:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
             # Create the residual vector
             res_vec = np.zeros(dim)
@@ -786,7 +837,10 @@ class UHF:
             coeff = np.linalg.solve(b, res_vec)
 
             # Create a fock as a linear combination of previous focks
-            fock = np.zeros(focks[0].shape)
+            if complex_method:
+                fock = np.zeros(focks[0].shape).astype(complex)
+            else:
+                fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
             return fock
@@ -822,8 +876,8 @@ class UHF:
                 f_b = diis_fock(fock_list_b, error_list_b)
 
             # Orthogonalise the fock matrices
-            f_orth_a = s_12.T @ f_a @ s_12
-            f_orth_b = s_12.T @ f_b @ s_12
+            f_orth_a = s_12.conj().T @ f_a @ s_12
+            f_orth_b = s_12.conj().T @ f_b @ s_12
 
             # Calculate the new density matrices
             new_density_a = density_matrix(f_orth_a, self.n_a, s_12)
@@ -882,18 +936,30 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged diis energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
         :param guess: The initial guess. If none is specified, core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged diis energy.
         """
-        self.diis(guess, convergence=convergence)
+        self.diis(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
-        print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (complex UHF, DIIS)")
+                print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                      ", Multiplicity = " + str(s_values[2]))
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (real UHF, DIIS)")
+            print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                  ", Multiplicity = " + str(s_values[2]))
         return self.energy

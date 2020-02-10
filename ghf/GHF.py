@@ -1,6 +1,6 @@
 """
-Complex generalised Hartree Fock, by means of SCF procedure
-============================================================
+Generalised Hartree Fock, by means of SCF procedure
+====================================================
 
 
 This class creates a generalised Hartree-Fock object which can be used for scf calculations. Different initial guesses
@@ -13,17 +13,15 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 from ghf.SCF_functions import *
 import numpy as np
 from numpy import linalg as la
-import math as m
 from scipy import linalg as la2
 from functools import reduce
 import collections as c
-from ghf.UHF import UHF
 
 
-class ComplexGHF:
+class GHF:
     """
-    Calculate the complex GHF energy.
-    ----------------------------------
+    Calculate the GHF energy.
+    --------------------------------
     Input is a molecule and the number of electrons.
 
     Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -33,12 +31,14 @@ class ComplexGHF:
     For a normal scf calculation your input looks like the following example:
 
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = ComplexGHF(h3, 3)
-    >>> x.loop_calculations()
+    >>> x = GHF(h3, 3)
+    >>> x. get_scf_solution()
+    Number of iterations: 81
+    Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
-        Initiate an instance of a complex GHF class.
+        Initiate an instance of a real GHF class.
 
         :param molecule: The molecule on which to perform the calculations, made in PySCF.
         :param number_of_electrons: The amount of electrons present in the system.
@@ -59,8 +59,8 @@ class ComplexGHF:
         self.mo = None
         self.last_dens = None
         self.last_fock = None
-        self.instability = None
         self.iterations = None
+        self.instability = None
 
     # Get the overlap integrals of the given molecule
     def get_ovlp(self):
@@ -94,18 +94,52 @@ class ComplexGHF:
         """
         return self.integrals[3]
 
+    def unitary_rotation_guess(self):
+        """
+        A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
+        matrix.
+
+        To use this guess:
+
+        >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+        >>> x = GHF(h3, 3)
+        >>> guess = x.unitary_rotation_guess()
+        >>> x.get_scf_solution(guess)
+
+        :return: A rotated guess matrix.
+        """
+        c_ham = expand_matrix(self.get_one_e())
+
+        def unitary_rotation(coefficient_matrix):
+            """
+            Perform a unitary transformation on the given coefficient matrix.
+
+            :param coefficient_matrix: The initial coefficient matrix, most often the core hamiltonian.
+            :return: The rotated coefficient matrix.
+            """
+            # Make sure the unitary matrix is the same size as the coefficient matrix.
+            shape = np.shape(coefficient_matrix)
+            # Create the unitary matrix as an exponential of a dense 1/-1 matrix, with all diagonal elements 0.
+            one = np.full(shape, 1)
+            neg = np.full(shape, -1)
+            ones = np.tril(one)
+            negative = np.triu(neg)
+            exp = -1 * (ones + negative)
+            u = la2.expm(exp)
+            # Return UCU^1 as the transformed matrix.
+            return u @ coefficient_matrix @ la.inv(u)
+
+        return unitary_rotation(c_ham)
+
     def random_guess(self):
         """
         A function that creates a matrix with random values that can be used as an initial guess
         for the SCF calculations.
 
-        IMPORTANT: It is recommended to use a random guess since the results are significantly better
-        than those found when using the standard guess.
-
         To use this guess:
 
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = ComplexGHF(h3, 3)
+        >>> x = GHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
@@ -114,38 +148,34 @@ class ComplexGHF:
         dim = int(np.shape(self.get_ovlp())[0] * 2)
 
         def random_hermitian_matrix(dimension):
-            # fill a matrix of the given dimensions with random complex numbers.
-            x = np.random.rand(dimension, dimension) + np.random.rand(dimension, dimension) * 1j
+            # fill a matrix of the given dimensions with random numbers.
+            np.random.seed(2)
+            x = np.random.rand(dimension, dimension)
             # Make the matrix symmetric by adding it's transpose.
             # Get the eigenvectors to use them, since they form a hermitian matrix.
             x_t = x.T
             y = x + x_t
             val, vec = la.eigh(y)
             return vec
+
         return random_hermitian_matrix(dim)
 
-    def mixed_ghf_guess(self, ghf, constant):
-        mo = ghf.get_mo_coeff()
-        guess = mo + mo * 1j * constant
-
-        def gs(X):
-            Q, R = np.linalg.qr(X)
-            return Q
-
-        return gs(guess)
-
-    def scf(self, guess=None, convergence=1e-12):
+    def scf(self, guess=None, convergence=1e-12, complex_method=False):
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
-        in the complex GHF class, all values throughout are complex.
+        in the real class, all values throughout are real. For complex, see the "complex_GHF" class.
 
+        :param guess: Initial guess to start SCF. If none is given, core hamiltonian will be used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
-        :param guess: Initial guess for scf. If none is given, a unitary rotation on the core Hamiltonian is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
-        s_min_12 = trans_matrix(self.get_ovlp()).astype(complex)
-        s_12_o = expand_matrix(s_min_12).astype(complex)
-        c_ham = expand_matrix(self.get_one_e()).astype(complex)
+        # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
+        # Also define the core Hamiltonian matrix in it's spin-blocked notation.
+        s_min_12 = trans_matrix(self.get_ovlp())
+        s_12_o = expand_matrix(s_min_12)
+        c_ham = expand_matrix(self.get_one_e())
+
         if guess is None:
 
             def coeff_matrix(orth_matrix, core_ham):
@@ -155,27 +185,8 @@ class ComplexGHF:
                 :return: The orthogonalised version of the core Hamiltonian matrix
                 """
                 return orth_matrix @ core_ham @ orth_matrix.conj().T
-
-            # Define the initial coefficient matrix the same way as for the real GHF object.
-            c_init = coeff_matrix(s_12_o, c_ham)
-
-            def unitary_rotation(coefficient_matrix):
-                """
-                This function will create a complex unitary matrix, which will then transform the given
-                coefficient matrix.
-                :param coefficient_matrix: Initial coefficient matrix, to be rotated.
-                :return: The complex rotated coefficient matrix.
-                """
-                dim = np.shape(coefficient_matrix)[0]
-                matrix = np.zeros((dim, dim), dtype=complex)
-                # The complex unitary matrix that is constructed is based on the Fourier transformation matrix.
-                for j in range(dim):
-                    for k in range(dim):
-                        matrix[j][k] = m.e ** ((2j * m.pi * (j + 1) * (k + 1)) / dim)
-                u = matrix / m.sqrt(dim)
-                return u @ coefficient_matrix @ u.conj().T
-
-            initial_guess = unitary_rotation(c_init)
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
         else:
             initial_guess = guess
 
@@ -187,12 +198,17 @@ class ComplexGHF:
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
             eigenval, eigenvec = la.eigh(fock)
             coeff = s_12_o @ eigenvec
-            coeff_r = coeff[:, 0:self.number_of_electrons].astype(complex)
+            coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
-        # Calculate the guess density from the given initial guess and put it in an array.
-        p_g = density(initial_guess).astype(complex)
+        if complex_method:
+            p_g = density(initial_guess.astype(complex))
+            p_g[0, :] += 0.1j
+            p_g[:, 0] -= 0.1j
+        else:
+            p_g = density(initial_guess)
+
         densities = [p_g]
 
         # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
@@ -201,13 +217,13 @@ class ComplexGHF:
             """
             Calculate the coulomb integrals.
             """
-            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e()).astype(complex)
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e())
 
         def exchange(density_block):
             """
             Calculate the exchange integrals.
             """
-            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3)).astype(complex)
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3))
 
         def fock_block(sigma, tau, p):
             """
@@ -223,14 +239,14 @@ class ComplexGHF:
                 d = 0
             # determine the dimension of 1 block.
             dim = int(np.shape(p)[0] / 2)
-            # split the density matrix in it's four spin-blocks
+            # split the density matrix in it's four spin-blocks: aa, ab, ba and bb.
             p_aa = p[0:dim, 0:dim]
             p_ab = p[dim:2 * dim, 0:dim]
             p_ba = p[0:dim, dim:2 * dim]
             p_bb = p[dim:2 * dim, dim:2 * dim]
-            # Calculate the one electron integrals
+            # Calculate the one_electron integrals.
             h_st = self.get_one_e()
-            # calculate the coulomb and exchange integrals
+            # calculate the coulomb and exchange integrals, needed for each of the spin-blocks in the Fock matrix.
             j_aa = coulomb(p_aa)
             j_bb = coulomb(p_bb)
             k_aa = exchange(p_aa)
@@ -250,28 +266,27 @@ class ComplexGHF:
         # The function that will calculate the energy value according to the GHF algorithm.
         def scf_e(dens, fock):
             """
-            Calculates the scf energy for the GHF method
+           Calculates the scf energy for the GHF method
             """
             return np.sum(dens * (expand_matrix(self.get_one_e()) + fock)) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
-        electronic_e = scf_e(p_g, c_ham)
-        energies = [electronic_e]
+        energies = [0.0]
         delta_e = []
 
         def iteration():
             """
-            This creates an iteration process to converge to the minimun energy.
+            This creates an iteration process to converge to the minimum energy.
             """
             # create the four spin blocks of the Fock matrix
-            f_aa = fock_block('a', 'a', densities[-1]).astype(complex)
-            f_ab = fock_block('a', 'b', densities[-1]).astype(complex)
-            f_ba = fock_block('b', 'a', densities[-1]).astype(complex)
-            f_bb = fock_block('b', 'b', densities[-1]).astype(complex)
+            f_aa = fock_block('a', 'a', densities[-1])
+            f_ab = fock_block('a', 'b', densities[-1])
+            f_ba = fock_block('b', 'a', densities[-1])
+            f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb).astype(complex)
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
 
             # Calculate the new energy and add it to the energies array.
             # Calculate the energy difference and add it to the delta_e array.
@@ -279,11 +294,11 @@ class ComplexGHF:
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalise the Fock matrix
-            f_o = s_12_o @ f @ s_12_o.conj().T
+            f_o = s_12_o.conj().T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
-            p_new = density(f_o).astype(complex)
+            p_new = density(f_o)
             densities.append(p_new)
 
         iteration()
@@ -297,7 +312,6 @@ class ComplexGHF:
         # Then set the last_dens value of the class object to this density matrix.
         def last_dens():
             return densities[-1]
-
         self.last_dens = last_dens()
 
         # A function that returns the last Fock matrix of the scf procedure.
@@ -311,8 +325,7 @@ class ComplexGHF:
             # Add the blocks together.
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
             # Return the orthogonalised last Fock matrix.
-            return s_12_o.conj().T @ f @ s_12_o
-
+            return f
         self.last_fock = last_fock()
 
         # A function that calculates the MO's from the last needed Fock matrix in the scf calculation.
@@ -324,7 +337,6 @@ class ComplexGHF:
             # calculate the coefficients.
             coeff = s_12_o @ vec
             return coeff
-
         self.mo = get_mo()
 
         # Calculate the final scf energy (electronic + nuclear repulsion)
@@ -333,22 +345,28 @@ class ComplexGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None, convergence=1e-12):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
 
-        :param guess: The initial scf guess. None specified: core Hamiltonian unitarily rotated with complex U matrix.
+        :param guess: Initial guess for scf. If none is specified: expanded core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy.
         """
-        scf_values = self.scf(guess, convergence=convergence)
-        e = scf_values[0]
-        i = scf_values[1]
-        if abs(np.imag(e)) > 1e-12:
-            print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+        self.scf(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        # s_values = ghf_spin(self.get_mo_coeff(), expand_matrix(self.get_ovlp()), self.number_of_electrons)
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
         else:
-            print("Number of iterations: " + str(i))
-            print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
+        # print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -385,7 +403,7 @@ class ComplexGHF:
         no more instability:
 
         >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
-        >>> x = ComplexGHF(h4, 4)
+        >>> x = GHF(h4, 4)
         >>> x.scf()
         >>> guess = x.stability()
         >>> while x.instability:
@@ -394,7 +412,6 @@ class ComplexGHF:
 
         :return: New and improved MO's.
         """
-
         # Calculate the original coefficients after the scf calculation.
         coeff = self.get_mo_coeff()
         dim = np.shape(coeff)[0]
@@ -505,7 +522,7 @@ class ComplexGHF:
             # needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
             if e < -1e-5:  # this points towards an internal instability
-                print("There is an instability in the complex GHF wave function.")
+                print("There is an instability in the real GHF wave function.")
                 mo_occ = np.zeros(dim, )  # total number of basis functions
                 # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
                 for i in range(self.number_of_electrons):
@@ -515,28 +532,28 @@ class ComplexGHF:
                 self.instability = True
             else:
                 # in the case where no instability is present
-                print("There is no instability in the complex GHF wave function.")
+                print("There is no instability in the real GHF wave function.")
                 mo = coeff
                 self.instability = False
             return mo
-
         return internal_stability()
 
-    def diis(self, guess=None, convergence=1e-12):
+    def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
         find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
         done as well.
 
-        :param guess: The initial guess matrix, if none is specified: expanded core Hamiltonian unitarily rotated.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
         # Also define the core Hamiltonian matrix in it's spin-blocked notation.
-        s_min_12 = trans_matrix(self.get_ovlp()).astype(complex)
-        s_12_o = expand_matrix(s_min_12).astype(complex)
-        c_ham = expand_matrix(self.get_one_e()).astype(complex)
+        s_min_12 = trans_matrix(self.get_ovlp())
+        s_12_o = expand_matrix(s_min_12)
+        c_ham = expand_matrix(self.get_one_e())
 
         if guess is None:
 
@@ -546,28 +563,10 @@ class ComplexGHF:
                 :param core_ham: the expanded core Hamiltonian matrix
                 :return: The orthogonalised version of the core Hamiltonian matrix
                 """
-                return orth_matrix @ core_ham @ orth_matrix.conj().T
+                return orth_matrix @ core_ham @ orth_matrix.T
 
-            # Define the initial coefficient matrix the same way as for the real GHF object.
-            c_init = coeff_matrix(s_12_o, c_ham)
-
-            def unitary_rotation(coefficient_matrix):
-                """
-                This function will create a complex unitary matrix, which will then transform the given
-                coefficient matrix.
-                :param coefficient_matrix: Initial coefficient matrix, to be rotated.
-                :return: The complex rotated coefficient matrix.
-                """
-                dim = np.shape(coefficient_matrix)[0]
-                matrix = np.zeros((dim, dim), dtype=complex)
-                # The complex unitary matrix that is constructed is based on the Fourier transformation matrix.
-                for j in range(dim):
-                    for k in range(dim):
-                        matrix[j][k] = m.e ** ((2j * m.pi * (j + 1) * (k + 1)) / dim)
-                u = matrix / m.sqrt(dim)
-                return u @ coefficient_matrix @ u.conj().T
-
-            initial_guess = unitary_rotation(c_init)
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
         else:
             initial_guess = guess
 
@@ -579,12 +578,18 @@ class ComplexGHF:
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
             eigenval, eigenvec = la.eigh(fock)
             coeff = s_12_o @ eigenvec
-            coeff_r = coeff[:, 0:self.number_of_electrons].astype(complex)
+            coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-            return np.einsum('ij,kj->ik', coeff_r, coeff_r)
+            return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
         # Calculate the guess density from the given initial guess and put it in an array.
-        p_g = density(initial_guess).astype(complex)
+        if complex_method:
+            p_g = density(initial_guess.astype(complex))
+            p_g[0, :] += 0.1j
+            p_g[:, 0] -= 0.1j
+        else:
+            p_g = density(initial_guess)
+
         densities_diis = [p_g]
 
         # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
@@ -593,13 +598,13 @@ class ComplexGHF:
             """
             Calculate the coulomb integrals.
             """
-            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e()).astype(complex)
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e())
 
         def exchange(density_block):
             """
             Calculate the exchange integrals.
             """
-            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3)).astype(complex)
+            return np.einsum('kl, ijkl -> ij', density_block, self.get_two_e().transpose(0, 2, 1, 3))
 
         def fock_block(sigma, tau, p):
             """
@@ -660,28 +665,37 @@ class ComplexGHF:
             dim = len(focks) + 1
 
             # Create the empty B matrix
-            b = np.empty((dim, dim)).astype(complex)
+            b = np.empty((dim, dim))
             b[-1, :] = -1
             b[:, -1] = -1
             b[-1, -1] = 0
 
             # Fill the B matrix: ei * ej, with e the errors
-            for k in range(len(focks)):
-                for l in range(len(focks)):
-                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            if complex_method:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b = b.astype(complex)
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            else:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
             # Create the residual vector
-            res_vec = np.zeros(dim).astype(complex)
+            res_vec = np.zeros(dim)
             res_vec[-1] = -1
 
             # Solve the pulay equation to get the coefficients
             coeff = np.linalg.solve(b, res_vec)
 
             # Create a fock as a linear combination of previous focks
-            fock = np.zeros(focks[0].shape).astype(complex)
+            if complex_method:
+                fock = np.zeros(focks[0].shape).astype(complex)
+            else:
+                fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
-            return fock.astype(complex)
+            return fock
 
         # The function that will calculate the energy value according to the GHF algorithm.
         def scf_e(dens, fock):
@@ -698,16 +712,16 @@ class ComplexGHF:
 
         def iteration_diis(number_of_iterations):
             # create the four spin blocks of the Fock matrix
-            f_aa = fock_block('a', 'a', densities_diis[-1]).astype(complex)
-            f_ab = fock_block('a', 'b', densities_diis[-1]).astype(complex)
-            f_ba = fock_block('b', 'a', densities_diis[-1]).astype(complex)
-            f_bb = fock_block('b', 'b', densities_diis[-1]).astype(complex)
+            f_aa = fock_block('a', 'a', densities_diis[-1])
+            f_ab = fock_block('a', 'b', densities_diis[-1])
+            f_ba = fock_block('b', 'a', densities_diis[-1])
+            f_bb = fock_block('b', 'b', densities_diis[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb).astype(complex)
+            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
 
             # Calculate the residual
-            resid = residual(densities_diis[-1], f).astype(complex)
+            resid = residual(densities_diis[-1], f)
 
             # Add them to the arrays
             fock_list.append(f)
@@ -723,11 +737,11 @@ class ComplexGHF:
                 f = diis_fock(fock_list, error_list)
 
             # orthogonalise the Fock matrix
-            f_o = s_12_o.T @ f @ s_12_o
+            f_o = s_12_o.conj().T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
-            p_new = density(f_o).astype(complex)
+            p_new = density(f_o)
             densities_diis.append(p_new)
 
         i = 1
@@ -747,15 +761,8 @@ class ComplexGHF:
         # A function that returns the last Fock matrix of the scf procedure.
         # Then, set the last_fock value of the GHF object to this Fock matrix.
         def last_fock():
-            # Create the 4 individual spin-blocks of the last Fock matrix.
-            f_aa = fock_block('a', 'a', densities_diis[-2])
-            f_ab = fock_block('a', 'b', densities_diis[-2])
-            f_ba = fock_block('b', 'a', densities_diis[-2])
-            f_bb = fock_block('b', 'b', densities_diis[-2])
-            # Add the blocks together.
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            # Return the orthogonalised last Fock matrix.
-            return s_12_o.T.conj() @ f @ s_12_o
+            f = fock_list[-1]
+            return f
 
         self.last_fock = last_fock()
 
@@ -777,7 +784,7 @@ class ComplexGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
         just like with a normal scf calculation.
@@ -785,90 +792,28 @@ class ComplexGHF:
         Example:
 
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = ComplexGHF(h3, 3)
+        >>> x = GHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
+        Number of iterations: 23
+        Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)
 
-        :param guess: Initial scf guess. None specified: core HAmiltonian unitarily rotated with complex U matrix.
+        Without DIIS, 81 iterations are needed to find this solution.
+
+        :param guess: Initial guess for scf. None specified: expanded core Hamiltonian
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.cd
         :return: The converged scf energy.
         """
-        scf_values = self.diis(guess, convergence=convergence)
-        e = scf_values[0]
-        i = scf_values[1]
-        if abs(np.imag(e)) > 1e-12:
-            print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+        self.diis(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF, DIIS)")
         else:
-            print("Number of iterations: " + str(i))
-            print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
-
-    def loop_calculations(self, number_of_loops, guess=None, convergence=1e-12):
-        """
-        This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
-        correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
-        from different random guesses and returning the lowest value of all the different calculations. The loops will
-        automatically perform a stability analysis until there is no more instability in the wave function.
-
-        :param number_of_loops: The amount of times you want to repeat the scf + stability procedure.
-        :param guess: The guess used for the scf procedure.
-        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
-        :return: The scf energy after the loops.
-        """
-        # Create the needed arrays.
-        energy = []
-        iterations = []
-        # Loop the scf calculation + stability analysis
-        for i in range(number_of_loops):
-            self.scf(guess, convergence=convergence)
-            self.stability()
-            while self.instability:
-                new_guess = self.stability()
-                self.scf(new_guess, convergence=convergence)
-            energy.append(self.energy)
-            iterations.append(self.iterations)
-        e = np.amin(energy)
-        i = iterations[energy.index(e)]
-        self.energy = e
-        # Print the resulting energy.
-        if abs(np.imag(e)) > 1e-12:
-            print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
-        else:
-            print("Number of iterations: " + str(i))
-            print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
-        return self.energy
-
-    def loop_calculations_diis(self, number_of_loops, guess=None, convergence=1e-12):
-        """
-        This function is specifically catered to the random guess method. Since it is hard to predict the seed of the
-        correct random matrix, a simple solution is to repeat the scf calculation a certain number of times, starting
-        from different random guesses and returning the lowest value of all the different calculations. The loops will
-        automatically perform a stability analysis until there is no more instability in the wave function. This option
-        uses the DIIS iteration so that convergence is generally reached faster.
-
-        :param number_of_loops: The amount of times you want to repeat the DIIS + stability procedure.
-        :param guess: The guess used for the DIIS procedure.
-        :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
-        :return: The energy after the loops.
-        """
-        # Create the needed arrays.
-        energy = []
-        iterations = []
-        # Loop the scf calculation + stability analysis
-        for i in range(number_of_loops):
-            self.diis(guess, convergence=convergence)
-            self.stability()
-            while self.instability:
-                new_guess = self.stability()
-                self.diis(new_guess, convergence=convergence)
-            energy.append(self.energy)
-            iterations.append(self.iterations)
-        e = np.amin(energy)
-        i = iterations[energy.index(e)]
-        self.energy = e
-        # Print the resulting energy.
-        if abs(np.imag(e)) > 1e-12:
-            print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
-        else:
-            print("Number of iterations: " + str(i))
-            print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
         return self.energy
