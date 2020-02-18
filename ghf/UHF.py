@@ -237,12 +237,12 @@ class UHF:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
             else:
                 print("Number of iterations: " + str(self.iterations))
-                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (complex UHF)")
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex UHF)")
                 print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
                       ", Multiplicity = " + str(s_values[2]))
         else:
             print("Number of iterations: " + str(self.iterations))
-            print("Converged SCF energy in Hartree: " + str(self.energy) + " (real UHF)")
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real UHF)")
             print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
                   ", Multiplicity = " + str(s_values[2]))
         return self.energy
@@ -954,12 +954,12 @@ class UHF:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
             else:
                 print("Number of iterations: " + str(self.iterations))
-                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (complex UHF, DIIS)")
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex UHF, DIIS)")
                 print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
                       ", Multiplicity = " + str(s_values[2]))
         else:
             print("Number of iterations: " + str(self.iterations))
-            print("Converged SCF energy in Hartree: " + str(self.energy) + " (real UHF, DIIS)")
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real UHF, DIIS)")
             print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
                   ", Multiplicity = " + str(s_values[2]))
         return self.energy

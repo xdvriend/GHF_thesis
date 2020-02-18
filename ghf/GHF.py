@@ -60,7 +60,8 @@ class GHF:
         self.last_dens = None
         self.last_fock = None
         self.iterations = None
-        self.instability = None
+        self.int_instability = None
+        self.ext_instability = None
 
     # Get the overlap integrals of the given molecule
     def get_ovlp(self):
@@ -366,7 +367,7 @@ class GHF:
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
-        # print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+    # print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[1]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -392,6 +393,127 @@ class GHF:
         :return: The last Fock matrix.
         """
         return self.last_fock
+
+    def stability_analysis(self, method, step_size=1e-5):
+        """
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :param step_size: Step size for orbital rotation. standard is 0.01.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
+        """
+        # Calculate the A & B blocks needed for stability analysis.
+        # Determine the number of occupied and virtual orbitals.
+        occ = int(self.number_of_electrons)
+        vir = int(np.shape(expand_matrix(self.get_ovlp()))[0] - self.number_of_electrons)
+
+        # Determine the Fock matrices needed.
+        coeff = self.get_mo_coeff()
+        fock_init = self.get_last_fock()
+        fock_ao = coeff.conj().T @ fock_init @ coeff
+
+        # Determine the two electron integrals in spinor basis.
+        eri = self.get_two_e()
+        eri_spinor = expand_tensor(eri)
+        eri_spinor_anti_abrs = eri_spinor - eri_spinor.transpose(0, 2, 1, 3)
+        eri_spinor_anti_asrb = eri_spinor.transpose(0, 1, 3, 2) - eri_spinor.transpose(0, 3, 1, 2)
+
+        # Create the tensors A and B.
+        if isinstance(self.energy, complex):
+            a_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
+            b_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
+        else:
+            a_arbs = np.zeros((occ, vir, occ, vir))
+            b_arbs = np.zeros((occ, vir, occ, vir))
+
+        # Fill the A and B tensors with the correct elements.
+        for a in range(occ):
+            for r in range(occ, occ + vir):
+                for b in range(occ):
+                    for s in range(occ, occ + vir):
+                        if a == b and s == r:
+                            a_arbs[a][r-occ][b][s-occ] = fock_ao[s][r] - fock_ao[a][b]\
+                                                         + eri_spinor_anti_asrb[a][s][r][b]
+                        elif a == b and s != r:
+                            a_arbs[a][r-occ][b][s-occ] = fock_ao[s][r] + eri_spinor_anti_asrb[a][s][r][b]
+                        elif s == r and a != b:
+                            a_arbs[a][r-occ][b][s-occ] = -1 * fock_ao[a][b] + eri_spinor_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_asrb[a][s][r][b]
+        for a in range(occ):
+            for r in range(occ, occ + vir):
+                for b in range(occ):
+                    for s in range(occ, occ + vir):
+                        b_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_abrs[a][b][r][s]
+
+        # Reshape the tensors pairwise to create the matrix representation.
+        a = a_arbs.reshape((occ*vir, occ*vir), order='F')
+        b = b_arbs.reshape((occ*vir, occ*vir), order='F')
+
+        # Create a function to rotate the orbitals in case of internal instability
+        def rotate_to_eigenvec(eigenvec):
+            if isinstance(self.energy, complex):
+                indx = int(np.shape(eigenvec)[0] / 2)
+                block_ab = eigenvec[:indx].reshape((occ, vir), order='F')
+            else:
+                block_ab = eigenvec.reshape((occ, vir), order='F')
+            block_aa = np.zeros((occ, occ))
+            block_ba = -1 * block_ab.conj().T
+            block_bb = np.zeros((vir, vir))
+            k = spin_blocked(block_aa, block_ab, block_ba, block_bb)
+            c = self.get_mo_coeff()
+            exp = la2.expm(step_size * k)
+            return c @ exp
+
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a + b
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real GHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable within the real GHF space.')
+                    self.int_instability = None
+
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix = a - b
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real GHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex GHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable in the complex GHF space.')
+                    self.int_instability = None
+            else:
+                raise Exception('Only internal stability analysis is possible for complex GHF.')
 
     def stability(self):
         """

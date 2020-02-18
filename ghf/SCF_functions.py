@@ -8,7 +8,6 @@ from pyscf import *
 import numpy as np
 from numpy import linalg as la
 from scipy import diag
-from functools import reduce
 import psi4
 import math as m
 
@@ -108,7 +107,7 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = reduce(np.dot, (occ_a_orb.conj().T, overlap, occ_b_orb))  # Basically (alpha orbitals).T * S * (beta orbitals)
+    s = occ_a_orb.conj().T @ overlap @ occ_b_orb # Basically (alpha orbitals).T * S * (beta orbitals)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)  # = S^2_x + S^2_y
     ss_z = (occ_b - occ_a)**2 * 0.25  # = S^2_z
     ss = (ss_xy + ss_z).real  # = S^2_total
@@ -134,6 +133,23 @@ def expand_matrix(matrix):
     return np.vstack((top, bottom))
 
 
+def expand_tensor(tensor):
+    """
+    Expand every matrix within the tensor, in the same way the expand matrix function works.
+    :param tensor: The tensor, usually eri, that you wish to expand.
+    :return: a tensor where each dimension is doubled.
+    """
+    dim = np.shape(tensor)[0]
+    tens_block = np.zeros((dim, dim, 2*dim, 2*dim))
+    zero = np.zeros((dim, dim, 2*dim, 2*dim))
+    for l in range(dim):
+        for k in range(dim):
+            tens_block[l][k] = expand_matrix(tensor[l][k])
+    top = np.hstack((tens_block, zero))
+    bottom = np.hstack((zero, tens_block))
+    return np.vstack((top, bottom))
+
+
 def spin_blocked(block_1, block_2, block_3, block_4):
     """
     When creating the blocks of the density or fock matrix separately, this function is used to add them together,
@@ -147,18 +163,10 @@ def spin_blocked(block_1, block_2, block_3, block_4):
 
 def ghf_spin(coeff, overlap, number_of_electrons):
     number_of_orbitals = coeff.shape[0] // 2
+    overlap = overlap[:number_of_orbitals, :number_of_orbitals]
     mo_occ = np.arange(number_of_electrons)
-    coeff_a = coeff[0][:, mo_occ[0] > 0]
-    coeff_b = coeff[1][:, mo_occ[1] > 0]
-    mo_a = coeff_a[:, number_of_orbitals]
-    mo_b = coeff_b[number_of_orbitals, :]
-    print(coeff)
-    #print(mo_coeff_a)
-    #print(mo_coeff_b)
-    #mo_a = mo_coeff_a[:number_of_orbitals].reshape(number_of_orbitals, 1)
-    #mo_b = mo_coeff_b[number_of_orbitals:].reshape(number_of_orbitals, 1)
-    print(mo_a, mo_b)
-    print(mo_a.shape, mo_b.shape)
+    mo_a = coeff[:number_of_orbitals]
+    mo_b = coeff[number_of_orbitals:]
     saa = mo_a.conj().T @ overlap @ mo_a
     sbb = mo_b.conj().T @ overlap @ mo_b
     sab = mo_a.conj().T @ overlap @ mo_b
@@ -171,7 +179,7 @@ def ghf_spin(coeff, overlap, number_of_electrons):
     ss_z += (number_occ_a - number_occ_b) ** 2 * .25
     tmp = saa - sbb
     ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
-    s_z = (number_occ_a - number_occ_b) / 2
+    s_z = m.sqrt(ss_z.real)
     ss = (ss_xy + ss_z).real
     s = np.sqrt(ss + .25) - .5
     return ss, s_z, s * 2 + 1

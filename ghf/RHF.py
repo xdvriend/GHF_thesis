@@ -162,7 +162,6 @@ class RHF:
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies[-1]
-        print(energies)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
@@ -354,7 +353,6 @@ class RHF:
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies_diis[-1]
-        print(energies_diis)
         self.energy = scf_e
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
