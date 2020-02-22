@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Feb 10, 2020}
+\date{Feb 22, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -843,31 +843,15 @@ scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matri
 
 \end{fulllineitems}
 
-\index{stability() (ghf.GHF.GHF method)@\spxentry{stability()}\spxextra{ghf.GHF.GHF method}}
+\index{stability\_analysis() (ghf.GHF.GHF method)@\spxentry{stability\_analysis()}\spxextra{ghf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
-Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest
-eigenvalue of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
-of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
-
-To perform a stability analysis, use the following syntax, this will continue the analysis until there is
-no more instability:
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{GHF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{scf}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k}{while} \PYG{n}{x}\PYG{o}{.}\PYG{n}{instability}\PYG{p}{:}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{new\PYGZus{}guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }    \PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{new\PYGZus{}guess}\PYG{p}{)}
-\end{sphinxVerbatim}
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-New and improved MO’s.
-
-\end{description}\end{quote}
+\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=1e-05}}{}
+Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:param step\_size: Step size for orbital rotation. standard is 1e-4.
+:return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
 
@@ -917,6 +901,29 @@ And a transformation matrix X.
 
 \end{fulllineitems}
 
+\index{eri\_ao\_to\_mo() (in module ghf.SCF\_functions)@\spxentry{eri\_ao\_to\_mo()}\spxextra{in module ghf.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.eri_ao_to_mo}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{eri\_ao\_to\_mo}}}{\emph{eri}, \emph{coeff}, \emph{complexity=False}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{eri\_spinor}} \textendash{} Electron repulsion interaction, in ao notation, tensor in spinor basis
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coeff}} \textendash{} coefficient matrix in spinor basis
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{complexity}} \textendash{} specify whether you are working with real or complex tensors. Default is real.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+Electron repulsion interaction, in mo notation, tensor in spinor basis
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{expand\_matrix() (in module ghf.SCF\_functions)@\spxentry{expand\_matrix()}\spxextra{in module ghf.SCF\_functions}}
 
 \begin{fulllineitems}
@@ -928,6 +935,17 @@ And a transformation matrix X.
 a matrix double the size, where blocks of zero’s are added top right and bottom left.
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{expand\_tensor() (in module ghf.SCF\_functions)@\spxentry{expand\_tensor()}\spxextra{in module ghf.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.expand_tensor}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{expand\_tensor}}}{\emph{tensor}, \emph{complexity=False}}{}
+Expand every matrix within the tensor, in the same way the expand matrix function works.
+:param tensor: The tensor, usually eri, that you wish to expand.
+:param complexity: Is your tensor complex or not? Default is false.
+:return: a tensor where each dimension is doubled.
 
 \end{fulllineitems}
 

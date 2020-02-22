@@ -14,7 +14,6 @@ from ghf.SCF_functions import *
 import numpy as np
 from numpy import linalg as la
 from scipy import linalg as la2
-from functools import reduce
 import collections as c
 
 
@@ -291,7 +290,7 @@ class GHF:
 
             # Calculate the new energy and add it to the energies array.
             # Calculate the energy difference and add it to the delta_e array.
-            energies.append(scf_e(densities[-1], f))
+            energies.append(float(scf_e(densities[-1], f)))
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalise the Fock matrix
@@ -399,7 +398,7 @@ class GHF:
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
         be internal or external.
-        :param step_size: Step size for orbital rotation. standard is 0.01.
+        :param step_size: Step size for orbital rotation. standard is 1e-4.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Calculate the A & B blocks needed for stability analysis.
@@ -410,13 +409,18 @@ class GHF:
         # Determine the Fock matrices needed.
         coeff = self.get_mo_coeff()
         fock_init = self.get_last_fock()
-        fock_ao = coeff.conj().T @ fock_init @ coeff
+        fock_mo = coeff.conj().T @ fock_init @ coeff
 
         # Determine the two electron integrals in spinor basis.
-        eri = self.get_two_e()
-        eri_spinor = expand_tensor(eri)
-        eri_spinor_anti_abrs = eri_spinor - eri_spinor.transpose(0, 2, 1, 3)
-        eri_spinor_anti_asrb = eri_spinor.transpose(0, 1, 3, 2) - eri_spinor.transpose(0, 3, 1, 2)
+        eri_ao = self.get_two_e()
+        eri_ao_spinor = expand_tensor(eri_ao)
+        if isinstance(self.energy, complex):
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff, complexity=True)
+        else:
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff)
+
+        eri_spinor_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
+        eri_spinor_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
 
         # Create the tensors A and B.
         if isinstance(self.energy, complex):
@@ -432,12 +436,12 @@ class GHF:
                 for b in range(occ):
                     for s in range(occ, occ + vir):
                         if a == b and s == r:
-                            a_arbs[a][r-occ][b][s-occ] = fock_ao[s][r] - fock_ao[a][b]\
+                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] - fock_mo[a][b]\
                                                          + eri_spinor_anti_asrb[a][s][r][b]
                         elif a == b and s != r:
-                            a_arbs[a][r-occ][b][s-occ] = fock_ao[s][r] + eri_spinor_anti_asrb[a][s][r][b]
+                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] + eri_spinor_anti_asrb[a][s][r][b]
                         elif s == r and a != b:
-                            a_arbs[a][r-occ][b][s-occ] = -1 * fock_ao[a][b] + eri_spinor_anti_asrb[a][s][r][b]
+                            a_arbs[a][r-occ][b][s-occ] = -1 * fock_mo[a][b] + eri_spinor_anti_asrb[a][s][r][b]
                         else:
                             a_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_asrb[a][s][r][b]
         for a in range(occ):
@@ -454,16 +458,20 @@ class GHF:
         def rotate_to_eigenvec(eigenvec):
             if isinstance(self.energy, complex):
                 indx = int(np.shape(eigenvec)[0] / 2)
-                block_ab = eigenvec[:indx].reshape((occ, vir), order='F')
+                eigenvec = eigenvec[:indx]
+                block_ab = np.zeros((occ, vir)).astype(complex)
             else:
-                block_ab = eigenvec.reshape((occ, vir), order='F')
+                block_ab = np.zeros((occ, vir))
+            for p in range(occ):
+                for q in range(vir):
+                    block_ab[p][q] = eigenvec[p * q]
             block_aa = np.zeros((occ, occ))
             block_ba = -1 * block_ab.conj().T
             block_bb = np.zeros((vir, vir))
             k = spin_blocked(block_aa, block_ab, block_ba, block_bb)
-            c = self.get_mo_coeff()
+            coeff_init = self.get_mo_coeff()
             exp = la2.expm(step_size * k)
-            return c @ exp
+            return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -514,151 +522,6 @@ class GHF:
                     self.int_instability = None
             else:
                 raise Exception('Only internal stability analysis is possible for complex GHF.')
-
-    def stability(self):
-        """
-        Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest
-        eigenvalue of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
-        of the lowest eigenvalue. These new MO's can then be used to start a new scf procedure.
-
-        To perform a stability analysis, use the following syntax, this will continue the analysis until there is
-        no more instability:
-
-        >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
-        >>> x = GHF(h4, 4)
-        >>> x.scf()
-        >>> guess = x.stability()
-        >>> while x.instability:
-        >>>     new_guess = x.stability()
-        >>>     x.get_scf_solution(new_guess)
-
-        :return: New and improved MO's.
-        """
-        # Calculate the original coefficients after the scf calculation.
-        coeff = self.get_mo_coeff()
-        dim = np.shape(coeff)[0]
-
-        # the generate_g() function returns 3 values
-        # - the gradient, g
-        # - the result of h_op, the trial vector
-        # - the diagonal of the Hessian matrix, h_diag
-        def generate_g():
-            total_orbitals = dim  # total number of orbitals = number of basis functions
-            n_occ = self.number_of_electrons  # Number of occupied orbitals
-            n_vir = int(total_orbitals - n_occ)  # number of virtual/unoccupied orbitals
-            occ_indx = np.arange(n_occ)  # indices of the occupied orbitals
-            vir_indx = np.arange(total_orbitals)[n_occ:]  # indices of the virtual/unoccupied orbitals.
-            occ_orb = coeff[:, occ_indx]  # the occupied orbitals
-            vir_orb = coeff[:, vir_indx]  # The virtual/unoccupied orbitals
-
-            # Use the last Fock matrix of the scf procedure as the initial Fock matrix for the stability analysis.
-            # Transform the Fock matrix to AO basis
-            fock_init = self.get_last_fock()
-            fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
-
-            # Split the Fock matrix in the occupied and virtual parts.
-            fock_occ = fock_ao[occ_indx[:, None], occ_indx]
-            fock_vir = fock_ao[vir_indx[:, None], vir_indx]
-
-            # Calculate the Gradient and the Hessian diagonal.
-            g = fock_ao[vir_indx[:, None], occ_indx]
-            h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
-
-            # h_op is the Hessian operator, which will return the useful block (occupied-virtual rotation)
-            # of the Hessian matrix.
-            def h_op(x):
-                x = x.reshape(n_vir, n_occ)  # Set the dimensions
-                x2 = np.einsum('ps,sq->pq', fock_vir, x)  # Add the virtual fock matrix
-                x2 -= np.einsum('ps,rp->rs', fock_occ, x)  # Add the occupied Fock matrix
-                d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))  # vir_orb @ x @ occ_orb.T
-                dm1 = d1 + d1.conj().T  # determine a density matrix
-
-                # A function to calculate the coulomb and exchange integrals
-                def vind(dm_1):
-                    vj, vk = scf.hf.get_jk(self.molecule, dm_1, hermi=1)
-                    return vj - vk
-
-                v1 = vind(dm1)  # Get Coulomb - Exchange
-                x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))  # vir_orb.T @ v1 @ occ_orb
-                return x2.ravel()  # Unravel the matrix into a 1D array.
-
-            return g.reshape(-1), h_op, h_diag.reshape(-1)
-
-        # This function will check whether or not there is an internal instability,
-        # and if there is one, it will calculate new and improved coefficients.
-        def internal_stability():
-            g, hop, hdiag = generate_g()
-            hdiag *= 2
-
-            # this function prepares for the conditions needed to use a davidson solver later on
-            def precond(dx, z, x0):
-                hdiagd = hdiag - z
-                hdiagd[abs(hdiagd) < 1e-8] = 1e-8
-                return dx / hdiagd
-
-            # The overall Hessian for internal rotation is x2 + x2.T.conj().
-            # This is the reason we apply (.real * 2)
-            def hessian_x(x):
-                return hop(x).real * 2
-
-            # Find the unique indices of the variables
-            # in this function, bitwise operators are used.
-            # They treat each operand as a sequence of binary digits and operate on them bit by bit
-            def uniq_variable_indices(occ_mo):
-                # indices of occupied alpha orbitals
-                # indices of occupied beta orbitals
-                occ_indx_a = occ_mo > 0
-                occ_indx_b = occ_mo == 2
-                # indices of virtual (unoccupied) alpha orbitals, done with bitwise operator: ~ (negation)
-                # indices of virtual (unoccupied) beta orbitals, done with bitwise operator: ~ (negation)
-                vir_indx_a = ~occ_indx_a
-                vir_indx_b = ~occ_indx_b
-                # & and | are bitwise operators for 'and' and 'or'
-                # each bit position is the result of the logical 'and' or 'or' of the bits in the
-                # corresponding position of the operands
-                # determine the unique variable indices, by use of bitwise operators
-                unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:, None] & occ_indx_b)
-                return unique
-
-            # put the unique variables in a new matrix used later to create a rotation matrix.
-            def unpack_uniq_variables(dx, occ_mo):
-                nmo = len(occ_mo)
-                idx = uniq_variable_indices(occ_mo)
-                # print(np.shape(idx))
-                # idx2 = np.ravel(idx[0:number_of_electrons, number_of_electrons:2 * nmo])
-                # print(np.shape(idx2))
-                x1 = np.zeros((nmo, nmo), dtype=dx.dtype)
-                x1[idx] = dx
-                # print(np.shape(dx))
-                return x1 - x1.conj().T
-
-            # A function to apply a rotation on the given coefficients
-            def rotate_mo(mo_coeff, occ_mo, dx):
-                dr = unpack_uniq_variables(dx, occ_mo)
-                u = la2.expm(dr)  # computes the matrix exponential
-                return np.dot(mo_coeff, u)
-
-            x0 = np.zeros_like(g)  # like returns a matrix of the same shape as the argument given
-            x0[g != 0] = 1. / hdiag[g != 0]  # create initial guess for davidson solver
-            # use the davidson solver to find the eigenvalues and eigenvectors
-            # needed to determine an internal instability
-            e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
-            if e < -1e-5:  # this points towards an internal instability
-                print("There is an instability in the real GHF wave function.")
-                mo_occ = np.zeros(dim, )  # total number of basis functions
-                # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
-                for i in range(self.number_of_electrons):
-                    mo_occ[i] = 1
-                # create new orbitals by rotating the old ones
-                mo = rotate_mo(coeff, mo_occ, v)
-                self.instability = True
-            else:
-                # in the case where no instability is present
-                print("There is no instability in the real GHF wave function.")
-                mo = coeff
-                self.instability = False
-            return mo
-        return internal_stability()
 
     def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """

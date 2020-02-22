@@ -124,7 +124,10 @@ def expand_matrix(matrix):
     # get the shape of the matrix you want to expand
     # create a zero-matrix with the same shape
     shape = np.shape(matrix)
-    zero = np.zeros(shape)
+    if isinstance(matrix.any(), complex):
+        zero = np.zeros(shape).astype(complex)
+    else:
+        zero = np.zeros(shape)
     # create the top part of the expanded matrix by putting the matrix and zero-matrix together
     # create the bottom part of the expanded matrix by putting the matrix and zero-matrix together
     top = np.hstack((matrix, zero))
@@ -133,21 +136,64 @@ def expand_matrix(matrix):
     return np.vstack((top, bottom))
 
 
-def expand_tensor(tensor):
+def expand_tensor(tensor, complexity=False):
     """
     Expand every matrix within the tensor, in the same way the expand matrix function works.
     :param tensor: The tensor, usually eri, that you wish to expand.
+    :param complexity: Is your tensor complex or not? Default is false.
     :return: a tensor where each dimension is doubled.
     """
     dim = np.shape(tensor)[0]
-    tens_block = np.zeros((dim, dim, 2*dim, 2*dim))
-    zero = np.zeros((dim, dim, 2*dim, 2*dim))
+    if complexity:
+        tens_block = np.zeros((dim, dim, 2*dim, 2*dim)).astype(complex)
+        zero = np.zeros((dim, dim, 2*dim, 2*dim)).astype(complex)
+    else:
+        tens_block = np.zeros((dim, dim, 2 * dim, 2 * dim))
+        zero = np.zeros((dim, dim, 2 * dim, 2 * dim))
     for l in range(dim):
         for k in range(dim):
             tens_block[l][k] = expand_matrix(tensor[l][k])
     top = np.hstack((tens_block, zero))
     bottom = np.hstack((zero, tens_block))
     return np.vstack((top, bottom))
+
+
+def eri_ao_to_mo(eri, coeff, complexity=False):
+    """
+
+    :param eri_spinor: Electron repulsion interaction, in ao notation, tensor in spinor basis
+    :param coeff: coefficient matrix in spinor basis
+    :param complexity: specify whether you are working with real or complex tensors. Default is real.
+    :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
+    """
+    dim = len(eri)
+    if complexity:
+        eri_mo = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_1 = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_2 = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_3 = np.zeros((dim, dim, dim, dim)).astype(complex)
+    else:
+        eri_mo = np.zeros((dim, dim, dim, dim))
+        mo_1 = np.zeros((dim, dim, dim, dim))
+        mo_2 = np.zeros((dim, dim, dim, dim))
+        mo_3 = np.zeros((dim, dim, dim, dim))
+
+    for s in range(0, len(coeff)):
+        for sig in range(0, len(coeff)):
+            mo_1[:, :, :, s] += coeff[sig, s] * eri[:, :, :, sig]
+
+        for r in range(0, len(coeff)):
+            for lam in range(0, len(coeff)):
+                mo_2[:, :, r, s] += coeff[lam, r] * mo_1[:, :, lam, s]
+
+            for q in range(0, len(coeff)):
+                for nu in range(0, len(coeff)):
+                    mo_3[:, q, r, s] += coeff[nu, q] * mo_2[:, nu, r, s]
+
+                for p in range(0, len(coeff)):
+                    for mu in range(0, len(coeff)):
+                        eri_mo[p, q, r, s] += coeff[mu, p] * mo_3[mu, q, r, s]
+    return eri_mo
 
 
 def spin_blocked(block_1, block_2, block_3, block_4):
