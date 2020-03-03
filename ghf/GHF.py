@@ -59,6 +59,7 @@ class GHF:
         self.last_dens = None
         self.last_fock = None
         self.iterations = None
+        self.hessian = None
         self.int_instability = None
         self.ext_instability = None
 
@@ -94,7 +95,7 @@ class GHF:
         """
         return self.integrals[3]
 
-    def unitary_rotation_guess(self):
+    def unitary_rotation_guess(self, init=None):
         """
         A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
         matrix.
@@ -108,7 +109,13 @@ class GHF:
 
         :return: A rotated guess matrix.
         """
-        c_ham = expand_matrix(self.get_one_e())
+        if init is None:
+            c_ham = expand_matrix(self.get_one_e())
+        else:
+            if np.shape(init)[0] == np.shape(self.get_ovlp())[0]:
+                c_ham = expand_matrix(init)
+            else:
+                c_ham = init
 
         def unitary_rotation(coefficient_matrix):
             """
@@ -147,18 +154,18 @@ class GHF:
         """
         dim = int(np.shape(self.get_ovlp())[0] * 2)
 
-        def random_hermitian_matrix(dimension):
+        def random_unitary_matrix(dimension):
             # fill a matrix of the given dimensions with random numbers.
             np.random.seed(2)
             x = np.random.rand(dimension, dimension)
             # Make the matrix symmetric by adding it's transpose.
-            # Get the eigenvectors to use them, since they form a hermitian matrix.
+            # Get the eigenvectors to use them, since they form a unitary matrix.
             x_t = x.T
             y = x + x_t
             val, vec = la.eigh(y)
             return vec
 
-        return random_hermitian_matrix(dim)
+        return random_unitary_matrix(dim)
 
     def scf(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -176,20 +183,6 @@ class GHF:
         s_12_o = expand_matrix(s_min_12)
         c_ham = expand_matrix(self.get_one_e())
 
-        if guess is None:
-
-            def coeff_matrix(orth_matrix, core_ham):
-                """
-                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
-                :param core_ham: the expanded core Hamiltonian matrix
-                :return: The orthogonalised version of the core Hamiltonian matrix
-                """
-                return orth_matrix @ core_ham @ orth_matrix.conj().T
-            # Define the initial guess as the orthogonalised core Hamiltonian matrix
-            initial_guess = coeff_matrix(s_12_o, c_ham)
-        else:
-            initial_guess = guess
-
         def density(fock):
             """
             :param fock: a fock matrix
@@ -202,12 +195,41 @@ class GHF:
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
-        if complex_method:
-            p_g = density(initial_guess.astype(complex))
-            p_g[0, :] += 0.1j
-            p_g[:, 0] -= 0.1j
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.conj().T
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
+
+            if complex_method:
+                if not isinstance(initial_guess[0][0], complex):
+                    p_g = density(initial_guess) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = density(initial_guess)
+            else:
+                p_g = density(initial_guess)
+
         else:
-            p_g = density(initial_guess)
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.number_of_electrons]
+
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
         densities = [p_g]
 
@@ -250,8 +272,8 @@ class GHF:
             j_aa = coulomb(p_aa)
             j_bb = coulomb(p_bb)
             k_aa = exchange(p_aa)
-            k_ab = exchange(p_ab)
-            k_ba = exchange(p_ba)
+            k_ab = exchange(p_ba)
+            k_ba = exchange(p_ab)
             k_bb = exchange(p_bb)
             # depending on which block of the Fock matrix you're making, use the needed J & K values.
             if sigma == 'a' and tau == 'a':  # aa-block
@@ -290,7 +312,7 @@ class GHF:
 
             # Calculate the new energy and add it to the energies array.
             # Calculate the energy difference and add it to the delta_e array.
-            energies.append(float(scf_e(densities[-1], f)))
+            energies.append(scf_e(densities[-1], f))
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalise the Fock matrix
@@ -324,7 +346,6 @@ class GHF:
             f_bb = fock_block('b', 'b', densities[-2])
             # Add the blocks together.
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            # Return the orthogonalised last Fock matrix.
             return f
         self.last_fock = last_fock()
 
@@ -375,7 +396,10 @@ class GHF:
 
         :return: The mo coefficients
         """
-        return self.mo
+        if self.mo is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.mo
 
     def get_last_dens(self):
         """
@@ -383,7 +407,10 @@ class GHF:
 
         :return: The last density matrix.
         """
-        return self.last_dens
+        if self.last_dens is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.last_dens
 
     def get_last_fock(self):
         """
@@ -391,9 +418,12 @@ class GHF:
 
         :return: The last Fock matrix.
         """
-        return self.last_fock
+        if self.last_fock is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.last_fock
 
-    def stability_analysis(self, method, step_size=1e-5):
+    def stability_analysis(self, method, step_size=1e-4):
         """
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
@@ -459,18 +489,14 @@ class GHF:
             if isinstance(self.energy, complex):
                 indx = int(np.shape(eigenvec)[0] / 2)
                 eigenvec = eigenvec[:indx]
-                block_ab = np.zeros((occ, vir)).astype(complex)
-            else:
-                block_ab = np.zeros((occ, vir))
-            for p in range(occ):
-                for q in range(vir):
-                    block_ab[p][q] = eigenvec[p * q]
-            block_aa = np.zeros((occ, occ))
-            block_ba = -1 * block_ab.conj().T
-            block_bb = np.zeros((vir, vir))
+
+            block_ba = eigenvec.reshape((occ, vir), order='F')
+            block_bb = np.zeros((occ, occ))
+            block_ab = -1 * block_ba.conj().T
+            block_aa = np.zeros((vir, vir))
             k = spin_blocked(block_aa, block_ab, block_ba, block_bb)
             coeff_init = self.get_mo_coeff()
-            exp = la2.expm(step_size * k)
+            exp = la2.expm(-1 * step_size * k)
             return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
@@ -478,6 +504,7 @@ class GHF:
             if method == 'internal':
                 # the stability matrix for the real sub problem consists of a + b
                 stability_matrix = a + b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -493,6 +520,7 @@ class GHF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix = a - b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -509,6 +537,7 @@ class GHF:
             if method == 'internal':
                 # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
                 stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = stability_matrix
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -522,6 +551,17 @@ class GHF:
                     self.int_instability = None
             else:
                 raise Exception('Only internal stability analysis is possible for complex GHF.')
+
+    def get_hessian(self):
+        """
+        After stability analysis is performed, the hessian is stored and can be used for further studying.
+        :return: The Hessian matrix
+        """
+        if self.hessian is None:
+            raise Exception('The Hessian matrix has not been calculated yet. To do so, perform a stability analysis'
+                            ' on your wave function.')
+        else:
+            return self.hessian
 
     def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -540,21 +580,6 @@ class GHF:
         s_12_o = expand_matrix(s_min_12)
         c_ham = expand_matrix(self.get_one_e())
 
-        if guess is None:
-
-            def coeff_matrix(orth_matrix, core_ham):
-                """
-                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
-                :param core_ham: the expanded core Hamiltonian matrix
-                :return: The orthogonalised version of the core Hamiltonian matrix
-                """
-                return orth_matrix @ core_ham @ orth_matrix.T
-
-            # Define the initial guess as the orthogonalised core Hamiltonian matrix
-            initial_guess = coeff_matrix(s_12_o, c_ham)
-        else:
-            initial_guess = guess
-
         def density(fock):
             """
             :param fock: a fock matrix
@@ -567,13 +592,42 @@ class GHF:
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
-        # Calculate the guess density from the given initial guess and put it in an array.
-        if complex_method:
-            p_g = density(initial_guess.astype(complex))
-            p_g[0, :] += 0.1j
-            p_g[:, 0] -= 0.1j
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.conj().T
+
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
+
+            if complex_method:
+                if not isinstance(initial_guess[0][0], complex):
+                    p_g = density(initial_guess) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = density(initial_guess)
+            else:
+                p_g = density(initial_guess)
+
         else:
-            p_g = density(initial_guess)
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.number_of_electrons]
+
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
         densities_diis = [p_g]
 
@@ -616,8 +670,8 @@ class GHF:
             j_aa = coulomb(p_aa)
             j_bb = coulomb(p_bb)
             k_aa = exchange(p_aa)
-            k_ab = exchange(p_ab)
-            k_ba = exchange(p_ba)
+            k_ab = exchange(p_ba)
+            k_ba = exchange(p_ab)
             k_bb = exchange(p_bb)
             # depending on which block of the Fock matrix you're making, use the needed J & K values.
             if sigma == 'a' and tau == 'a':  # aa-block
@@ -691,8 +745,7 @@ class GHF:
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
-        electronic_e = scf_e(p_g, initial_guess)
-        energies_diis = [electronic_e]
+        energies_diis = [0.0]
         delta_e_diis = []
 
         def iteration_diis(number_of_iterations):

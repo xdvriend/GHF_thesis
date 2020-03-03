@@ -58,7 +58,8 @@ class UHF:
         self.last_fock = None
         self.iterations = None
         self.hessian = None
-        self.instability = None
+        self.int_instability = None
+        self.ext_instability = None
         if number_of_electrons % 2 == 0:
             self.n_a = int(number_of_electrons / 2)
             self.n_b = int(number_of_electrons / 2)
@@ -596,135 +597,249 @@ class UHF:
             return new_orbitals
         return internal_stability()
 
-    def internal_stability_analysis(self, step_size=1e-5):
+    def stability_analysis(self, method, step_size=1e-5):
         """
-        Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
-        function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
-        in the direction of the lowest eigenvector of the (A' + B') part of the Hessian, resulting in improved MO's and
-        hopefully a stable wave function.
-
-        :return: New and improved MO's
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :param step_size: Step size for orbital rotation. standard is 1e-5.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Get the total amount of orbitals
         # Number of occupied alpha and beta orbitals
         # number of virtual (unoccupied) alpha and beta orbitals
-        number_of_orbitals = np.shape(self.get_ovlp())[0]
+        n_orb = np.shape(self.get_ovlp())[0]
         n_occ_a = self.n_a
         n_occ_b = self.n_b
-        n_vir_a = int(number_of_orbitals - self.n_a)
-        n_vir_b = int(number_of_orbitals - self.n_b)
-        n_occ = n_occ_a + n_occ_b
-        n_vir = n_vir_a + n_vir_b
+        n_vir_a = int(n_orb - self.n_a)
+        n_vir_b = int(n_orb - self.n_b)
 
-        # indices of the occupied alpha and beta orbitals
-        # indices of the virtual (unoccupied) alpha and orbitals
-        occ_indx_a = np.arange(self.n_a)
-        occ_indx_b = np.arange(self.n_b)
-        vir_indx_a = np.arange(number_of_orbitals)[self.n_a:]
-        vir_indx_b = np.arange(number_of_orbitals)[self.n_b:]
+        # Get the mo coefficients
+        mo_a = self.get_mo_coeff()[0]
+        mo_b = self.get_mo_coeff()[1]
+
+        # Create a zero matrix to form the general blocked matrix expression
+        zero = np.zeros_like(mo_a)
 
         # Get the fock matrices
         fock_a = self.get_last_fock()[0]
         fock_b = self.get_last_fock()[1]
 
         # Set Fock matrices to the basis of the MO's
-        mo_fock_a = self.get_mo_coeff()[0].T @ fock_a @ self.get_mo_coeff()[0]
-        mo_fock_b = self.get_mo_coeff()[1].T @ fock_b @ self.get_mo_coeff()[1]
+        mo_fock_a = mo_a.T @ fock_a @ mo_a
+        mo_fock_b = mo_b.T @ fock_b @ mo_b
+        mo_fock_gen = spin_blocked(mo_fock_a, zero, zero, mo_fock_b)
 
-        # Get the separate occupied and virtual fock matrices
-        fock_occ_a = mo_fock_a[occ_indx_a[:, None], occ_indx_a]
-        fock_vir_a = mo_fock_a[vir_indx_a[:, None], vir_indx_a]
-        fock_occ_b = mo_fock_b[occ_indx_b[:, None], occ_indx_b]
-        fock_vir_b = mo_fock_b[vir_indx_b[:, None], vir_indx_b]
+        # Determine the two electron integrals in MO basis.
+        eri_ao = self.get_two_e()
+        eri_ao_gen = expand_tensor(eri_ao)
+        mo_coeff_gen = spin_blocked(mo_a, zero, zero, mo_b)
+        if isinstance(self.energy, complex):
+            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen, complexity=True)
+        else:
+            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen)
 
-        def diagonal_blocks(eri, fock_occ, fock_vir, occ, vir):
-            """
-            A function to create the diagonal (aa and bb)  blocks of the needed matrix
+        eri_mo_abrs = eri_mo
+        eri_mo_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
+        eri_mo_asrb = eri_mo.transpose(0, 1, 3, 2)
+        eri_mo_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
 
-            :param eri: The two electron tensor of the system.
-            :param fock_occ: The alpha or beta fock matrix of the occupied orbitals depending on which block
-            :param fock_vir: The alpha or beta fock matrix of the virtual orbitals depending on which block
-            :param occ: Specify the number of occupied orbitals.
-            :param vir: Specify the number of virtual orbitals.
-            :return: the aa/bb block
-            """
-            block_dim = occ * vir
-            eigval_occ, eigvec_occ = la.eigh(fock_occ)
-            eigval_vir, eigvec_vir = la.eigh(fock_vir)
-            diagonal = np.einsum('i, j->ij', eigval_vir, -1 * eigval_occ).ravel()
-            ea_ei = np.diag(diagonal)
-            #print(ea_ei)
-            print(np.shape(ea_ei))
-            print(np.allclose(ea_ei, ea_ei.T))
-            aj_ib = eri.transpose(0, 3, 1, 2)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            #print(aj_ib)
-            print(np.allclose(aj_ib, aj_ib.T))
-            aj_bi = eri.transpose(0, 3, 2, 1)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            #print(aj_bi)
-            print(np.allclose(aj_bi, aj_bi.T))
-            ab_ji = eri.transpose(0, 2, 3, 1)[:occ, occ:, :occ, occ:].reshape(block_dim, block_dim)
-            #print(ab_ji)
-            print(np.allclose(ab_ji, ab_ji.T))
-            return ea_ei + 2 * aj_ib - aj_bi - ab_ji
+        # Fill the A' and B' tensor
+        # we have 4 blocks in each of these: aa, ab, ba & bb
+        if isinstance(self.energy, complex):
+            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
+            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
+            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
+            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
+            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
+            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
+            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
+            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
+        else:
+            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
+            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
+            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
+            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
+            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
+            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
+            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
+            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
 
-        def off_diagonal_blocks(eri, which_block):
-            """
-            A function to create the off diagonal ab and ba blocks
-            :param eri: The two electron tensor of the system.
-            :param which_block: Specify whether or not you want to make the alpha/beta or beta/alpha block
-            :return: the ab/ba block
-            """
-            dim_a = (n_occ_a * n_vir_a)
-            dim_b = (n_occ_b * n_vir_b)
-            aj_ib = eri.transpose(0, 3, 1, 2)[n_occ_a:, :n_occ_b, :n_occ_a, n_occ_b:].reshape(dim_a, dim_b)
-            print(np.shape(aj_ib))
-            if which_block == 'ab':
-                return 2 * aj_ib
-            elif which_block == 'ba':
-                return (2 * aj_ib).T
+        # The A_alpha_alpha block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        if r == s and a == b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] \
+                                                                        + eri_mo_anti_asrb[a][s][r][b]
+                        elif r == s and a != b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] \
+                                                                        + eri_mo_anti_asrb[a][s][r][b]
+                        elif r != s and a == b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_asrb[a][s][r][b]
 
-        aa = diagonal_blocks(self.get_two_e(), fock_occ_a, fock_vir_a, n_occ_a, n_vir_a)
-        #print(aa)
-        bb = diagonal_blocks(self.get_two_e(), fock_occ_b, fock_vir_b, n_occ_b, n_vir_b)
-        #print(bb)
-        ab = off_diagonal_blocks(self.get_two_e(), 'ab')
-        #print(ab)
-        print(ab.shape)
-        ba = off_diagonal_blocks(self.get_two_e(), 'ba')
-        #print(ba)
-        print(ba.shape)
+        # The A_beta_beta block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        if r == s and a == b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        elif r == s and a != b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                -1 * mo_fock_gen[r][s] + eri_mo_anti_asrb[a][s][r][b]
+                        elif r != s and a == b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                eri_mo_anti_asrb[a][s][r][b]
 
-        stability_matrix = spin_blocked(aa, ab, ba, bb)
-        print(stability_matrix.shape)
-        #print(stability_matrix)
-        print(np.allclose(stability_matrix, stability_matrix.T))
-        self.hessian = stability_matrix
+        # The A_alpha_beta block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        a_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_asrb[a][s][r][b]
 
-        def rotate_orbs(coeff, vector, n_occ):
-            k = np.zeros_like(coeff)
-            k[:n_occ, n_occ:] = vector.reshape(n_occ, number_of_orbitals - n_occ)
-            k[n_occ:, :n_occ] = -vector.reshape(n_occ, number_of_orbitals - n_occ).conj().T
+        # The A_beta_alpha block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        a_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_asrb[a][s][r][b]
 
-            exp_u = la.expm(-step_size * k)
-            coeff_rot = coeff @ exp_u
-            return coeff_rot
+        # B_alpha_alpha block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        b_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_abrs[a][b][r][s]
 
-        def analysis():
-            dim_a = n_occ_a * n_vir_a
-            e, v = la.eigh(stability_matrix)
-            print(e)
-            lowest_eigenvec = v[:, 0]
-            if np.amin(e) < -1e-5:  # this points towards an internal instability
-                #new_orbitals = (rotate_orbs(self.get_mo_coeff()[0], lowest_eigenvec, self.n_a),
-                #               rotate_orbs(self.get_mo_coeff()[1], lowest_eigenvec, self.n_b))
-                #self.instability = True
-                print("There is an internal instability in the UHF wave function.")
-            else:  # in the case where no instability is present
-                #new_orbitals = (self.get_mo_coeff()[0], self.get_mo_coeff()[1])
-                #self.instability = False
-                print('The wave function is stable within the UHF space.')
-            #return new_orbitals
-        return analysis()
+        # B_beta_beta block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        b_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                            eri_mo_anti_abrs[a][b][r][s]
+
+        # B_alpha_beta block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        b_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_abrs[a][b][r][s]
+
+        # B_beta_alpha block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        b_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_abrs[a][b][r][s]
+
+        a = spin_blocked(a_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                         a_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                         a_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                         a_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+
+        b = spin_blocked(b_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                         b_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                         b_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                         b_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+
+        # Create a function to rotate the orbitals in case of internal instability
+        def rotate_to_eigenvec(eigenvec):
+            # If it's a complex eigenvector, work only with k and ignore k*
+            if isinstance(self.energy, complex):
+                indx = int(np.shape(eigenvec)[0] / 2)
+                eigenvec = eigenvec[:indx]
+
+            # Split the eigenvector in alpha and beta components
+            dim = int(np.shape(eigenvec)[0] / 2)
+
+            # Create all the blocks to fill the matrix
+            block_a_ov = eigenvec[:dim].reshape((n_occ_a, n_vir_a), order='F')
+            block_b_ov = eigenvec[dim:].reshape((n_occ_b, n_vir_b), order='F')
+
+            block_off_diag_a_oo = np.zeros((n_occ_a, n_occ_a))
+            block_off_diag_a_vv = np.zeros((n_vir_a, n_vir_a))
+            block_off_diag_b_oo = np.zeros((n_occ_b, n_occ_b))
+            block_off_diag_b_vv = np.zeros((n_vir_b, n_vir_b))
+
+            # Create the general K matrix
+            k_a = spin_blocked(block_off_diag_a_oo, block_a_ov, block_a_ov.conj().T, block_off_diag_a_vv)
+            k_b = spin_blocked(block_off_diag_b_oo, block_b_ov, block_b_ov.conj().T, block_off_diag_b_vv)
+            zeros = np.zeros((n_orb, n_orb))
+            k = spin_blocked(k_a, zeros, zeros, k_b)
+
+            # Generalise the notation for the coefficients to make working with them more efficient
+            # Then use the DEM algorithm to take a step towards the lowest eigenvector
+            coeff_gen = spin_blocked(self.get_mo_coeff()[0], zeros, zeros, self.get_mo_coeff()[1])
+            exp = la.expm(step_size * k)
+            new_coeff_gen = coeff_gen @ exp
+
+            # Split the generalised coefficients once again in it's alpha and beta components
+            c_a = new_coeff_gen[:n_orb, :n_orb]
+            c_b = new_coeff_gen[n_orb:, :n_orb]
+            return c_a, c_b
+
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a + b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real UHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable within the real UHF space.')
+                    self.int_instability = None
+
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix = a - b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real UHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = stability_matrix
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex UHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable in the complex UHF space.')
+                    self.int_instability = None
+            else:
+                raise Exception('Only internal stability analysis is possible for complex GHF.')
 
     def get_hessian(self):
         """

@@ -107,7 +107,7 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = occ_a_orb.conj().T @ overlap @ occ_b_orb # Basically (alpha orbitals).T * S * (beta orbitals)
+    s = occ_a_orb.conj().T @ overlap @ occ_b_orb  # Basically (alpha orbitals).T * S * (beta orbitals)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)  # = S^2_x + S^2_y
     ss_z = (occ_b - occ_a)**2 * 0.25  # = S^2_z
     ss = (ss_xy + ss_z).real  # = S^2_total
@@ -160,8 +160,8 @@ def expand_tensor(tensor, complexity=False):
 
 def eri_ao_to_mo(eri, coeff, complexity=False):
     """
-
-    :param eri_spinor: Electron repulsion interaction, in ao notation, tensor in spinor basis
+    Transform the two electron tensor to MO basis. Scales as N^5.
+    :param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
     :param coeff: coefficient matrix in spinor basis
     :param complexity: specify whether you are working with real or complex tensors. Default is real.
     :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
