@@ -48,6 +48,8 @@ class CUHF:
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
+        # Several dictionaries are created, as to be able to check these properties for a certain iteration
+        # The dictionaries are filled while iterating.
         self.energy = None
         self.energy_list = {}
         self.mo = None
@@ -121,15 +123,25 @@ class CUHF:
         delta_e = []
 
         def constrained_fock(fock_a, fock_b):
+            # create the closed shell fock matrix to determine delta uhf, equation 16 in paper
             fock_cs = (fock_a + fock_b) / 2
             delta_uhf = fock_cs - fock_a
 
+            # To create the different blocks in the fock matrix, notation from equation 21,
+            # we need to be able to use the indices for the amount of core, open and virtual orbitals
+            # All we need to do this is core and open, since virtual is done by starting at the number of occupied
+            # orbitals, and just continuing to the end.
             core = self.n_a - self.n_b
             open = self.n_b
 
+            # Only in the cv and vc blocks will the c_fock matrix be different from the regular UHF one
+            # Collect those blocks from delta_uhf, since the value of lambda_ij is 2 * delta_uhf_cv
+            # we drop the factor two since we divide by two to form delta_cuhf, equation 17
             lambda_ij_cv_a = delta_uhf[:core, core+open:]
             lambda_ij_cv_b = delta_uhf[:core, core:]
 
+            # Create a zero matrix and fill in the cv and vc blocks
+            # We do this for alpha and beta separately
             lambda_ij_a = np.zeros_like(delta_uhf)
             lambda_ij_a[:core, core+open:] = lambda_ij_cv_a
             lambda_ij_a[core+open:, :core] = lambda_ij_cv_a.T
@@ -138,9 +150,13 @@ class CUHF:
             lambda_ij_b[:core, core:] = lambda_ij_cv_b
             lambda_ij_b[core:, :core] = lambda_ij_cv_b.T
 
+            # delta_CUHF can now be calculated by subtracting the lambda value from delta_UHF in the vc and cv blocks
+            # We subtract lambda_ij / 2, but the factor 2 was dropped in a previous step
             delta_cuhf_a = delta_uhf - lambda_ij_a
             delta_cuhf_b = delta_uhf - lambda_ij_b
 
+            # Create the constrained fock matrix for alpha and beta
+            # equation 18 in the paper
             cfa = fock_cs - delta_cuhf_a
             cfb = fock_cs + delta_cuhf_b
 
@@ -154,6 +170,8 @@ class CUHF:
             # create a fock matrix for beta from last beta density
             fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
 
+            # To perform constrained UHF, we simply use the constrained Fock matrices in a normal UHF-SCF calculation
+            # To do this, the constraints are added during each iteration.
             c_fock_a, c_fock_b = constrained_fock(fock_a, fock_b)
             self.fock_list[n_i] = [c_fock_a, c_fock_b]
 
