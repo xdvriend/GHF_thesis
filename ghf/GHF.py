@@ -210,8 +210,8 @@ class GHF:
             if complex_method:
                 if not isinstance(initial_guess[0][0], complex):
                     p_g = density(initial_guess) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = density(initial_guess)
             else:
@@ -224,8 +224,8 @@ class GHF:
             if complex_method:
                 if not isinstance(guess[0][0], complex):
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
             else:
