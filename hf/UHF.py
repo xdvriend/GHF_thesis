@@ -6,7 +6,7 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from ghf.SCF_functions import *
+from hf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg as la

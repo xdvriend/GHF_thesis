@@ -7,7 +7,7 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from ghf.SCF_functions import *
+from hf.SCF_functions import *
 from pyscf import *
 import scipy.linalg as la
 import collections as c
@@ -15,8 +15,8 @@ import collections as c
 
 class CUHF:
     """
-    Calculate UHF energy.
-    ---------------------
+    Calculate contrained UHF energy.
+    ----------------------------------
     Input is a molecule and the number of electrons.
 
     Molecules are made in pySCF/psi4 and calculations are performed as follows, eg.:
@@ -184,10 +184,6 @@ class CUHF:
             density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj(), optimize=True)
             return density
 
-        def constrain_dens(dens_a, dens_b):
-            dens_b[:, :self.n_b] = dens_a[:, :self.n_b]
-            return dens_a, dens_b
-
         # create an iteration procedure
         def iteration(n_i):
             self.density_list[n_i] = [densities_a[-1], densities_b[-1]]
@@ -221,7 +217,6 @@ class CUHF:
             # create a new alpha and beta density matrix
             new_density_a = dens(c_mo_a, self.n_a)
             new_density_b = dens(c_mo_b, self.n_b)
-            #new_density_a, new_density_b = constrain_dens(new_density_a, new_density_b)
 
             # put the density matrices in their respective arrays
             densities_a.append(new_density_a)

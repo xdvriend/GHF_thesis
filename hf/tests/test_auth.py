@@ -4,9 +4,9 @@ Testing the RHF and UHF methods
 
 Simple tests to check whether or not the functions return the correct value.
 """
-from ghf.RHF import RHF
-from ghf.UHF import UHF
-from ghf.GHF import GHF
+from hf.RHF import RHF
+from hf.UHF import UHF
+from hf.GHF import GHF
 import numpy as np
 from pyscf import *
 import psi4
