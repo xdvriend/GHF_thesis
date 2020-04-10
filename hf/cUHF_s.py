@@ -9,7 +9,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 
 from hf.SCF_functions import *
 from pyscf import *
-import scipy.linalg as la
+import numpy.linalg as la
 import collections as c
 
 
@@ -180,6 +180,45 @@ class CUHF:
                 f += coeff[x] * focks[x]
             return f
 
+        # constraint function
+        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x):
+            f_p = 0.5 * (2 * (j_a + j_b) - k_a - k_b)
+            f_m = -0.5 * (k_a - k_b)
+
+            p = (d_a + d_b) / 2
+            p = la.inv(x) @ p @ la.inv(x.T)
+            nat_occ_num, nat_occ_vec = la.eigh(p)
+
+            f_m = la.inv(nat_occ_vec) @ la.inv(x) @ f_m @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+            f_m[:self.n_b, self.n_a:] = 0.0
+            f_m[self.n_a:, :self.n_b] = 0.0
+            f_m = x @ nat_occ_vec @ f_m @ nat_occ_vec.T @ x.T
+
+            f_a = self.get_one_e() + f_p + f_m
+            f_b = self.get_one_e() + f_p - f_m
+            return f_a, f_b
+
+        def constrain2(d_a, d_b, f_a, f_b, x):
+            p = (d_a + d_b) / 2.0
+            f_cs = (f_a + f_b) / 2.0
+            delta_uhf = (f_a - f_b) / 2.0
+
+            p = la.inv(x) @ p @ la.inv(x.T)
+            nat_occ_num, nat_occ_vec = np.linalg.eigh(p)
+            nat_occ_vec = np.flip(nat_occ_vec, axis=1)
+
+            delta_uhf_no = la.inv(nat_occ_vec) @ la.inv(x) @ delta_uhf @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+
+            delta_cuhf = np.copy(delta_uhf_no)
+            delta_cuhf[:self.n_b, self.n_a:] = 0.0
+            delta_cuhf[self.n_a:, :self.n_b] = 0.0
+
+            delta_cuhf = x @ nat_occ_vec @ delta_cuhf @ nat_occ_vec.T @ x.T
+
+            f_a = f_cs + delta_cuhf
+            f_b = f_cs - delta_cuhf
+            return f_a, f_b
+
         # core Hamiltonian guess
         c_a, guess_d_a = density(self.get_one_e(), self.n_a)
         c_b, guess_d_b = density(self.get_one_e(), self.n_b)
@@ -198,24 +237,10 @@ class CUHF:
 
         def iterate(n_i):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
-            f_a, f_b = fock(j_a, j_b, k_a, k_b)
+            f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
             delta_e.append(energies[-1] - energies[-2])
 
-            f_p = 0.5 * (2 * (j_a + j_b) - k_a - k_b)
-            f_m = -0.5 * (k_a - k_b)
-
-            p = (dens_a[-1] + dens_b[-1]) / 2
-            p = la.inv(s_12) @ p @ la.inv(s_12.T)
-            nat_occ_num, nat_occ_vec = np.linalg.eigh(p)
-
-            f_m = la.inv(nat_occ_vec) @ la.inv(s_12) @ f_m @ la.inv(s_12.T) @ la.inv(nat_occ_vec.T)
-            f_m[:self.n_b, self.n_a:] = 0.0
-            f_m[self.n_a:, :self.n_b] = 0.0
-            f_m = s_12 @ nat_occ_vec @ f_m @ nat_occ_vec.T @ s_12.T
-
-            f_a = self.get_one_e() + f_p + f_m
-            f_b = self.get_one_e() + f_p - f_m
             focks_a.append(f_a)
             focks_b.append(f_b)
 
@@ -231,7 +256,7 @@ class CUHF:
                 error_list_b.append(resid_b)
 
                 # Starting at two iterations, use the DIIS acceleration
-                if n_i >= 2:
+                if n_i >= 1:
                     f_a = diis_fock(fock_list_a, error_list_a)
                     f_b = diis_fock(fock_list_b, error_list_b)
 
@@ -244,11 +269,11 @@ class CUHF:
             mo_a.append(c_a_new)
             mo_b.append(c_b_new)
 
-        i = 1
+        i = 0
         iterate(i)
-        while abs(delta_e[-1]) >= convergence:
-            iterate(i)
+        while abs(delta_e[-1]) >= convergence and i < 1000:
             i += 1
+            iterate(i)
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure, both for alpha and beta
@@ -265,6 +290,7 @@ class CUHF:
         self.mo = get_mo()
 
         self.energy = energies[-1]
+        print(energies)
 
         return energies[-1], i
 
