@@ -6,7 +6,7 @@ The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
 """
 
-from ghf.SCF_functions import *
+from hf.SCF_functions import *
 import collections as c
 
 
