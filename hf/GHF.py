@@ -1,6 +1,6 @@
 """
-Real generalised Hartree Fock, by means of SCF procedure
-=========================================================
+Generalised Hartree Fock, by means of SCF procedure
+====================================================
 
 
 This class creates a generalised Hartree-Fock object which can be used for scf calculations. Different initial guesses
@@ -10,17 +10,16 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 
 """
 
-from ghf.SCF_functions import *
+from hf.SCF_functions import *
 import numpy as np
 from numpy import linalg as la
 from scipy import linalg as la2
-from functools import reduce
 import collections as c
 
 
-class RealGHF:
+class GHF:
     """
-    Calculate the real GHF energy.
+    Calculate the GHF energy.
     --------------------------------
     Input is a molecule and the number of electrons.
 
@@ -31,7 +30,7 @@ class RealGHF:
     For a normal scf calculation your input looks like the following example:
 
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = RealGHF(h3, 3)
+    >>> x = GHF(h3, 3)
     >>> x. get_scf_solution()
     Number of iterations: 81
     Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
@@ -54,13 +53,15 @@ class RealGHF:
             self.integrals = get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
-                            'Make sure the molecule instance matches the method.')
+                            'Make sure the molecule instance matches the method and is given as a string.')
         self.energy = None
         self.mo = None
         self.last_dens = None
         self.last_fock = None
         self.iterations = None
-        self.instability = None
+        self.hessian = None
+        self.int_instability = None
+        self.ext_instability = None
 
     # Get the overlap integrals of the given molecule
     def get_ovlp(self):
@@ -94,7 +95,7 @@ class RealGHF:
         """
         return self.integrals[3]
 
-    def unitary_rotation_guess(self):
+    def unitary_rotation_guess(self, init=None):
         """
         A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
         matrix.
@@ -102,13 +103,19 @@ class RealGHF:
         To use this guess:
 
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = RealGHF(h3, 3)
+        >>> x = GHF(h3, 3)
         >>> guess = x.unitary_rotation_guess()
         >>> x.get_scf_solution(guess)
 
         :return: A rotated guess matrix.
         """
-        c_ham = expand_matrix(self.get_one_e())
+        if init is None:
+            c_ham = expand_matrix(self.get_one_e())
+        else:
+            if np.shape(init)[0] == np.shape(self.get_ovlp())[0]:
+                c_ham = expand_matrix(init)
+            else:
+                c_ham = init
 
         def unitary_rotation(coefficient_matrix):
             """
@@ -139,7 +146,7 @@ class RealGHF:
         To use this guess:
 
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = RealGHF(h3, 3)
+        >>> x = GHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
@@ -147,26 +154,27 @@ class RealGHF:
         """
         dim = int(np.shape(self.get_ovlp())[0] * 2)
 
-        def random_hermitian_matrix(dimension):
+        def random_unitary_matrix(dimension):
             # fill a matrix of the given dimensions with random numbers.
             np.random.seed(2)
             x = np.random.rand(dimension, dimension)
             # Make the matrix symmetric by adding it's transpose.
-            # Get the eigenvectors to use them, since they form a hermitian matrix.
+            # Get the eigenvectors to use them, since they form a unitary matrix.
             x_t = x.T
             y = x + x_t
             val, vec = la.eigh(y)
             return vec
 
-        return random_hermitian_matrix(dim)
+        return random_unitary_matrix(dim)
 
-    def scf(self, guess=None, convergence=1e-12):
+    def scf(self, guess=None, convergence=1e-12, complex_method=False):
         """
         This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we're working
         in the real class, all values throughout are real. For complex, see the "complex_GHF" class.
 
         :param guess: Initial guess to start SCF. If none is given, core hamiltonian will be used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
@@ -174,20 +182,6 @@ class RealGHF:
         s_min_12 = trans_matrix(self.get_ovlp())
         s_12_o = expand_matrix(s_min_12)
         c_ham = expand_matrix(self.get_one_e())
-
-        if guess is None:
-
-            def coeff_matrix(orth_matrix, core_ham):
-                """
-                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
-                :param core_ham: the expanded core Hamiltonian matrix
-                :return: The orthogonalised version of the core Hamiltonian matrix
-                """
-                return orth_matrix @ core_ham @ orth_matrix.T
-            # Define the initial guess as the orthogonalised core Hamiltonian matrix
-            initial_guess = coeff_matrix(s_12_o, c_ham)
-        else:
-            initial_guess = guess
 
         def density(fock):
             """
@@ -199,10 +193,44 @@ class RealGHF:
             coeff = s_12_o @ eigenvec
             coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-            return np.einsum('ij,kj->ik', coeff_r, coeff_r)
+            return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
-        # Calculate the guess density from the given initial guess and put it in an array.
-        p_g = density(initial_guess)
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.conj().T
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
+
+            if complex_method:
+                if not isinstance(initial_guess[0][0], complex):
+                    p_g = density(initial_guess) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = density(initial_guess)
+            else:
+                p_g = density(initial_guess)
+
+        else:
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.number_of_electrons]
+
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+
         densities = [p_g]
 
         # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
@@ -244,8 +272,8 @@ class RealGHF:
             j_aa = coulomb(p_aa)
             j_bb = coulomb(p_bb)
             k_aa = exchange(p_aa)
-            k_ab = exchange(p_ab)
-            k_ba = exchange(p_ba)
+            k_ab = exchange(p_ba)
+            k_ba = exchange(p_ab)
             k_bb = exchange(p_bb)
             # depending on which block of the Fock matrix you're making, use the needed J & K values.
             if sigma == 'a' and tau == 'a':  # aa-block
@@ -288,7 +316,7 @@ class RealGHF:
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalise the Fock matrix
-            f_o = s_12_o.T @ f @ s_12_o
+            f_o = s_12_o.conj().T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
@@ -318,7 +346,6 @@ class RealGHF:
             f_bb = fock_block('b', 'b', densities[-2])
             # Add the blocks together.
             f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            # Return the orthogonalised last Fock matrix.
             return f
         self.last_fock = last_fock()
 
@@ -339,19 +366,28 @@ class RealGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None, convergence=1e-12):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
 
         :param guess: Initial guess for scf. If none is specified: expanded core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy.
         """
-        self.scf(guess, convergence=convergence)
-        #s_values = ghf_spin(self.get_mo_coeff(), self.get_ovlp())
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
-        #print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        self.scf(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        # s_values = ghf_spin(self.get_mo_coeff(), expand_matrix(self.get_ovlp()), self.number_of_electrons)
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF)")
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
+    # print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[1]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -360,7 +396,10 @@ class RealGHF:
 
         :return: The mo coefficients
         """
-        return self.mo
+        if self.mo is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.mo
 
     def get_last_dens(self):
         """
@@ -368,7 +407,10 @@ class RealGHF:
 
         :return: The last density matrix.
         """
-        return self.last_dens
+        if self.last_dens is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.last_dens
 
     def get_last_fock(self):
         """
@@ -376,154 +418,152 @@ class RealGHF:
 
         :return: The last Fock matrix.
         """
-        return self.last_fock
+        if self.last_fock is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.last_fock
 
-    def stability(self):
+    def stability_analysis(self, method, step_size=1e-4):
         """
-        Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest
-        eigenvalue of the Hessian matrix. If there's an instability, the MO's will be rotated in the direction
-        of the lowest eigenvalue. These new MO's can then be used to start a new scf procedure.
-
-        To perform a stability analysis, use the following syntax, this will continue the analysis until there is
-        no more instability:
-
-        >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
-        >>> x = RealGHF(h4, 4)
-        >>> x.scf()
-        >>> guess = x.stability()
-        >>> while x.instability:
-        >>>     new_guess = x.stability()
-        >>>     x.get_scf_solution(new_guess)
-
-        :return: New and improved MO's.
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :param step_size: Step size for orbital rotation. standard is 1e-4.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
-        # Calculate the original coefficients after the scf calculation.
+        # Calculate the A & B blocks needed for stability analysis.
+        # Determine the number of occupied and virtual orbitals.
+        occ = int(self.number_of_electrons)
+        vir = int(np.shape(expand_matrix(self.get_ovlp()))[0] - self.number_of_electrons)
+
+        # Determine the Fock matrices needed.
         coeff = self.get_mo_coeff()
-        dim = np.shape(coeff)[0]
+        fock_init = self.get_last_fock()
+        fock_mo = coeff.conj().T @ fock_init @ coeff
 
-        # the generate_g() function returns 3 values
-        # - the gradient, g
-        # - the result of h_op, the trial vector
-        # - the diagonal of the Hessian matrix, h_diag
-        def generate_g():
-            total_orbitals = dim  # total number of orbitals = number of basis functions
-            n_occ = self.number_of_electrons  # Number of occupied orbitals
-            n_vir = int(total_orbitals - n_occ)  # number of virtual/unoccupied orbitals
-            occ_indx = np.arange(n_occ)  # indices of the occupied orbitals
-            vir_indx = np.arange(total_orbitals)[n_occ:]  # indices of the virtual/unoccupied orbitals.
-            occ_orb = coeff[:, occ_indx]  # the occupied orbitals
-            vir_orb = coeff[:, vir_indx]  # The virtual/unoccupied orbitals
+        # Determine the two electron integrals in spinor basis.
+        eri_ao = self.get_two_e()
+        eri_ao_spinor = expand_tensor(eri_ao)
+        if isinstance(self.energy, complex):
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff, complexity=True)
+        else:
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff)
 
-            # Use the last Fock matrix of the scf procedure as the initial Fock matrix for the stability analysis.
-            # Transform the Fock matrix to AO basis
-            fock_init = self.get_last_fock()
-            fock_ao = reduce(np.dot, (coeff.conj().T, fock_init, coeff))
+        eri_spinor_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
+        eri_spinor_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
 
-            # Split the Fock matrix in the occupied and virtual parts.
-            fock_occ = fock_ao[occ_indx[:, None], occ_indx]
-            fock_vir = fock_ao[vir_indx[:, None], vir_indx]
+        # Create the tensors A and B.
+        if isinstance(self.energy, complex):
+            a_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
+            b_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
+        else:
+            a_arbs = np.zeros((occ, vir, occ, vir))
+            b_arbs = np.zeros((occ, vir, occ, vir))
 
-            # Calculate the Gradient and the Hessian diagonal.
-            g = fock_ao[vir_indx[:, None], occ_indx]
-            h_diag = fock_vir.diagonal().real[:, None] - fock_occ.diagonal().real
+        # Fill the A and B tensors with the correct elements.
+        for a in range(occ):
+            for r in range(occ, occ + vir):
+                for b in range(occ):
+                    for s in range(occ, occ + vir):
+                        if a == b and s == r:
+                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] - fock_mo[a][b]\
+                                                         + eri_spinor_anti_asrb[a][s][r][b]
+                        elif a == b and s != r:
+                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] + eri_spinor_anti_asrb[a][s][r][b]
+                        elif s == r and a != b:
+                            a_arbs[a][r-occ][b][s-occ] = -1 * fock_mo[a][b] + eri_spinor_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_asrb[a][s][r][b]
+        for a in range(occ):
+            for r in range(occ, occ + vir):
+                for b in range(occ):
+                    for s in range(occ, occ + vir):
+                        b_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_abrs[a][b][r][s]
 
-            # h_op is the Hessian operator, which will return the useful block (occupied-virtual rotation)
-            # of the Hessian matrix.
-            def h_op(x):
-                x = x.reshape(n_vir, n_occ)  # Set the dimensions
-                x2 = np.einsum('ps,sq->pq', fock_vir, x)  # Add the virtual fock matrix
-                x2 -= np.einsum('ps,rp->rs', fock_occ, x)  # Add the occupied Fock matrix
-                d1 = reduce(np.dot, (vir_orb, x, occ_orb.conj().T))  # vir_orb @ x @ occ_orb.T
-                dm1 = d1 + d1.conj().T  # determine a density matrix
+        # Reshape the tensors pairwise to create the matrix representation.
+        a = a_arbs.reshape((occ*vir, occ*vir), order='F')
+        b = b_arbs.reshape((occ*vir, occ*vir), order='F')
 
-                # A function to calculate the coulomb and exchange integrals
-                def vind(dm_1):
-                    vj, vk = scf.hf.get_jk(self.molecule, dm_1, hermi=1)
-                    return vj - vk
+        # Create a function to rotate the orbitals in case of internal instability
+        def rotate_to_eigenvec(eigenvec):
+            if isinstance(self.energy, complex):
+                indx = int(np.shape(eigenvec)[0] / 2)
+                eigenvec = eigenvec[:indx]
 
-                v1 = vind(dm1)  # Get Coulomb - Exchange
-                x2 += reduce(np.dot, (vir_orb.conj().T, v1, occ_orb))  # vir_orb.T @ v1 @ occ_orb
-                return x2.ravel()  # Unravel the matrix into a 1D array.
+            block_ba = eigenvec.reshape((occ, vir), order='F')
+            block_bb = np.zeros((occ, occ))
+            block_ab = -1 * block_ba.conj().T
+            block_aa = np.zeros((vir, vir))
+            k = spin_blocked(block_aa, block_ab, block_ba, block_bb)
+            coeff_init = self.get_mo_coeff()
+            exp = la2.expm(-1 * step_size * k)
+            return coeff_init @ exp
 
-            return g.reshape(-1), h_op, h_diag.reshape(-1)
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a + b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
 
-        # This function will check whether or not there is an internal instability,
-        # and if there is one, it will calculate new and improved coefficients.
-        def internal_stability():
-            g, hop, hdiag = generate_g()
-            hdiag *= 2
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real GHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable within the real GHF space.')
+                    self.int_instability = None
 
-            # this function prepares for the conditions needed to use a davidson solver later on
-            def precond(dx, z, x0):
-                hdiagd = hdiag - z
-                hdiagd[abs(hdiagd) < 1e-8] = 1e-8
-                return dx / hdiagd
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix = a - b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
 
-            # The overall Hessian for internal rotation is x2 + x2.T.conj().
-            # This is the reason we apply (.real * 2)
-            def hessian_x(x):
-                return hop(x).real * 2
-
-            # Find the unique indices of the variables
-            # in this function, bitwise operators are used.
-            # They treat each operand as a sequence of binary digits and operate on them bit by bit
-            def uniq_variable_indices(occ_mo):
-                # indices of occupied alpha orbitals
-                # indices of occupied beta orbitals
-                occ_indx_a = occ_mo > 0
-                occ_indx_b = occ_mo == 2
-                # indices of virtual (unoccupied) alpha orbitals, done with bitwise operator: ~ (negation)
-                # indices of virtual (unoccupied) beta orbitals, done with bitwise operator: ~ (negation)
-                vir_indx_a = ~occ_indx_a
-                vir_indx_b = ~occ_indx_b
-                # & and | are bitwise operators for 'and' and 'or'
-                # each bit position is the result of the logical 'and' or 'or' of the bits in the
-                # corresponding position of the operands
-                # determine the unique variable indices, by use of bitwise operators
-                unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:, None] & occ_indx_b)
-                return unique
-
-            # put the unique variables in a new matrix used later to create a rotation matrix.
-            def unpack_uniq_variables(dx, occ_mo):
-                nmo = len(occ_mo)
-                idx = uniq_variable_indices(occ_mo)
-                # print(np.shape(idx))
-                # idx2 = np.ravel(idx[0:number_of_electrons, number_of_electrons:2 * nmo])
-                # print(np.shape(idx2))
-                x1 = np.zeros((nmo, nmo), dtype=dx.dtype)
-                x1[idx] = dx
-                # print(np.shape(dx))
-                return x1 - x1.conj().T
-
-            # A function to apply a rotation on the given coefficients
-            def rotate_mo(mo_coeff, occ_mo, dx):
-                dr = unpack_uniq_variables(dx, occ_mo)
-                u = la2.expm(dr)  # computes the matrix exponential
-                return np.dot(mo_coeff, u)
-
-            x0 = np.zeros_like(g)  # like returns a matrix of the same shape as the argument given
-            x0[g != 0] = 1. / hdiag[g != 0]  # create initial guess for davidson solver
-            # use the davidson solver to find the eigenvalues and eigenvectors
-            # needed to determine an internal instability
-            e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
-            if e < -1e-5:  # this points towards an internal instability
-                print("There is an instability in the real GHF wave function.")
-                mo_occ = np.zeros(dim, )  # total number of basis functions
-                # create representation of alpha orbitals by adding an electron (= 1) to each occupied orbital
-                for i in range(self.number_of_electrons):
-                    mo_occ[i] = 1
-                # create new orbitals by rotating the old ones
-                mo = rotate_mo(coeff, mo_occ, v)
-                self.instability = True
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real GHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex space.')
+                    self.ext_instability = None
             else:
-                # in the case where no instability is present
-                print("There is no instability in the real GHF wave function.")
-                mo = coeff
-                self.instability = False
-            return mo
-        return internal_stability()
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = stability_matrix
 
-    def diis(self, guess=None, convergence=1e-12):
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex GHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable in the complex GHF space.')
+                    self.int_instability = None
+            else:
+                raise Exception('Only internal stability analysis is possible for complex GHF.')
+
+    def get_hessian(self):
+        """
+        After stability analysis is performed, the hessian is stored and can be used for further studying.
+        :return: The Hessian matrix
+        """
+        if self.hessian is None:
+            raise Exception('The Hessian matrix has not been calculated yet. To do so, perform a stability analysis'
+                            ' on your wave function.')
+        else:
+            return self.hessian
+
+    def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
         find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
@@ -531,6 +571,7 @@ class RealGHF:
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param guess: The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf_energy, iterations, mo coefficients, last density matrix & last Fock matrix
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
@@ -538,21 +579,6 @@ class RealGHF:
         s_min_12 = trans_matrix(self.get_ovlp())
         s_12_o = expand_matrix(s_min_12)
         c_ham = expand_matrix(self.get_one_e())
-
-        if guess is None:
-
-            def coeff_matrix(orth_matrix, core_ham):
-                """
-                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
-                :param core_ham: the expanded core Hamiltonian matrix
-                :return: The orthogonalised version of the core Hamiltonian matrix
-                """
-                return orth_matrix @ core_ham @ orth_matrix.T
-
-            # Define the initial guess as the orthogonalised core Hamiltonian matrix
-            initial_guess = coeff_matrix(s_12_o, c_ham)
-        else:
-            initial_guess = guess
 
         def density(fock):
             """
@@ -564,10 +590,45 @@ class RealGHF:
             coeff = s_12_o @ eigenvec
             coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-            return np.einsum('ij,kj->ik', coeff_r, coeff_r)
+            return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
-        # Calculate the guess density from the given initial guess and put it in an array.
-        p_g = density(initial_guess)
+        if guess is None:
+
+            def coeff_matrix(orth_matrix, core_ham):
+                """
+                :param orth_matrix: an orthogonalisation matrix, created with the expand matrix function
+                :param core_ham: the expanded core Hamiltonian matrix
+                :return: The orthogonalised version of the core Hamiltonian matrix
+                """
+                return orth_matrix @ core_ham @ orth_matrix.conj().T
+
+            # Define the initial guess as the orthogonalised core Hamiltonian matrix
+            initial_guess = coeff_matrix(s_12_o, c_ham)
+
+            if complex_method:
+                if not isinstance(initial_guess[0][0], complex):
+                    p_g = density(initial_guess).astype(complex)
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = density(initial_guess)
+            else:
+                p_g = density(initial_guess)
+
+        else:
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.number_of_electrons]
+
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()).astype(complex)
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
+                else:
+                    p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+
         densities_diis = [p_g]
 
         # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
@@ -609,8 +670,8 @@ class RealGHF:
             j_aa = coulomb(p_aa)
             j_bb = coulomb(p_bb)
             k_aa = exchange(p_aa)
-            k_ab = exchange(p_ab)
-            k_ba = exchange(p_ba)
+            k_ab = exchange(p_ba)
+            k_ba = exchange(p_ab)
             k_bb = exchange(p_bb)
             # depending on which block of the Fock matrix you're making, use the needed J & K values.
             if sigma == 'a' and tau == 'a':  # aa-block
@@ -630,7 +691,7 @@ class RealGHF:
             :return: a value that should be zero and a fock matrix
             """
             return s_12_o @ (fock @ dens @ expand_matrix(self.get_ovlp()) -
-                             expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.T
+                             expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -649,9 +710,15 @@ class RealGHF:
             b[-1, -1] = 0
 
             # Fill the B matrix: ei * ej, with e the errors
-            for k in range(len(focks)):
-                for l in range(len(focks)):
-                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            if complex_method:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b = b.astype(complex)
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            else:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
             # Create the residual vector
             res_vec = np.zeros(dim)
@@ -661,7 +728,10 @@ class RealGHF:
             coeff = np.linalg.solve(b, res_vec)
 
             # Create a fock as a linear combination of previous focks
-            fock = np.zeros(focks[0].shape)
+            if complex_method:
+                fock = np.zeros(focks[0].shape).astype(complex)
+            else:
+                fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
             return fock
@@ -675,8 +745,7 @@ class RealGHF:
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
-        electronic_e = scf_e(p_g, initial_guess)
-        energies_diis = [electronic_e]
+        energies_diis = [0.0]
         delta_e_diis = []
 
         def iteration_diis(number_of_iterations):
@@ -706,7 +775,7 @@ class RealGHF:
                 f = diis_fock(fock_list, error_list)
 
             # orthogonalise the Fock matrix
-            f_o = s_12_o.T @ f @ s_12_o
+            f_o = s_12_o.conj().T @ f @ s_12_o
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
@@ -753,7 +822,7 @@ class RealGHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
         just like with a normal scf calculation.
@@ -761,7 +830,7 @@ class RealGHF:
         Example:
 
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = RealGHF(h3, 3)
+        >>> x = GHF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
         Number of iterations: 23
@@ -771,9 +840,18 @@ class RealGHF:
 
         :param guess: Initial guess for scf. None specified: expanded core Hamiltonian
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.cd
         :return: The converged scf energy.
         """
-        self.diis(guess, convergence=convergence)
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
+        self.diis(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF, DIIS)")
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
         return self.energy

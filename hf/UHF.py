@@ -2,11 +2,11 @@
 Unrestricted Hartree Fock, by means of SCF procedure
 ====================================================
 This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
-Several options are available to make sure you get the lowest energy from your calculation, as well as some usefull
+Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from ghf.SCF_functions import *
+from hf.SCF_functions import *
 from functools import reduce
 from pyscf import *
 import scipy.linalg as la
@@ -51,14 +51,15 @@ class UHF:
             self.integrals = get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
-                            'Make sure the molecule instance matches the method.')
+                            'Make sure the molecule instance matches the method and is gives as a string.')
         self.energy = None
         self.mo = None
         self.last_dens = None
         self.last_fock = None
         self.iterations = None
         self.hessian = None
-        self.instability = None
+        self.int_instability = None
+        self.ext_instability = None
         if number_of_electrons % 2 == 0:
             self.n_a = int(number_of_electrons / 2)
             self.n_b = int(number_of_electrons / 2)
@@ -98,12 +99,13 @@ class UHF:
         """
         return self.integrals[3]
 
-    def scf(self, initial_guess=None, convergence=1e-12):
+    def scf(self, initial_guess=None, convergence=1e-12, complex_method=False):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
         :param initial_guess: A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
@@ -112,9 +114,20 @@ class UHF:
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
         if initial_guess is None:
-            initial_guess = s_12.T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            if complex_method:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                initial_guess = initial_guess.astype(complex)
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a[0, :] += 0.1j
+                guess_density_a[:, 0] -= 0.1j
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b[0, :] += 0.1j
+                guess_density_b[:, 0] -= 0.1j
+            else:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+
         else:
             # Make the coefficients orthogonal in the correct basis.
             coeff_a = s_12 @ initial_guess[0]
@@ -124,9 +137,13 @@ class UHF:
             coeff_r_a = coeff_a[:, 0:self.n_a]
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
-            # Create the guess density matrices from the given coefficients
-            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
-            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+            if complex_method:
+                # Create the guess density matrices from the given coefficients
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+            else:
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
 
         # Store the density matrices in an array
         densities_a = [guess_density_a]
@@ -149,8 +166,8 @@ class UHF:
             delta_e.append(energies[-1] - energies[-2])
 
             # orthogonalize both fock matrices
-            fock_orth_a = s_12.T.dot(fock_a).dot(s_12)
-            fock_orth_b = s_12.T.dot(fock_b).dot(s_12)
+            fock_orth_a = s_12.conj().T.dot(fock_a).dot(s_12)
+            fock_orth_b = s_12.conj().T.dot(fock_b).dot(s_12)
 
             # create a new alpha and beta density matrix
             new_density_a = density_matrix(fock_orth_a, self.n_a, s_12)
@@ -203,20 +220,32 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution(self, guess=None, convergence=1e-12):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
         :param guess: The initial guess for the scf procedure. If none is given: core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy.
         """
-        self.scf(guess, convergence=convergence)
+        self.scf(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
-        print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex UHF)")
+                print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                      ", Multiplicity = " + str(s_values[2]))
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real UHF)")
+            print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                  ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -479,8 +508,8 @@ class UHF:
                 x2b = np.einsum('pr,rq->pq', fock_vir_b, x1b)  # summation from fock_vir_b * x1b
                 x2b -= np.einsum('sq,ps->pq', fock_occ_b, x1b)  # subtract summation from fock_occ_b * x1b
 
-                d1a = reduce(np.dot, (vir_a_orb, x1a, occ_a_orb.conj().T))  # diagonolise x1a
-                d1b = reduce(np.dot, (vir_b_orb, x1b, occ_b_orb.conj().T))  # diagonolise x1b
+                d1a = reduce(np.dot, (vir_a_orb, x1a, occ_a_orb.conj().T))  # diagonalise x1a
+                d1b = reduce(np.dot, (vir_b_orb, x1b, occ_b_orb.conj().T))  # diagonalise x1b
                 dm1 = np.array((d1a + d1a.conj().T, d1b + d1b.conj().T))  # create a density matrix from d1a and d1b
                 v1 = -scf.hf.get_jk(self.molecule, dm1, hermi=1)[
                     1]  # calculate the exchange integrals in the case where dm1 is used as a density matrix
@@ -547,7 +576,6 @@ class UHF:
             # use the davidson solver to find the eigenvalues and eigenvectors
             # needed to determine an internal instability
             e, v = lib.davidson(hessian_x, x0, precond, tol=1e-4)
-            print(e)
             if e < -1e-5:  # this points towards an internal instability
                 total_orbitals = self.get_ovlp().shape[0]  # total number of basis functions
                 n_vir_a = int(total_orbitals - self.n_a)  # number of virtual (unoccupied) alpha orbitals
@@ -569,170 +597,249 @@ class UHF:
             return new_orbitals
         return internal_stability()
 
-    def stability_2(self, step_size=1e-5):
-        number_of_orbitals = np.shape(self.get_ovlp())[0]
-        coeff_occ_a = self.get_mo_coeff()[0][:, :self.n_a]
-        coeff_vir_a = self.get_mo_coeff()[0][:, self.n_a:]
-        coeff_occ_b = self.get_mo_coeff()[1][:, :self.n_b]
-        coeff_vir_b = self.get_mo_coeff()[1][:, self.n_b:]
-
-        # Form fock matrices
-        fock_a = self.get_last_fock()[0]
-        fock_b = self.get_last_fock()[1]
-
-        mo_fock_a = self.get_mo_coeff()[0].T @ fock_a @ self.get_mo_coeff()[0]
-        mo_fock_b = self.get_mo_coeff()[1].T @ fock_b @ self.get_mo_coeff()[1]
-
-        def transform(c1, c2, c3, c4):
-            mo = (c1.T @ self.get_two_e().reshape(number_of_orbitals, -1)).reshape(c1.shape[1], number_of_orbitals,
-                                                                                   number_of_orbitals,
-                                                                                   number_of_orbitals)
-            mo = np.einsum('qb,aqrs->abrs', c2, mo)
-            mo = np.einsum('rc,abrs->abcs', c3, mo)
-            mo = np.einsum('sd,abcs->abcd', c4, mo)
-            return mo
-
-        # Off diagonal Hessian elements
-        j_ab = 8 * transform(coeff_occ_a, coeff_vir_a, coeff_occ_b, coeff_vir_b)
-        print(np.shape(j_ab))
-
-        # Diagonal alpha elements
-        mo_aa = transform(coeff_occ_a, self.get_mo_coeff()[0], self.get_mo_coeff()[0], self.get_mo_coeff()[0])
-        h_a = np.einsum('ab,ij->iajb', mo_fock_a[self.n_a:, self.n_a:], np.diag(np.ones(self.n_a)))
-        h_a -= np.einsum('ij,ab->iajb', mo_fock_a[:self.n_a:, :self.n_a], np.diag(np.ones(number_of_orbitals
-                                                                                          - self.n_a)))
-        h_a += 2 * mo_aa[:, self.n_a:, :self.n_a, self.n_a:]
-        h_a -= mo_aa[:, self.n_a:, :self.n_a, self.n_a:].swapaxes(0, 2)
-        h_a -= mo_aa[:, :self.n_a, self.n_a:, self.n_a:].swapaxes(1, 2)
-        h_a *= 4
-        print(np.shape(h_a))
-
-        # diagonal beta elements
-        mo_bb = transform(coeff_occ_b, self.get_mo_coeff()[1], self.get_mo_coeff()[1], self.get_mo_coeff()[1])
-        h_b = np.einsum('ab,ij->iajb', mo_fock_b[self.n_b:, self.n_b:], np.diag(np.ones(self.n_b)))
-        h_b -= np.einsum('ij,ab->iajb', mo_fock_b[:self.n_b:, :self.n_b], np.diag(np.ones(number_of_orbitals
-                                                                                          - self.n_b)))
-        h_b += 2 * mo_bb[:, self.n_b:, :self.n_b, self.n_b:]
-        h_b -= mo_bb[:, self.n_b:, :self.n_b, self.n_b:].swapaxes(0, 2)
-        h_b -= mo_bb[:, :self.n_b, self.n_b:, self.n_b:].swapaxes(1, 2)
-        h_b *= 4
-        print(np.shape(h_b))
-
-        # Build the full hessian
-        n_a = h_a.shape[0] * h_a.shape[1]
-        n_b = h_b.shape[0] * h_b.shape[1]
-        n_tot = n_a + n_b
-
-        hess = np.zeros((n_tot, n_tot))
-        hess[:n_a, :n_a] = h_a.reshape(n_a, n_a)
-        hess[:n_a, n_a:] = j_ab.reshape(n_a, n_b)
-        hess[n_a:, :n_a] = j_ab.reshape(n_a, n_b).T
-        hess[n_a:, n_a:] = h_b.reshape(n_b, n_b)
-        print(np.shape(hess))
-
-        self.hessian = hess
-
-        def rotate_orbs(coeff, vector, n_occ):
-            k = np.zeros_like(coeff)
-            k[:n_occ, n_occ:] = vector.reshape(n_occ, number_of_orbitals - n_occ)
-            k[n_occ:, :n_occ] = -vector.reshape(n_occ, number_of_orbitals - n_occ).conj().T
-            print(np.shape(k))
-
-            exp_u = la.expm(-step_size * k)
-            coeff_rot = coeff @ exp_u
-            return coeff_rot
-
-        def stab_analysis():
-            e, v = la.eigh(hess)
-            print(e)
-            lowest_eig_vec_a = v[:n_a, 0]
-            lowest_eig_vec_b = v[n_a:, n_a]
-            if np.amin(e) < -1e-5:  # this points towards an internal instability
-                new_orbitals = (rotate_orbs(self.get_mo_coeff()[0], lowest_eig_vec_a, self.n_a),
-                                rotate_orbs(self.get_mo_coeff()[1], lowest_eig_vec_b, self.n_b))
-                self.instability = True
-                print("There is an instability in the UHF wave function.")
-            else:  # in the case where no instability is present
-                new_orbitals = (self.get_mo_coeff()[0], self.get_mo_coeff()[1])
-                self.instability = False
-                print('There is no instability in the UHF wave function.')
-            return new_orbitals
-
-        return stab_analysis()
-
-    def internal_stability_analysis(self, step_size=1e-5):
+    def stability_analysis(self, method, step_size=1e-5):
         """
-        Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
-        function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
-        in the direction of the lowest eigenvector of the (A' + B') part of the Hessian, resulting in improved MO's and
-        hopefully a stable wave function.
-
-        :return: New and improved MO's
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :param step_size: Step size for orbital rotation. standard is 1e-5.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Get the total amount of orbitals
         # Number of occupied alpha and beta orbitals
         # number of virtual (unoccupied) alpha and beta orbitals
-        number_of_orbitals = np.shape(self.get_ovlp())[0]
+        n_orb = np.shape(self.get_ovlp())[0]
         n_occ_a = self.n_a
         n_occ_b = self.n_b
-        n_vir_a = int(number_of_orbitals - self.n_a)
-        n_vir_b = int(number_of_orbitals - self.n_b)
+        n_vir_a = int(n_orb - self.n_a)
+        n_vir_b = int(n_orb - self.n_b)
 
-        # Split the MO coefficients into occupied and virtual for both alpha and beta orbitals
-        coeff_occ_a = self.get_mo_coeff()[0][:, :self.n_a]
-        coeff_vir_a = self.get_mo_coeff()[0][:, self.n_a:]
-        coeff_occ_b = self.get_mo_coeff()[1][:, :self.n_b]
-        coeff_vir_b = self.get_mo_coeff()[1][:, self.n_b:]
+        # Get the mo coefficients
+        mo_a = self.get_mo_coeff()[0]
+        mo_b = self.get_mo_coeff()[1]
 
-        # indices of the occupied alpha and beta orbitals
-        # indices of the virtual (unoccupied) alpha and orbitals
-        occ_indx_a = np.arange(self.n_a)
-        occ_indx_b = np.arange(self.n_b)
-        vir_indx_a = np.arange(number_of_orbitals)[self.n_a:]
-        vir_indx_b = np.arange(number_of_orbitals)[self.n_b:]
+        # Create a zero matrix to form the general blocked matrix expression
+        zero = np.zeros_like(mo_a)
 
         # Get the fock matrices
         fock_a = self.get_last_fock()[0]
         fock_b = self.get_last_fock()[1]
 
         # Set Fock matrices to the basis of the MO's
-        mo_fock_a = self.get_mo_coeff()[0].T @ fock_a @ self.get_mo_coeff()[0]
-        mo_fock_b = self.get_mo_coeff()[1].T @ fock_b @ self.get_mo_coeff()[1]
+        mo_fock_a = mo_a.T @ fock_a @ mo_a
+        mo_fock_b = mo_b.T @ fock_b @ mo_b
+        mo_fock_gen = spin_blocked(mo_fock_a, zero, zero, mo_fock_b)
 
-        # Get the separate occupied and virtual fock matrices
-        fock_occ_a = mo_fock_a[occ_indx_a[:, None], occ_indx_a]
-        fock_vir_a = mo_fock_a[vir_indx_a[:, None], vir_indx_a]
-        fock_occ_b = mo_fock_b[occ_indx_b[:, None], occ_indx_b]
-        fock_vir_b = mo_fock_b[vir_indx_b[:, None], vir_indx_b]
+        # Determine the two electron integrals in MO basis.
+        eri_ao = self.get_two_e()
+        eri_ao_gen = expand_tensor(eri_ao)
+        mo_coeff_gen = spin_blocked(mo_a, zero, zero, mo_b)
+        if isinstance(self.energy, complex):
+            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen, complexity=True)
+        else:
+            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen)
 
-        def diagonal_blocks(eri, fock_occ, fock_vir, n_vir, n_occ):
-            """
-            A function to create the diagonal (aa and bb)  blocks of the needed matrix
+        eri_mo_abrs = eri_mo
+        eri_mo_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
+        eri_mo_asrb = eri_mo.transpose(0, 1, 3, 2)
+        eri_mo_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
 
-            :param eri: The two electron tensor of the system.
-            :param fock_occ: The alpha or beta fock matrix of the occupied orbitals depending on which block
-            :param fock_vir: The alpha or beta fock matrix of the virtual orbitals depending on which block
-            :param n_vir: Number of virtuals
-            :param n_occ: Number of occupieds
-            :return: the aa/bb block
-            """
-            ea_ei = np.einsum('ii, jj->ij', (-1 * fock_occ), fock_vir)
-            print(np.shape(ea_ei))
-            aj_ib = eri.transpose(0, 3, 1, 2)
-            aj_bi = eri.transpose(0, 3, 2, 1)
-            ab_ji = eri.transpose(0, 2, 3, 1)
-            return ea_ei
+        # Fill the A' and B' tensor
+        # we have 4 blocks in each of these: aa, ab, ba & bb
+        if isinstance(self.energy, complex):
+            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
+            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
+            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
+            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
+            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
+            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
+            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
+            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
+        else:
+            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
+            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
+            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
+            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
+            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
+            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
+            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
+            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
 
-        def off_diagonal_blocks(eri):
-            """
-            A function to create the off diagonal ab and ba blocks
-            :param eri: The two electron tensor of the system.
-            :return: the ab/ba block
-            """
-            return 2 * eri.transpose(0, 3, 1, 2)
+        # The A_alpha_alpha block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        if r == s and a == b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] \
+                                                                        + eri_mo_anti_asrb[a][s][r][b]
+                        elif r == s and a != b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] \
+                                                                        + eri_mo_anti_asrb[a][s][r][b]
+                        elif r != s and a == b:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_asrb[a][s][r][b]
 
-        test = diagonal_blocks(self.get_two_e(), fock_occ_a, fock_vir_a, n_occ_a, n_vir_a)
-        print(test)
+        # The A_beta_beta block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        if r == s and a == b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        elif r == s and a != b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                -1 * mo_fock_gen[r][s] + eri_mo_anti_asrb[a][s][r][b]
+                        elif r != s and a == b:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
+                        else:
+                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                                eri_mo_anti_asrb[a][s][r][b]
+
+        # The A_alpha_beta block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        a_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_asrb[a][s][r][b]
+
+        # The A_beta_alpha block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        a_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_asrb[a][s][r][b]
+
+        # B_alpha_alpha block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        b_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_abrs[a][b][r][s]
+
+        # B_beta_beta block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        b_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
+                            eri_mo_anti_abrs[a][b][r][s]
+
+        # B_alpha_beta block
+        for a in range(n_occ_a):
+            for r in range(n_occ_a, n_orb):
+                for b in range(n_orb, n_orb + n_occ_b):
+                    for s in range(n_orb + n_occ_b, 2 * n_orb):
+                        b_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_abrs[a][b][r][s]
+
+        # B_beta_alpha block
+        for a in range(n_orb, n_orb + n_occ_b):
+            for r in range(n_orb + n_occ_b, 2 * n_orb):
+                for b in range(n_occ_a):
+                    for s in range(n_occ_a, n_orb):
+                        b_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_abrs[a][b][r][s]
+
+        a = spin_blocked(a_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                         a_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                         a_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                         a_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+
+        b = spin_blocked(b_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                         b_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                         b_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                         b_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+
+        # Create a function to rotate the orbitals in case of internal instability
+        def rotate_to_eigenvec(eigenvec):
+            # If it's a complex eigenvector, work only with k and ignore k*
+            if isinstance(self.energy, complex):
+                indx = int(np.shape(eigenvec)[0] / 2)
+                eigenvec = eigenvec[:indx]
+
+            # Split the eigenvector in alpha and beta components
+            dim = int(np.shape(eigenvec)[0] / 2)
+
+            # Create all the blocks to fill the matrix
+            block_a_ov = eigenvec[:dim].reshape((n_occ_a, n_vir_a), order='F')
+            block_b_ov = eigenvec[dim:].reshape((n_occ_b, n_vir_b), order='F')
+
+            block_off_diag_a_oo = np.zeros((n_occ_a, n_occ_a))
+            block_off_diag_a_vv = np.zeros((n_vir_a, n_vir_a))
+            block_off_diag_b_oo = np.zeros((n_occ_b, n_occ_b))
+            block_off_diag_b_vv = np.zeros((n_vir_b, n_vir_b))
+
+            # Create the general K matrix
+            k_a = spin_blocked(block_off_diag_a_oo, block_a_ov, block_a_ov.conj().T, block_off_diag_a_vv)
+            k_b = spin_blocked(block_off_diag_b_oo, block_b_ov, block_b_ov.conj().T, block_off_diag_b_vv)
+            zeros = np.zeros((n_orb, n_orb))
+            k = spin_blocked(k_a, zeros, zeros, k_b)
+
+            # Generalise the notation for the coefficients to make working with them more efficient
+            # Then use the DEM algorithm to take a step towards the lowest eigenvector
+            coeff_gen = spin_blocked(self.get_mo_coeff()[0], zeros, zeros, self.get_mo_coeff()[1])
+            exp = la.expm(step_size * k)
+            new_coeff_gen = coeff_gen @ exp
+
+            # Split the generalised coefficients once again in it's alpha and beta components
+            c_a = new_coeff_gen[:n_orb, :n_orb]
+            c_b = new_coeff_gen[n_orb:, :n_orb]
+            return c_a, c_b
+
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a + b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real UHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable within the real UHF space.')
+                    self.int_instability = None
+
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix = a - b
+                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real UHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = stability_matrix
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex UHF wave function.")
+                    self.int_instability = True
+                    lowest_eigenvec = v[:, 0]
+                    return rotate_to_eigenvec(lowest_eigenvec)
+                else:
+                    print('The wave function is stable in the complex UHF space.')
+                    self.int_instability = None
+            else:
+                raise Exception('Only internal stability analysis is possible for complex GHF.')
 
     def get_hessian(self):
         """
@@ -741,12 +848,13 @@ class UHF:
         """
         return self.hessian
 
-    def diis(self, initial_guess=None, convergence=1e-12):
+    def diis(self, initial_guess=None, convergence=1e-12, complex_method=False):
         """
         When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
 
         :param initial_guess: Initial guess for the scf procedure. None specified: core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
@@ -754,9 +862,20 @@ class UHF:
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
         if initial_guess is None:
-            initial_guess = s_12.T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            if complex_method:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                initial_guess = initial_guess.astype(complex)
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a[0, :] += 0.1j
+                guess_density_a[:, 0] -= 0.1j
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b[0, :] += 0.1j
+                guess_density_b[:, 0] -= 0.1j
+            else:
+                initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
+                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+
         else:
             # Make the coefficients orthogonal in the correct basis.
             coeff_a = s_12 @ initial_guess[0]
@@ -766,9 +885,13 @@ class UHF:
             coeff_r_a = coeff_a[:, 0:self.n_a]
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
-            # Create the guess density matrices from the given coefficients
-            guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
-            guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+            if complex_method:
+                # Create the guess density matrices from the given coefficients
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+            else:
+                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
 
         def uhf_fock(density_matrix_1, density_matrix_2):
             """
@@ -789,7 +912,7 @@ class UHF:
             :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.T
+            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -811,9 +934,15 @@ class UHF:
             b[-1, -1] = 0
 
             # Fill the B matrix: ei * ej, with e the errors
-            for k in range(len(focks)):
-                for l in range(len(focks)):
-                    b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            if complex_method:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b = b.astype(complex)
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
+            else:
+                for k in range(len(focks)):
+                    for l in range(len(focks)):
+                        b[k, l] = np.einsum('kl,kl->', residuals[k], residuals[l])
 
             # Create the residual vector
             res_vec = np.zeros(dim)
@@ -823,7 +952,10 @@ class UHF:
             coeff = np.linalg.solve(b, res_vec)
 
             # Create a fock as a linear combination of previous focks
-            fock = np.zeros(focks[0].shape)
+            if complex_method:
+                fock = np.zeros(focks[0].shape).astype(complex)
+            else:
+                fock = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
                 fock += coeff[x] * focks[x]
             return fock
@@ -859,8 +991,8 @@ class UHF:
                 f_b = diis_fock(fock_list_b, error_list_b)
 
             # Orthogonalise the fock matrices
-            f_orth_a = s_12.T @ f_a @ s_12
-            f_orth_b = s_12.T @ f_b @ s_12
+            f_orth_a = s_12.conj().T @ f_a @ s_12
+            f_orth_b = s_12.conj().T @ f_b @ s_12
 
             # Calculate the new density matrices
             new_density_a = density_matrix(f_orth_a, self.n_a, s_12)
@@ -919,18 +1051,30 @@ class UHF:
 
         return scf_e, i, get_mo(), last_dens(), last_fock()
 
-    def get_scf_solution_diis(self, guess=None, convergence=1e-12):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged diis energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
         :param guess: The initial guess. If none is specified, core Hamiltonian.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
+        :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged diis energy.
         """
-        self.diis(guess, convergence=convergence)
+        self.diis(guess, convergence=convergence, complex_method=complex_method)
+        e = self.energy
         s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
-        print("Number of iterations: " + str(self.iterations))
-        print("Converged SCF energy in Hartree: " + str(self.energy) + " (UHF)")
-        print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
+        if complex_method:
+            if abs(np.imag(e)) > 1e-12:
+                print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
+            else:
+                print("Number of iterations: " + str(self.iterations))
+                print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex UHF, DIIS)")
+                print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                      ", Multiplicity = " + str(s_values[2]))
+        else:
+            print("Number of iterations: " + str(self.iterations))
+            print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real UHF, DIIS)")
+            print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) +
+                  ", Multiplicity = " + str(s_values[2]))
         return self.energy

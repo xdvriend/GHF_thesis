@@ -84,8 +84,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Real_GHF.html">Real generalised Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Complex_GHF.html">Complex generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
@@ -164,20 +163,23 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns RHF energy of h_2
 and the number of iterations needed to get this value.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;sto-3g&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="p">(</span><span class="n">h_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
-<span class="go">Number of iterations: 2</span>
+<span class="go">Number of iterations: 6</span>
 <span class="go">Converged SCF energy in Hartree: -1.0661086493179357 (RHF)</span>
 </pre></div>
 </div>
 <dl class="method">
 <dt id="ghf.RHF.RHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix</p>
@@ -240,11 +242,14 @@ and the number of iterations needed to get this value.</p>
 
 <dl class="method">
 <dt id="ghf.RHF.RHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the converged energy</p>
@@ -254,19 +259,22 @@ and the number of iterations needed to get this value.</p>
 
 <dl class="method">
 <dt id="ghf.RHF.RHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0&#39;</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution_diis</span><span class="p">()</span>
-<span class="go">Number of iterations: 9</span>
+<span class="go">Number of iterations: 5</span>
 <span class="go">Converged SCF energy in Hartree: -1.100153764878446 (RHF)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The converged scf energy, using DIIS.</p>
@@ -296,11 +304,14 @@ a normal scf, but the energy value will be the same. Example:</p>
 
 <dl class="method">
 <dt id="ghf.RHF.RHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.scf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.RHF.RHF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest RHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>convergence</strong> – Convergence criterion. If none is specified, 1e-12 is used.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence</strong> – Convergence criterion. If none is specified, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix</p>

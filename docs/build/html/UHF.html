@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Real generalised Hartree Fock, by means of SCF procedure" href="Real_GHF.html" />
+    <link rel="next" title="Generalised Hartree Fock, by means of SCF procedure" href="GHF.html" />
     <link rel="prev" title="Restricted Hartree Fock, by means of SCF procedure" href="RHF.html" /> 
 </head>
 
@@ -84,8 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Real_GHF.html">Real generalised Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Complex_GHF.html">Complex generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
@@ -155,7 +154,7 @@
   <span class="target" id="module-ghf.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Unrestricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#unrestricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
-Several options are available to make sure you get the lowest energy from your calculation, as well as some usefull
+Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.</p>
 <dl class="class">
 <dt id="ghf.UHF.UHF">
@@ -175,13 +174,14 @@ and the number of iterations needed to get this value.</p>
 </div>
 <dl class="method">
 <dt id="ghf.UHF.UHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>initial_guess</strong> – Initial guess for the scf procedure. None specified: core Hamiltonian.</p></li>
 <li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -278,7 +278,7 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -286,6 +286,7 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>guess</strong> – The initial guess for the scf procedure. If none is given: core Hamiltonian.</p></li>
 <li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -296,7 +297,7 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -304,6 +305,7 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>guess</strong> – The initial guess. If none is specified, core Hamiltonian.</p></li>
 <li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -348,13 +350,14 @@ hopefully a stable wave function.</p>
 
 <dl class="method">
 <dt id="ghf.UHF.UHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest UHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>initial_guess</strong> – A tuple of an alpha and beta guess matrix. If none, the core hamiltonian will be used.</p></li>
 <li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -399,7 +402,7 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Real_GHF.html" class="btn btn-neutral float-right" title="Real generalised Hartree Fock, by means of SCF procedure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="GHF.html" class="btn btn-neutral float-right" title="Generalised Hartree Fock, by means of SCF procedure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="RHF.html" class="btn btn-neutral float-left" title="Restricted Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

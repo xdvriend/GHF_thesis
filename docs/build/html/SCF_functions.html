@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Testing the RHF and UHF methods" href="tests.html" />
-    <link rel="prev" title="Complex generalised Hartree Fock, by means of SCF procedure" href="Complex_GHF.html" /> 
+    <link rel="prev" title="Generalised Hartree Fock, by means of SCF procedure" href="GHF.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,8 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Real_GHF.html">Real generalised Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Complex_GHF.html">Complex generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
@@ -166,6 +165,23 @@ And a transformation matrix X.</p></li>
 </dd></dl>
 
 <dl class="function">
+<dt id="ghf.SCF_functions.eri_ao_to_mo">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">eri_ao_to_mo</code><span class="sig-paren">(</span><em class="sig-param">eri</em>, <em class="sig-param">coeff</em>, <em class="sig-param">complexity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.eri_ao_to_mo" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eri_spinor</strong> – Electron repulsion interaction, in ao notation, tensor in spinor basis</p></li>
+<li><p><strong>coeff</strong> – coefficient matrix in spinor basis</p></li>
+<li><p><strong>complexity</strong> – specify whether you are working with real or complex tensors. Default is real.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Electron repulsion interaction, in mo notation, tensor in spinor basis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="ghf.SCF_functions.expand_matrix">
 <code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.expand_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -176,6 +192,15 @@ And a transformation matrix X.</p></li>
 <dd class="field-even"><p>a matrix double the size, where blocks of zero’s are added top right and bottom left.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ghf.SCF_functions.expand_tensor">
+<code class="sig-prename descclassname">ghf.SCF_functions.</code><code class="sig-name descname">expand_tensor</code><span class="sig-paren">(</span><em class="sig-param">tensor</em>, <em class="sig-param">complexity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.SCF_functions.expand_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand every matrix within the tensor, in the same way the expand matrix function works.
+:param tensor: The tensor, usually eri, that you wish to expand.
+:param complexity: Is your tensor complex or not? Default is false.
+:return: a tensor where each dimension is doubled.</p>
 </dd></dl>
 
 <dl class="function">
@@ -263,7 +288,7 @@ matrix.</p></li>
         <a href="tests.html" class="btn btn-neutral float-right" title="Testing the RHF and UHF methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Complex_GHF.html" class="btn btn-neutral float-left" title="Complex generalised Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="GHF.html" class="btn btn-neutral float-left" title="Generalised Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

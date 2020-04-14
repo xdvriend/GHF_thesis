@@ -8,8 +8,8 @@ from pyscf import *
 import numpy as np
 from numpy import linalg as la
 from scipy import diag
-from functools import reduce
 import psi4
+import math as m
 
 
 def get_integrals_pyscf(molecule):
@@ -60,7 +60,7 @@ def density_matrix(f_matrix, occ, trans):
     coefficients = trans.dot(f_eigenvectors)
     coefficients_r = coefficients[:, 0:occ]  # summation over occupied orbitals
     # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
-    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r, optimize=True)
+    density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj(), optimize=True)
     return density
 
 
@@ -107,7 +107,7 @@ def spin(occ_a, occ_b, coeff_a, coeff_b, overlap):
     occ_indx_b = np.arange(occ_b)  # indices of the occupied beta orbitals
     occ_a_orb = coeff_a[:, occ_indx_a]  # orbital coefficients associated with occupied alpha orbitals
     occ_b_orb = coeff_b[:, occ_indx_b]  # orbital coefficients associated with occupied beta orbitals
-    s = reduce(np.dot, (occ_a_orb.T, overlap, occ_b_orb))  # Basically (alpha orbitals).T * S * (beta orbitals)
+    s = occ_a_orb.conj().T @ overlap @ occ_b_orb  # Basically (alpha orbitals).T * S * (beta orbitals)
     ss_xy = (occ_a + occ_b) * 0.5 - np.einsum('ij,ij->', s.conj(), s)  # = S^2_x + S^2_y
     ss_z = (occ_b - occ_a)**2 * 0.25  # = S^2_z
     ss = (ss_xy + ss_z).real  # = S^2_total
@@ -124,13 +124,76 @@ def expand_matrix(matrix):
     # get the shape of the matrix you want to expand
     # create a zero-matrix with the same shape
     shape = np.shape(matrix)
-    zero = np.zeros(shape)
+    if isinstance(matrix.any(), complex):
+        zero = np.zeros(shape).astype(complex)
+    else:
+        zero = np.zeros(shape)
     # create the top part of the expanded matrix by putting the matrix and zero-matrix together
     # create the bottom part of the expanded matrix by putting the matrix and zero-matrix together
     top = np.hstack((matrix, zero))
     bottom = np.hstack((zero, matrix))
     # Add top and bottom part together.
     return np.vstack((top, bottom))
+
+
+def expand_tensor(tensor, complexity=False):
+    """
+    Expand every matrix within the tensor, in the same way the expand matrix function works.
+    :param tensor: The tensor, usually eri, that you wish to expand.
+    :param complexity: Is your tensor complex or not? Default is false.
+    :return: a tensor where each dimension is doubled.
+    """
+    dim = np.shape(tensor)[0]
+    if complexity:
+        tens_block = np.zeros((dim, dim, 2*dim, 2*dim)).astype(complex)
+        zero = np.zeros((dim, dim, 2*dim, 2*dim)).astype(complex)
+    else:
+        tens_block = np.zeros((dim, dim, 2 * dim, 2 * dim))
+        zero = np.zeros((dim, dim, 2 * dim, 2 * dim))
+    for l in range(dim):
+        for k in range(dim):
+            tens_block[l][k] = expand_matrix(tensor[l][k])
+    top = np.hstack((tens_block, zero))
+    bottom = np.hstack((zero, tens_block))
+    return np.vstack((top, bottom))
+
+
+def eri_ao_to_mo(eri, coeff, complexity=False):
+    """
+    Transform the two electron tensor to MO basis. Scales as N^5.
+    :param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
+    :param coeff: coefficient matrix in spinor basis
+    :param complexity: specify whether you are working with real or complex tensors. Default is real.
+    :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
+    """
+    dim = len(eri)
+    if complexity:
+        eri_mo = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_1 = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_2 = np.zeros((dim, dim, dim, dim)).astype(complex)
+        mo_3 = np.zeros((dim, dim, dim, dim)).astype(complex)
+    else:
+        eri_mo = np.zeros((dim, dim, dim, dim))
+        mo_1 = np.zeros((dim, dim, dim, dim))
+        mo_2 = np.zeros((dim, dim, dim, dim))
+        mo_3 = np.zeros((dim, dim, dim, dim))
+
+    for s in range(0, len(coeff)):
+        for sig in range(0, len(coeff)):
+            mo_1[:, :, :, s] += coeff[sig, s] * eri[:, :, :, sig]
+
+        for r in range(0, len(coeff)):
+            for lam in range(0, len(coeff)):
+                mo_2[:, :, r, s] += coeff[lam, r] * mo_1[:, :, lam, s]
+
+            for q in range(0, len(coeff)):
+                for nu in range(0, len(coeff)):
+                    mo_3[:, q, r, s] += coeff[nu, q] * mo_2[:, nu, r, s]
+
+                for p in range(0, len(coeff)):
+                    for mu in range(0, len(coeff)):
+                        eri_mo[p, q, r, s] += coeff[mu, p] * mo_3[mu, q, r, s]
+    return eri_mo
 
 
 def spin_blocked(block_1, block_2, block_3, block_4):
@@ -144,27 +207,25 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     return np.vstack((top, bottom))
 
 
-def ghf_spin(mo_coeff, overlap):
-    number_of_orbitals = mo_coeff.shape[0] // 2
-    mo_a = mo_coeff[:number_of_orbitals]
-    mo_b = mo_coeff[number_of_orbitals:]
+def ghf_spin(coeff, overlap, number_of_electrons):
+    number_of_orbitals = coeff.shape[0] // 2
+    overlap = overlap[:number_of_orbitals, :number_of_orbitals]
+    mo_occ = np.arange(number_of_electrons)
+    mo_a = coeff[:number_of_orbitals]
+    mo_b = coeff[number_of_orbitals:]
     saa = mo_a.conj().T @ overlap @ mo_a
     sbb = mo_b.conj().T @ overlap @ mo_b
     sab = mo_a.conj().T @ overlap @ mo_b
     sba = mo_b.conj().T @ overlap @ mo_a
     number_occ_a = saa.trace()
-    print(number_occ_a)
     number_occ_b = sbb.trace()
-    print(number_occ_b)
     ss_xy = (number_occ_a + number_occ_b) * .5
     ss_xy += sba.trace() * sab.trace() - np.einsum('ij,ji->', sba, sab)
-    print(ss_xy)
     ss_z = (number_occ_a + number_occ_b) * .25
     ss_z += (number_occ_a - number_occ_b) ** 2 * .25
     tmp = saa - sbb
     ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
-    print(ss_z)
-    s_z = 1
+    s_z = m.sqrt(ss_z.real)
     ss = (ss_xy + ss_z).real
     s = np.sqrt(ss + .25) - .5
     return ss, s_z, s * 2 + 1
