@@ -83,6 +83,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_s.html">Constrained unrestricted Hartree Fock by Scuseria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Testing the RHF and UHF methods</a></li>
@@ -150,76 +152,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-ghf.tests.test_auth"></span><div class="section" id="testing-the-rhf-and-uhf-methods">
+  <span class="target" id="module-hf.tests.test_auth"></span><div class="section" id="testing-the-rhf-and-uhf-methods">
 <h1>Testing the RHF and UHF methods<a class="headerlink" href="#testing-the-rhf-and-uhf-methods" title="Permalink to this headline">¶</a></h1>
 <p>Simple tests to check whether or not the functions return the correct value.</p>
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_diis_real_ghf">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_diis_real_ghf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_diis_real_ghf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_diis_real_ghf">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_diis_real_ghf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_diis_real_ghf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether diis gives the same energy in fewer iterations.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_diis_rhf">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_diis_rhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_diis_rhf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_diis_rhf">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_diis_rhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_diis_rhf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether diis gives the same energy in fewer iterations.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_diis_uhf">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_diis_uhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_diis_uhf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_diis_uhf">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_diis_uhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_diis_uhf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether diis gives the same energy in fewer iterations.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_extra_e">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_extra_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_extra_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_extra_e">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_extra_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_extra_e" title="Permalink to this definition">¶</a></dt>
 <dd><p>test_extra_e will test the UHF method, with the added option of first adding 2 electrons to the system and using
 those coefficients for the actual system, by checking whether or not it returns the expected result.
 The accuracy is 10^-6.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_one_e">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_one_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_one_e">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_one_e" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether or not psi4 and pyscf give the same core Hamiltonian integrals.
 :return:</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_overlap">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_overlap" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_overlap">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_overlap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_overlap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether or not psi4 and pyscf give the same overlap integrals.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_pyscf_vs_psi4">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_pyscf_vs_psi4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_pyscf_vs_psi4" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_pyscf_vs_psi4">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_pyscf_vs_psi4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_pyscf_vs_psi4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test a pyscf energy calculation vs a psi4 energy calculation.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_rhf">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_rhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_rhf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_rhf">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_rhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_rhf" title="Permalink to this definition">¶</a></dt>
 <dd><p>test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^-11.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_stability">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_stability" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_stability">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_stability" title="Permalink to this definition">¶</a></dt>
 <dd><p>test_stability will test the UHF method, with stability analysis, by checking whether or not it returns
 the expected result. The accuracy is 10^-6.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_two_e">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_two_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_two_e">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_two_e" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test whether or not psi4 and pyscf give the same two electron integrals.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ghf.tests.test_auth.test_uhf">
-<code class="sig-prename descclassname">ghf.tests.test_auth.</code><code class="sig-name descname">test_uhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.tests.test_auth.test_uhf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.tests.test_auth.test_uhf">
+<code class="sig-prename descclassname">hf.tests.test_auth.</code><code class="sig-name descname">test_uhf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.tests.test_auth.test_uhf" title="Permalink to this definition">¶</a></dt>
 <dd><p>test_UHF will test the regular UHF method, by checking whether or not it returns the expected result.
 The accuracy is 10^-6.</p>
 </dd></dl>

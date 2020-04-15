@@ -1,2 +1,2 @@
-.. automodule:: ghf.RHF
+.. automodule:: hf.RHF
     :members:

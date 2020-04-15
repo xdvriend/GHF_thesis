@@ -1,8 +1,8 @@
 """
-Constrained unrestricted Hartree Fock
-=====================================
+Constrained unrestricted Hartree Fock by Scuseria
+==================================================
 This class is used to calculate the ROHF energy for a given molecule and the number of electrons of that molecule,
-using a constrained version of unrestricted Hartree Fock.
+using a constrained version of unrestricted Hartree Fock, according to Scuseria..
 Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
@@ -15,8 +15,8 @@ import collections as c
 
 class CUHF:
     """
-    Calculate UHF energy.
-    ---------------------
+    Calculate cUHF energy.
+    -----------------------
     Input is a molecule and the number of electrons.
 
     Molecules are made in pySCF/psi4 and calculations are performed as follows, eg.:

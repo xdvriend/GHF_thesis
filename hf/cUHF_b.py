@@ -1,8 +1,9 @@
 """
-Constrained unrestricted Hartree Fock
-=====================================
+Constrained unrestricted Hartree Fock by P. Bultinck
+=====================================================
 This class is used to calculate the ROHF energy for a given molecule and the number of electrons of that molecule,
-using a constrained version of unrestricted Hartree Fock.
+using a constrained version of unrestricted Hartree Fock. This constraint is an idea from professor P. Bultinck, where
+the alpha and beta MO's are made equal for the closed shell part of the system.
 Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """

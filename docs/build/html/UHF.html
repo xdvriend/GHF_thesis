@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Generalised Hartree Fock, by means of SCF procedure" href="GHF.html" />
+    <link rel="next" title="Constrained unrestricted Hartree Fock by Scuseria" href="cUHF_s.html" />
     <link rel="prev" title="Restricted Hartree Fock, by means of SCF procedure" href="RHF.html" /> 
 </head>
 
@@ -84,6 +84,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_s.html">Constrained unrestricted Hartree Fock by Scuseria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
@@ -151,14 +153,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-ghf.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
+  <span class="target" id="module-hf.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Unrestricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#unrestricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
 Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.</p>
 <dl class="class">
-<dt id="ghf.UHF.UHF">
-<em class="property">class </em><code class="sig-prename descclassname">ghf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF">
+<em class="property">class </em><code class="sig-prename descclassname">hf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns UHF energy of h_3
@@ -173,8 +175,8 @@ and the number of iterations needed to get this value.</p>
 </pre></div>
 </div>
 <dl class="method">
-<dt id="ghf.UHF.UHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.diis">
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -191,8 +193,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.extra_electron_guess">
-<code class="sig-name descname">extra_electron_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.extra_electron_guess" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.extra_electron_guess">
+<code class="sig-name descname">extra_electron_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.extra_electron_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method adds two electrons to the system in order to get coefficients that can be used as a better guess
 for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt; = 0 state.</p>
 <p>!!!IMPORTANT!!! Only supported with pyscf.</p>
@@ -214,15 +216,15 @@ for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_hessian">
-<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_hessian" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_hessian">
+<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_hessian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Hessian matrix after performing a stability analysis.
 :return: The hessian matrix</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_last_dens">
-<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_last_dens">
+<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the last density matrix of the converged solution.
 Alpha density in the first matrix, beta density in the second.</p>
 <dl class="field-list simple">
@@ -233,8 +235,8 @@ Alpha density in the first matrix, beta density in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_last_fock">
-<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_last_fock">
+<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the last fock matrix of the converged solution.
 Alpha Fock matrix first, beta Fock matrix second.</p>
 <dl class="field-list simple">
@@ -245,8 +247,8 @@ Alpha Fock matrix first, beta Fock matrix second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_mo_coeff">
-<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_mo_coeff">
+<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the mo coefficients of the converged solution.
 Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 <dl class="field-list simple">
@@ -257,8 +259,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_one_e">
-<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_one_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_one_e">
+<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_one_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The one electron integral matrix: T + V</p>
@@ -267,8 +269,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_ovlp">
-<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_ovlp" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_ovlp">
+<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_ovlp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The overlap matrix</p>
@@ -277,8 +279,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_scf_solution">
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -296,8 +298,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_scf_solution_diis">
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -315,8 +317,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.get_two_e">
-<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.get_two_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.get_two_e">
+<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_two_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The electron repulsion interaction tensor</p>
@@ -325,22 +327,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.internal_stability_analysis">
-<code class="sig-name descname">internal_stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">step_size=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.internal_stability_analysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
-function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
-in the direction of the lowest eigenvector of the (A’ + B’) part of the Hessian, resulting in improved MO’s and
-hopefully a stable wave function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>New and improved MO’s</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ghf.UHF.UHF.nuc_rep">
-<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.nuc_rep">
+<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The nuclear repulsion value</p>
@@ -349,8 +337,8 @@ hopefully a stable wave function.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.scf">
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest UHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -367,8 +355,8 @@ hopefully a stable wave function.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ghf.UHF.UHF.stability">
-<code class="sig-name descname">stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ghf.UHF.UHF.stability" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.UHF.UHF.stability">
+<code class="sig-name descname">stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.stability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
 value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
 of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.</p>
@@ -390,6 +378,16 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="hf.UHF.UHF.stability_analysis">
+<code class="sig-name descname">stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">step_size=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.stability_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:param step_size: Step size for orbital rotation. standard is 1e-5.
+:return: In case of internal stability analysis, it returns a new set of coefficients.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -402,7 +400,7 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="GHF.html" class="btn btn-neutral float-right" title="Generalised Hartree Fock, by means of SCF procedure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cUHF_s.html" class="btn btn-neutral float-right" title="Constrained unrestricted Hartree Fock by Scuseria" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="RHF.html" class="btn btn-neutral float-left" title="Restricted Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

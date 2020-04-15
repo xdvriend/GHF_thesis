@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Feb 22, 2020}
+\date{Apr 15, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -87,17 +87,17 @@
 \pagestyle{normal}
 \phantomsection\label{\detokenize{index::doc}}
 
-\phantomsection\label{\detokenize{RHF:module-ghf.RHF}}\index{ghf.RHF (module)@\spxentry{ghf.RHF}\spxextra{module}}
+\phantomsection\label{\detokenize{RHF:module-hf.RHF}}\index{hf.RHF (module)@\spxentry{hf.RHF}\spxextra{module}}
 
 \chapter{Restricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{RHF:restricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{RHF::doc}}
 This class is used to calculate the RHF energy of a given molecule and the number of electrons.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-\index{RHF (class in ghf.RHF)@\spxentry{RHF}\spxextra{class in ghf.RHF}}
+\index{RHF (class in hf.RHF)@\spxentry{RHF}\spxextra{class in hf.RHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.RHF.}}\sphinxbfcode{\sphinxupquote{RHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -111,10 +111,10 @@ and the number of iterations needed to get this value.
 \PYG{g+go}{Number of iterations: 6}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.0661086493179357 (RHF)}
 \end{sphinxVerbatim}
-\index{diis() (ghf.RHF.RHF method)@\spxentry{diis()}\spxextra{ghf.RHF.RHF method}}
+\index{diis() (hf.RHF.RHF method)@\spxentry{diis()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -133,10 +133,10 @@ scf energy, number of iterations, mo coefficients, last density matrix, last foc
 
 \end{fulllineitems}
 
-\index{get\_last\_dens() (ghf.RHF.RHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_last\_dens() (hf.RHF.RHF method)@\spxentry{get\_last\_dens()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
 Returns the last density matrix of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -146,10 +146,10 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (ghf.RHF.RHF method)@\spxentry{get\_last\_fock()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_last\_fock() (hf.RHF.RHF method)@\spxentry{get\_last\_fock()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
 Returns the last fock matrix of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -159,10 +159,10 @@ The last Fock matrix.
 
 \end{fulllineitems}
 
-\index{get\_mo\_coeff() (ghf.RHF.RHF method)@\spxentry{get\_mo\_coeff()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_mo\_coeff() (hf.RHF.RHF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
 Returns mo coefficients of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -172,10 +172,10 @@ The mo coefficients
 
 \end{fulllineitems}
 
-\index{get\_one\_e() (ghf.RHF.RHF method)@\spxentry{get\_one\_e()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_one\_e() (hf.RHF.RHF method)@\spxentry{get\_one\_e()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The one electron integral matrix: T + V
 
@@ -183,10 +183,10 @@ The one electron integral matrix: T + V
 
 \end{fulllineitems}
 
-\index{get\_ovlp() (ghf.RHF.RHF method)@\spxentry{get\_ovlp()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_ovlp() (hf.RHF.RHF method)@\spxentry{get\_ovlp()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The overlap matrix
 
@@ -194,10 +194,10 @@ The overlap matrix
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_scf\_solution() (hf.RHF.RHF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -216,10 +216,10 @@ the converged energy
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution\_diis() (ghf.RHF.RHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_scf\_solution\_diis() (hf.RHF.RHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:
 
@@ -247,10 +247,10 @@ The converged scf energy, using DIIS.
 
 \end{fulllineitems}
 
-\index{get\_two\_e() (ghf.RHF.RHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.RHF.RHF method}}
+\index{get\_two\_e() (hf.RHF.RHF method)@\spxentry{get\_two\_e()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The electron repulsion interaction tensor
 
@@ -258,10 +258,10 @@ The electron repulsion interaction tensor
 
 \end{fulllineitems}
 
-\index{nuc\_rep() (ghf.RHF.RHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.RHF.RHF method}}
+\index{nuc\_rep() (hf.RHF.RHF method)@\spxentry{nuc\_rep()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The nuclear repulsion value
 
@@ -269,10 +269,10 @@ The nuclear repulsion value
 
 \end{fulllineitems}
 
-\index{scf() (ghf.RHF.RHF method)@\spxentry{scf()}\spxextra{ghf.RHF.RHF method}}
+\index{scf() (hf.RHF.RHF method)@\spxentry{scf()}\spxextra{hf.RHF.RHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:ghf.RHF.RHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.RHF.RHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Performs a self consistent field calculation to find the lowest RHF energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -294,17 +294,17 @@ number of iterations, scf energy, mo coefficients, last density matrix, last foc
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{UHF:module-ghf.UHF}}\index{ghf.UHF (module)@\spxentry{ghf.UHF}\spxextra{module}}
+\phantomsection\label{\detokenize{UHF:module-hf.UHF}}\index{hf.UHF (module)@\spxentry{hf.UHF}\spxextra{module}}
 
 \chapter{Unrestricted Hartree Fock, by means of SCF procedure}
 \label{\detokenize{UHF:unrestricted-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{UHF::doc}}
 This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
 Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.
-\index{UHF (class in ghf.UHF)@\spxentry{UHF}\spxextra{class in ghf.UHF}}
+\index{UHF (class in hf.UHF)@\spxentry{UHF}\spxextra{class in hf.UHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.UHF.}}\sphinxbfcode{\sphinxupquote{UHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -321,10 +321,10 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.506274320261134 (UHF)}
 \PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 0.7735672504295973, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.5, Multiplicity = 2.023430009098014}
 \end{sphinxVerbatim}
-\index{diis() (ghf.UHF.UHF method)@\spxentry{diis()}\spxextra{ghf.UHF.UHF method}}
+\index{diis() (hf.UHF.UHF method)@\spxentry{diis()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -346,10 +346,10 @@ scf energy, number of iterations, mo coefficients, last density matrix, last foc
 
 \end{fulllineitems}
 
-\index{extra\_electron\_guess() (ghf.UHF.UHF method)@\spxentry{extra\_electron\_guess()}\spxextra{ghf.UHF.UHF method}}
+\index{extra\_electron\_guess() (hf.UHF.UHF method)@\spxentry{extra\_electron\_guess()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.extra_electron_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{extra\_electron\_guess}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.extra_electron_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{extra\_electron\_guess}}}{}{}
 This method adds two electrons to the system in order to get coefficients that can be used as a better guess
 for the scf procedure. This essentially forces the system into it’s \textless{}S\_z\textgreater{} = 0 state.
 
@@ -374,19 +374,19 @@ A new guess matrix to use for the scf procedure.
 
 \end{fulllineitems}
 
-\index{get\_hessian() (ghf.UHF.UHF method)@\spxentry{get\_hessian()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_hessian() (hf.UHF.UHF method)@\spxentry{get\_hessian()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
 Get the Hessian matrix after performing a stability analysis.
 :return: The hessian matrix
 
 \end{fulllineitems}
 
-\index{get\_last\_dens() (ghf.UHF.UHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_last\_dens() (hf.UHF.UHF method)@\spxentry{get\_last\_dens()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
 Gets the last density matrix of the converged solution.
 Alpha density in the first matrix, beta density in the second.
 \begin{quote}\begin{description}
@@ -397,10 +397,10 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (ghf.UHF.UHF method)@\spxentry{get\_last\_fock()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_last\_fock() (hf.UHF.UHF method)@\spxentry{get\_last\_fock()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
 Gets the last fock matrix of the converged solution.
 Alpha Fock matrix first, beta Fock matrix second.
 \begin{quote}\begin{description}
@@ -411,10 +411,10 @@ The last Fock matrix.
 
 \end{fulllineitems}
 
-\index{get\_mo\_coeff() (ghf.UHF.UHF method)@\spxentry{get\_mo\_coeff()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_mo\_coeff() (hf.UHF.UHF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
 Gets the mo coefficients of the converged solution.
 Alpha coefficients in the first matrix, beta coefficients in the second.
 \begin{quote}\begin{description}
@@ -425,10 +425,10 @@ The mo coefficients
 
 \end{fulllineitems}
 
-\index{get\_one\_e() (ghf.UHF.UHF method)@\spxentry{get\_one\_e()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_one\_e() (hf.UHF.UHF method)@\spxentry{get\_one\_e()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The one electron integral matrix: T + V
 
@@ -436,10 +436,10 @@ The one electron integral matrix: T + V
 
 \end{fulllineitems}
 
-\index{get\_ovlp() (ghf.UHF.UHF method)@\spxentry{get\_ovlp()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_ovlp() (hf.UHF.UHF method)@\spxentry{get\_ovlp()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The overlap matrix
 
@@ -447,10 +447,10 @@ The overlap matrix
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_scf\_solution() (hf.UHF.UHF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
 \begin{quote}\begin{description}
@@ -473,10 +473,10 @@ The converged scf energy.
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution\_diis() (ghf.UHF.UHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_scf\_solution\_diis() (hf.UHF.UHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
 \begin{quote}\begin{description}
@@ -499,10 +499,10 @@ The converged diis energy.
 
 \end{fulllineitems}
 
-\index{get\_two\_e() (ghf.UHF.UHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.UHF.UHF method}}
+\index{get\_two\_e() (hf.UHF.UHF method)@\spxentry{get\_two\_e()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The electron repulsion interaction tensor
 
@@ -510,26 +510,10 @@ The electron repulsion interaction tensor
 
 \end{fulllineitems}
 
-\index{internal\_stability\_analysis() (ghf.UHF.UHF method)@\spxentry{internal\_stability\_analysis()}\spxextra{ghf.UHF.UHF method}}
+\index{nuc\_rep() (hf.UHF.UHF method)@\spxentry{nuc\_rep()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.internal_stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{internal\_stability\_analysis}}}{\emph{step\_size=1e-05}}{}
-Perform an internal stability analysis on the UHF wave function. This will determine whether or not the wave
-function is stable within the real UHF method. If there is an instability, the MO coefficients will be rotated
-in the direction of the lowest eigenvector of the (A’ + B’) part of the Hessian, resulting in improved MO’s and
-hopefully a stable wave function.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-New and improved MO’s
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{nuc\_rep() (ghf.UHF.UHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.UHF.UHF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The nuclear repulsion value
 
@@ -537,10 +521,10 @@ The nuclear repulsion value
 
 \end{fulllineitems}
 
-\index{scf() (ghf.UHF.UHF method)@\spxentry{scf()}\spxextra{ghf.UHF.UHF method}}
+\index{scf() (hf.UHF.UHF method)@\spxentry{scf()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Performs a self consistent field calculation to find the lowest UHF energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -562,10 +546,10 @@ The scf energy, number of iterations, the mo coefficients, the last density and 
 
 \end{fulllineitems}
 
-\index{stability() (ghf.UHF.UHF method)@\spxentry{stability()}\spxextra{ghf.UHF.UHF method}}
+\index{stability() (hf.UHF.UHF method)@\spxentry{stability()}\spxextra{hf.UHF.UHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:ghf.UHF.UHF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
 Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
 value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
 of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
@@ -590,10 +574,409 @@ New and improved MO’s.
 
 \end{fulllineitems}
 
+\index{stability\_analysis() (hf.UHF.UHF method)@\spxentry{stability\_analysis()}\spxextra{hf.UHF.UHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.UHF.UHF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=1e-05}}{}
+Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:param step\_size: Step size for orbital rotation. standard is 1e-5.
+:return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{GHF:module-ghf.GHF}}\index{ghf.GHF (module)@\spxentry{ghf.GHF}\spxextra{module}}
+
+\end{fulllineitems}
+
+\phantomsection\label{\detokenize{cUHF_s:module-hf.cUHF_s}}\index{hf.cUHF\_s (module)@\spxentry{hf.cUHF\_s}\spxextra{module}}
+
+\chapter{Constrained unrestricted Hartree Fock by Scuseria}
+\label{\detokenize{cUHF_s:constrained-unrestricted-hartree-fock-by-scuseria}}\label{\detokenize{cUHF_s::doc}}
+This class is used to calculate the ROHF energy for a given molecule and the number of electrons of that molecule,
+using a constrained version of unrestricted Hartree Fock, according to Scuseria..
+Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
+functions to get intermediate values such as MO coefficients, density and fock matrices.
+\index{CUHF (class in hf.cUHF\_s)@\spxentry{CUHF}\spxextra{class in hf.cUHF\_s}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.cUHF\_s.}}\sphinxbfcode{\sphinxupquote{CUHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
+Input is a molecule and the number of electrons.
+
+Molecules are made in pySCF/psi4 and calculations are performed as follows, eg.:
+The following snippet prints and returns UHF energy of h\_3
+and the number of iterations needed to get this value.
+
+For a normal scf calculation your input looks like the following example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{CUHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\end{sphinxVerbatim}
+\index{get\_dens() (hf.cUHF\_s.CUHF method)@\spxentry{get\_dens()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_dens}}}{\emph{i=-1}}{}
+Gets the last density matrix of the converged solution.
+Alpha density in the first matrix, beta density in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last density matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock() (hf.cUHF\_s.CUHF method)@\spxentry{get\_fock()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock}}}{\emph{i=-1}}{}
+Gets the last fock matrix of the converged solution.
+Alpha Fock matrix first, beta Fock matrix second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_coeff() (hf.cUHF\_s.CUHF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{\emph{i=-1}}{}
+Gets the mo coefficients of the converged solution.
+Alpha coefficients in the first matrix, beta coefficients in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The mo coefficients
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_one\_e() (hf.cUHF\_s.CUHF method)@\spxentry{get\_one\_e()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The one electron integral matrix: T + V
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_ovlp() (hf.cUHF\_s.CUHF method)@\spxentry{get\_ovlp()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The overlap matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution() (hf.cUHF\_s.CUHF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}, \emph{diis=True}}{}
+Prints the number of iterations and the converged scf energy.
+Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{diis}} \textendash{} Accelerates the convergence, default is true.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_two\_e() (hf.cUHF\_s.CUHF method)@\spxentry{get\_two\_e()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The electron repulsion interaction tensor
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{nuc\_rep() (hf.cUHF\_s.CUHF method)@\spxentry{nuc\_rep()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The nuclear repulsion value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{scf() (hf.cUHF\_s.CUHF method)@\spxentry{scf()}\spxextra{hf.cUHF\_s.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_s:hf.cUHF_s.CUHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}, \emph{diis=True}}{}
+Performs a self consistent field calculation to find the lowest UHF energy.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{diis}} \textendash{} Accelerates the convergence, default is true.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\phantomsection\label{\detokenize{cUHF_b:module-hf.cUHF_b}}\index{hf.cUHF\_b (module)@\spxentry{hf.cUHF\_b}\spxextra{module}}
+
+\chapter{Constrained unrestricted Hartree Fock by P. Bultinck}
+\label{\detokenize{cUHF_b:constrained-unrestricted-hartree-fock-by-p-bultinck}}\label{\detokenize{cUHF_b::doc}}
+This class is used to calculate the ROHF energy for a given molecule and the number of electrons of that molecule,
+using a constrained version of unrestricted Hartree Fock. This constraint is an idea from professor P. Bultinck, where
+the alpha and beta MO’s are made equal for the closed shell part of the system.
+Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
+functions to get intermediate values such as MO coefficients, density and fock matrices.
+\index{CUHF (class in hf.cUHF\_b)@\spxentry{CUHF}\spxextra{class in hf.cUHF\_b}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.cUHF\_b.}}\sphinxbfcode{\sphinxupquote{CUHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
+Input is a molecule and the number of electrons.
+
+Molecules are made in pySCF/psi4 and calculations are performed as follows, eg.:
+The following snippet prints and returns UHF energy of h\_3
+and the number of iterations needed to get this value.
+
+For a normal scf calculation your input looks like the following example:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{CUHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
+\end{sphinxVerbatim}
+\index{diis() (hf.cUHF\_b.CUHF method)@\spxentry{diis()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}}{}
+When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{initial\_guess}} \textendash{} Initial guess for the scf procedure. None specified: core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_last\_dens() (hf.cUHF\_b.CUHF method)@\spxentry{get\_last\_dens()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+Gets the last density matrix of the converged solution.
+Alpha density in the first matrix, beta density in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last density matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_last\_fock() (hf.cUHF\_b.CUHF method)@\spxentry{get\_last\_fock()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+Gets the last fock matrix of the converged solution.
+Alpha Fock matrix first, beta Fock matrix second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_coeff() (hf.cUHF\_b.CUHF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+Gets the mo coefficients of the converged solution.
+Alpha coefficients in the first matrix, beta coefficients in the second.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The mo coefficients
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_one\_e() (hf.cUHF\_b.CUHF method)@\spxentry{get\_one\_e()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The one electron integral matrix: T + V
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_ovlp() (hf.cUHF\_b.CUHF method)@\spxentry{get\_ovlp()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The overlap matrix
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution() (hf.cUHF\_b.CUHF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
+Prints the number of iterations and the converged scf energy.
+Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial scf guess
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converged scf energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_scf\_solution\_diis() (hf.cUHF\_b.CUHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}}{}
+Prints the number of iterations and the converged diis energy.
+Also prints the expectation value of S\_z, S\textasciicircum{}2 and the multiplicity.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} The initial guess. If none is specified, core Hamiltonian.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converged diis energy.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_two\_e() (hf.cUHF\_b.CUHF method)@\spxentry{get\_two\_e()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The electron repulsion interaction tensor
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{nuc\_rep() (hf.cUHF\_b.CUHF method)@\spxentry{nuc\_rep()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The nuclear repulsion value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{random\_guess() (hf.cUHF\_b.CUHF method)@\spxentry{random\_guess()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.random_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{random\_guess}}}{}{}
+A function that creates a matrix with random values that can be used as an initial guess
+for the SCF calculations.
+
+To use this guess:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{CUHF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
+\end{sphinxVerbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+A random hermitian matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{scf() (hf.cUHF\_b.CUHF method)@\spxentry{scf()}\spxextra{hf.cUHF\_b.CUHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{cUHF_b:hf.cUHF_b.CUHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{initial\_guess=None}, \emph{convergence=1e-12}}{}
+Performs a self consistent field calculation to find the lowest UHF energy.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{initial\_guess}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\phantomsection\label{\detokenize{GHF:module-hf.GHF}}\index{hf.GHF (module)@\spxentry{hf.GHF}\spxextra{module}}
 
 \chapter{Generalised Hartree Fock, by means of SCF procedure}
 \label{\detokenize{GHF:generalised-hartree-fock-by-means-of-scf-procedure}}\label{\detokenize{GHF::doc}}
@@ -601,10 +984,10 @@ This class creates a generalised Hartree-Fock object which can be used for scf c
 are provided as well as the option to perform a stability analysis.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
-\index{GHF (class in ghf.GHF)@\spxentry{GHF}\spxextra{class in ghf.GHF}}
+\index{GHF (class in hf.GHF)@\spxentry{GHF}\spxextra{class in hf.GHF}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{ghf.GHF.}}\sphinxbfcode{\sphinxupquote{GHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.GHF.}}\sphinxbfcode{\sphinxupquote{GHF}}}{\emph{molecule}, \emph{number\_of\_electrons}, \emph{int\_method='pyscf'}}{}
 Input is a molecule and the number of electrons.
 
 Molecules are made in pySCF and calculations are performed as follows, eg.:
@@ -620,10 +1003,10 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+go}{Number of iterations: 81}
 \PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202607725 (Real GHF)}
 \end{sphinxVerbatim}
-\index{diis() (ghf.GHF.GHF method)@\spxentry{diis()}\spxextra{ghf.GHF.GHF method}}
+\index{diis() (hf.GHF.GHF method)@\spxentry{diis()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
 find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
 done as well.
@@ -647,10 +1030,19 @@ scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matri
 
 \end{fulllineitems}
 
-\index{get\_last\_dens() (ghf.GHF.GHF method)@\spxentry{get\_last\_dens()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_hessian() (hf.GHF.GHF method)@\spxentry{get\_hessian()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
+After stability analysis is performed, the hessian is stored and can be used for further studying.
+:return: The Hessian matrix
+
+\end{fulllineitems}
+
+\index{get\_last\_dens() (hf.GHF.GHF method)@\spxentry{get\_last\_dens()}\spxextra{hf.GHF.GHF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
 Gets the last density matrix of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -660,10 +1052,10 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (ghf.GHF.GHF method)@\spxentry{get\_last\_fock()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_last\_fock() (hf.GHF.GHF method)@\spxentry{get\_last\_fock()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
 Gets the last fock matrix of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -673,10 +1065,10 @@ The last Fock matrix.
 
 \end{fulllineitems}
 
-\index{get\_mo\_coeff() (ghf.GHF.GHF method)@\spxentry{get\_mo\_coeff()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_mo\_coeff() (hf.GHF.GHF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
 Gets the mo coefficients of the converged solution.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -686,10 +1078,10 @@ The mo coefficients
 
 \end{fulllineitems}
 
-\index{get\_one\_e() (ghf.GHF.GHF method)@\spxentry{get\_one\_e()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_one\_e() (hf.GHF.GHF method)@\spxentry{get\_one\_e()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_one_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_one\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The one electron integral matrix: T + V
 
@@ -697,10 +1089,10 @@ The one electron integral matrix: T + V
 
 \end{fulllineitems}
 
-\index{get\_ovlp() (ghf.GHF.GHF method)@\spxentry{get\_ovlp()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_ovlp() (hf.GHF.GHF method)@\spxentry{get\_ovlp()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_ovlp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_ovlp}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The overlap matrix
 
@@ -708,10 +1100,10 @@ The overlap matrix
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution() (ghf.GHF.GHF method)@\spxentry{get\_scf\_solution()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_scf\_solution() (hf.GHF.GHF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -733,10 +1125,10 @@ The converged scf energy.
 
 \end{fulllineitems}
 
-\index{get\_scf\_solution\_diis() (ghf.GHF.GHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_scf\_solution\_diis() (hf.GHF.GHF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
 just like with a normal scf calculation.
 
@@ -772,10 +1164,10 @@ The converged scf energy.
 
 \end{fulllineitems}
 
-\index{get\_two\_e() (ghf.GHF.GHF method)@\spxentry{get\_two\_e()}\spxextra{ghf.GHF.GHF method}}
+\index{get\_two\_e() (hf.GHF.GHF method)@\spxentry{get\_two\_e()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.get_two_e}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_two\_e}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The electron repulsion interaction tensor
 
@@ -783,10 +1175,10 @@ The electron repulsion interaction tensor
 
 \end{fulllineitems}
 
-\index{nuc\_rep() (ghf.GHF.GHF method)@\spxentry{nuc\_rep()}\spxextra{ghf.GHF.GHF method}}
+\index{nuc\_rep() (hf.GHF.GHF method)@\spxentry{nuc\_rep()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.nuc_rep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nuc\_rep}}}{}{}~\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The nuclear repulsion value
 
@@ -794,10 +1186,10 @@ The nuclear repulsion value
 
 \end{fulllineitems}
 
-\index{random\_guess() (ghf.GHF.GHF method)@\spxentry{random\_guess()}\spxextra{ghf.GHF.GHF method}}
+\index{random\_guess() (hf.GHF.GHF method)@\spxentry{random\_guess()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.random_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{random\_guess}}}{}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.random_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{random\_guess}}}{}{}
 A function that creates a matrix with random values that can be used as an initial guess
 for the SCF calculations.
 
@@ -817,10 +1209,10 @@ A random hermitian matrix.
 
 \end{fulllineitems}
 
-\index{scf() (ghf.GHF.GHF method)@\spxentry{scf()}\spxextra{ghf.GHF.GHF method}}
+\index{scf() (hf.GHF.GHF method)@\spxentry{scf()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
 in the real class, all values throughout are real. For complex, see the “complex\_GHF” class.
 \begin{quote}\begin{description}
@@ -843,10 +1235,10 @@ scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matri
 
 \end{fulllineitems}
 
-\index{stability\_analysis() (ghf.GHF.GHF method)@\spxentry{stability\_analysis()}\spxextra{ghf.GHF.GHF method}}
+\index{stability\_analysis() (hf.GHF.GHF method)@\spxentry{stability\_analysis()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=1e-05}}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=0.0001}}{}
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
@@ -855,10 +1247,10 @@ be internal or external.
 
 \end{fulllineitems}
 
-\index{unitary\_rotation\_guess() (ghf.GHF.GHF method)@\spxentry{unitary\_rotation\_guess()}\spxextra{ghf.GHF.GHF method}}
+\index{unitary\_rotation\_guess() (hf.GHF.GHF method)@\spxentry{unitary\_rotation\_guess()}\spxextra{hf.GHF.GHF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:ghf.GHF.GHF.unitary_rotation_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{unitary\_rotation\_guess}}}{}{}
+\phantomsection\label{\detokenize{GHF:hf.GHF.GHF.unitary_rotation_guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{unitary\_rotation\_guess}}}{\emph{init=None}}{}
 A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
 matrix.
 
@@ -881,15 +1273,15 @@ A rotated guess matrix.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{SCF_functions:module-ghf.SCF_functions}}\index{ghf.SCF\_functions (module)@\spxentry{ghf.SCF\_functions}\spxextra{module}}
+\phantomsection\label{\detokenize{SCF_functions:module-hf.SCF_functions}}\index{hf.SCF\_functions (module)@\spxentry{hf.SCF\_functions}\spxextra{module}}
 
 \chapter{Useful functions for SCF procedure}
 \label{\detokenize{SCF_functions:useful-functions-for-scf-procedure}}\label{\detokenize{SCF_functions::doc}}
 A number of functions used throughout the UHF and RHF calculations are summarised here.
-\index{density\_matrix() (in module ghf.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module ghf.SCF\_functions}}
+\index{density\_matrix() (in module hf.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.density_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{density\_matrix}}}{\emph{f\_matrix}, \emph{occ}, \emph{trans}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.density_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{density\_matrix}}}{\emph{f\_matrix}, \emph{occ}, \emph{trans}}{}~\begin{itemize}
 \item {} 
 density() creates a density matrix from a fock matrix and the number of occupied orbitals.
 
@@ -901,33 +1293,22 @@ And a transformation matrix X.
 
 \end{fulllineitems}
 
-\index{eri\_ao\_to\_mo() (in module ghf.SCF\_functions)@\spxentry{eri\_ao\_to\_mo()}\spxextra{in module ghf.SCF\_functions}}
+\index{eri\_ao\_to\_mo() (in module hf.SCF\_functions)@\spxentry{eri\_ao\_to\_mo()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.eri_ao_to_mo}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{eri\_ao\_to\_mo}}}{\emph{eri}, \emph{coeff}, \emph{complexity=False}}{}~\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{eri\_spinor}} \textendash{} Electron repulsion interaction, in ao notation, tensor in spinor basis
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{coeff}} \textendash{} coefficient matrix in spinor basis
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{complexity}} \textendash{} specify whether you are working with real or complex tensors. Default is real.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-Electron repulsion interaction, in mo notation, tensor in spinor basis
-
-\end{description}\end{quote}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.eri_ao_to_mo}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{eri\_ao\_to\_mo}}}{\emph{eri}, \emph{coeff}, \emph{complexity=False}}{}
+Transform the two electron tensor to MO basis. Scales as N\textasciicircum{}5.
+:param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
+:param coeff: coefficient matrix in spinor basis
+:param complexity: specify whether you are working with real or complex tensors. Default is real.
+:return: Electron repulsion interaction, in mo notation, tensor in spinor basis
 
 \end{fulllineitems}
 
-\index{expand\_matrix() (in module ghf.SCF\_functions)@\spxentry{expand\_matrix()}\spxextra{in module ghf.SCF\_functions}}
+\index{expand\_matrix() (in module hf.SCF\_functions)@\spxentry{expand\_matrix()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.expand_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{expand\_matrix}}}{\emph{matrix}}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.expand_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{expand\_matrix}}}{\emph{matrix}}{}~\begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
 \sphinxstyleliteralstrong{\sphinxupquote{matrix}} \textendash{} 
 
@@ -938,10 +1319,10 @@ a matrix double the size, where blocks of zero’s are added top right and botto
 
 \end{fulllineitems}
 
-\index{expand\_tensor() (in module ghf.SCF\_functions)@\spxentry{expand\_tensor()}\spxextra{in module ghf.SCF\_functions}}
+\index{expand\_tensor() (in module hf.SCF\_functions)@\spxentry{expand\_tensor()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.expand_tensor}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{expand\_tensor}}}{\emph{tensor}, \emph{complexity=False}}{}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.expand_tensor}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{expand\_tensor}}}{\emph{tensor}, \emph{complexity=False}}{}
 Expand every matrix within the tensor, in the same way the expand matrix function works.
 :param tensor: The tensor, usually eri, that you wish to expand.
 :param complexity: Is your tensor complex or not? Default is false.
@@ -949,28 +1330,28 @@ Expand every matrix within the tensor, in the same way the expand matrix functio
 
 \end{fulllineitems}
 
-\index{get\_integrals\_psi4() (in module ghf.SCF\_functions)@\spxentry{get\_integrals\_psi4()}\spxextra{in module ghf.SCF\_functions}}
+\index{get\_integrals\_psi4() (in module hf.SCF\_functions)@\spxentry{get\_integrals\_psi4()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_psi4}}}{\emph{mol}}{}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.get_integrals_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_psi4}}}{\emph{mol}}{}
 A function to calculate your integrals \& nuclear repulsion with psi4.
 :param mol: Psi4 instance
 :return: overlap, core hamiltonian, eri tensor and nuclear repulsion
 
 \end{fulllineitems}
 
-\index{get\_integrals\_pyscf() (in module ghf.SCF\_functions)@\spxentry{get\_integrals\_pyscf()}\spxextra{in module ghf.SCF\_functions}}
+\index{get\_integrals\_pyscf() (in module hf.SCF\_functions)@\spxentry{get\_integrals\_pyscf()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.get_integrals_pyscf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_pyscf}}}{\emph{molecule}}{}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.get_integrals_pyscf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_pyscf}}}{\emph{molecule}}{}
 A function to calculate your integrals \& nuclear repulsion with pyscf.
 
 \end{fulllineitems}
 
-\index{spin() (in module ghf.SCF\_functions)@\spxentry{spin()}\spxextra{in module ghf.SCF\_functions}}
+\index{spin() (in module hf.SCF\_functions)@\spxentry{spin()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.spin}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{spin}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}~\begin{quote}\begin{description}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.spin}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{spin}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}~\begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{occ\_a}} \textendash{} number of occupied alpha orbitals
@@ -996,20 +1377,20 @@ S\textasciicircum{}2, S\_z and spin multiplicity
 
 \end{fulllineitems}
 
-\index{spin\_blocked() (in module ghf.SCF\_functions)@\spxentry{spin\_blocked()}\spxextra{in module ghf.SCF\_functions}}
+\index{spin\_blocked() (in module hf.SCF\_functions)@\spxentry{spin\_blocked()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.spin_blocked}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{spin\_blocked}}}{\emph{block\_1}, \emph{block\_2}, \emph{block\_3}, \emph{block\_4}}{}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.spin_blocked}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{spin\_blocked}}}{\emph{block\_1}, \emph{block\_2}, \emph{block\_3}, \emph{block\_4}}{}
 When creating the blocks of the density or fock matrix separately, this function is used to add them together,
 and create the total density or Fock matrix in spin Blocked notation.
 :return: a density matrix in the spin-blocked notation
 
 \end{fulllineitems}
 
-\index{trans\_matrix() (in module ghf.SCF\_functions)@\spxentry{trans\_matrix()}\spxextra{in module ghf.SCF\_functions}}
+\index{trans\_matrix() (in module hf.SCF\_functions)@\spxentry{trans\_matrix()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.trans_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{trans\_matrix}}}{\emph{overlap}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.trans_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{trans\_matrix}}}{\emph{overlap}}{}~\begin{itemize}
 \item {} 
 Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation.
 
@@ -1020,10 +1401,10 @@ Input should be an overlap matrix.
 
 \end{fulllineitems}
 
-\index{uhf\_fock\_matrix() (in module ghf.SCF\_functions)@\spxentry{uhf\_fock\_matrix()}\spxextra{in module ghf.SCF\_functions}}
+\index{uhf\_fock\_matrix() (in module hf.SCF\_functions)@\spxentry{uhf\_fock\_matrix()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.uhf_fock_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_fock\_matrix}}}{\emph{density\_matrix\_1}, \emph{density\_matrix\_2}, \emph{one\_electron}, \emph{two\_electron}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.uhf_fock_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_fock\_matrix}}}{\emph{density\_matrix\_1}, \emph{density\_matrix\_2}, \emph{one\_electron}, \emph{two\_electron}}{}~\begin{itemize}
 \item {} 
 calculate a fock matrix from a given alpha and beta density matrix
 
@@ -1037,10 +1418,10 @@ input is the density matrix for alpha and beta, a one electron matrix and a two 
 
 \end{fulllineitems}
 
-\index{uhf\_scf\_energy() (in module ghf.SCF\_functions)@\spxentry{uhf\_scf\_energy()}\spxextra{in module ghf.SCF\_functions}}
+\index{uhf\_scf\_energy() (in module hf.SCF\_functions)@\spxentry{uhf\_scf\_energy()}\spxextra{in module hf.SCF\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{SCF_functions:ghf.SCF_functions.uhf_scf_energy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_scf\_energy}}}{\emph{density\_matrix\_a}, \emph{density\_matrix\_b}, \emph{fock\_a}, \emph{fock\_b}, \emph{one\_electron}}{}~\begin{itemize}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.uhf_scf_energy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{uhf\_scf\_energy}}}{\emph{density\_matrix\_a}, \emph{density\_matrix\_b}, \emph{fock\_a}, \emph{fock\_b}, \emph{one\_electron}}{}~\begin{itemize}
 \item {} 
 calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta,
 so 4 matrices in total.
@@ -1056,99 +1437,99 @@ matrix.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{tests:module-ghf.tests.test_auth}}\index{ghf.tests.test\_auth (module)@\spxentry{ghf.tests.test\_auth}\spxextra{module}}
+\phantomsection\label{\detokenize{tests:module-hf.tests.test_auth}}\index{hf.tests.test\_auth (module)@\spxentry{hf.tests.test\_auth}\spxextra{module}}
 
 \chapter{Testing the RHF and UHF methods}
 \label{\detokenize{tests:testing-the-rhf-and-uhf-methods}}\label{\detokenize{tests::doc}}
 Simple tests to check whether or not the functions return the correct value.
-\index{test\_diis\_real\_ghf() (in module ghf.tests.test\_auth)@\spxentry{test\_diis\_real\_ghf()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_diis\_real\_ghf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_real\_ghf()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_diis_real_ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_real\_ghf}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_real_ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_real\_ghf}}}{}{}
 Test whether diis gives the same energy in fewer iterations.
 
 \end{fulllineitems}
 
-\index{test\_diis\_rhf() (in module ghf.tests.test\_auth)@\spxentry{test\_diis\_rhf()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_diis\_rhf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_rhf()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_diis_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_rhf}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_rhf}}}{}{}
 Test whether diis gives the same energy in fewer iterations.
 
 \end{fulllineitems}
 
-\index{test\_diis\_uhf() (in module ghf.tests.test\_auth)@\spxentry{test\_diis\_uhf()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_diis\_uhf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_uhf()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_diis_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_uhf}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_uhf}}}{}{}
 Test whether diis gives the same energy in fewer iterations.
 
 \end{fulllineitems}
 
-\index{test\_extra\_e() (in module ghf.tests.test\_auth)@\spxentry{test\_extra\_e()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_extra\_e() (in module hf.tests.test\_auth)@\spxentry{test\_extra\_e()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_extra_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_extra\_e}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_extra_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_extra\_e}}}{}{}
 test\_extra\_e will test the UHF method, with the added option of first adding 2 electrons to the system and using
 those coefficients for the actual system, by checking whether or not it returns the expected result.
 The accuracy is 10\textasciicircum{}-6.
 
 \end{fulllineitems}
 
-\index{test\_one\_e() (in module ghf.tests.test\_auth)@\spxentry{test\_one\_e()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_one\_e() (in module hf.tests.test\_auth)@\spxentry{test\_one\_e()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_one_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_one\_e}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_one_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_one\_e}}}{}{}
 Test whether or not psi4 and pyscf give the same core Hamiltonian integrals.
 :return:
 
 \end{fulllineitems}
 
-\index{test\_overlap() (in module ghf.tests.test\_auth)@\spxentry{test\_overlap()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_overlap() (in module hf.tests.test\_auth)@\spxentry{test\_overlap()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_overlap}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_overlap}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_overlap}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_overlap}}}{}{}
 Test whether or not psi4 and pyscf give the same overlap integrals.
 
 \end{fulllineitems}
 
-\index{test\_pyscf\_vs\_psi4() (in module ghf.tests.test\_auth)@\spxentry{test\_pyscf\_vs\_psi4()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_pyscf\_vs\_psi4() (in module hf.tests.test\_auth)@\spxentry{test\_pyscf\_vs\_psi4()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_pyscf_vs_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_pyscf\_vs\_psi4}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_pyscf_vs_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_pyscf\_vs\_psi4}}}{}{}
 Test a pyscf energy calculation vs a psi4 energy calculation.
 
 \end{fulllineitems}
 
-\index{test\_rhf() (in module ghf.tests.test\_auth)@\spxentry{test\_rhf()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_rhf() (in module hf.tests.test\_auth)@\spxentry{test\_rhf()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_rhf}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_rhf}}}{}{}
 test\_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10\textasciicircum{}-11.
 
 \end{fulllineitems}
 
-\index{test\_stability() (in module ghf.tests.test\_auth)@\spxentry{test\_stability()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_stability() (in module hf.tests.test\_auth)@\spxentry{test\_stability()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_stability}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_stability}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_stability}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_stability}}}{}{}
 test\_stability will test the UHF method, with stability analysis, by checking whether or not it returns
 the expected result. The accuracy is 10\textasciicircum{}-6.
 
 \end{fulllineitems}
 
-\index{test\_two\_e() (in module ghf.tests.test\_auth)@\spxentry{test\_two\_e()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_two\_e() (in module hf.tests.test\_auth)@\spxentry{test\_two\_e()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_two_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_two\_e}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_two_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_two\_e}}}{}{}
 Test whether or not psi4 and pyscf give the same two electron integrals.
 
 \end{fulllineitems}
 
-\index{test\_uhf() (in module ghf.tests.test\_auth)@\spxentry{test\_uhf()}\spxextra{in module ghf.tests.test\_auth}}
+\index{test\_uhf() (in module hf.tests.test\_auth)@\spxentry{test\_uhf()}\spxextra{in module hf.tests.test\_auth}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:ghf.tests.test_auth.test_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{ghf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_uhf}}}{}{}
+\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_uhf}}}{}{}
 test\_UHF will test the regular UHF method, by checking whether or not it returns the expected result.
 The accuracy is 10\textasciicircum{}-6.
 
@@ -1159,12 +1540,14 @@ The accuracy is 10\textasciicircum{}-6.
 \renewcommand{\indexname}{Python Module Index}
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
-\bigletter{g}
-\item\relax\sphinxstyleindexentry{ghf.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-ghf.GHF}}
-\item\relax\sphinxstyleindexentry{ghf.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-ghf.RHF}}
-\item\relax\sphinxstyleindexentry{ghf.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-ghf.SCF_functions}}
-\item\relax\sphinxstyleindexentry{ghf.tests.test\_auth}\sphinxstyleindexpageref{tests:\detokenize{module-ghf.tests.test_auth}}
-\item\relax\sphinxstyleindexentry{ghf.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-ghf.UHF}}
+\bigletter{h}
+\item\relax\sphinxstyleindexentry{hf.cUHF\_b}\sphinxstyleindexpageref{cUHF_b:\detokenize{module-hf.cUHF_b}}
+\item\relax\sphinxstyleindexentry{hf.cUHF\_s}\sphinxstyleindexpageref{cUHF_s:\detokenize{module-hf.cUHF_s}}
+\item\relax\sphinxstyleindexentry{hf.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-hf.GHF}}
+\item\relax\sphinxstyleindexentry{hf.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-hf.RHF}}
+\item\relax\sphinxstyleindexentry{hf.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-hf.SCF_functions}}
+\item\relax\sphinxstyleindexentry{hf.tests.test\_auth}\sphinxstyleindexpageref{tests:\detokenize{module-hf.tests.test_auth}}
+\item\relax\sphinxstyleindexentry{hf.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-hf.UHF}}
 \end{sphinxtheindex}
 
 \renewcommand{\indexname}{Index}
