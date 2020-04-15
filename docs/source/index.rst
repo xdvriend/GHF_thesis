@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GHF's documentation
+HF's documentation
 ===================
 
 .. toctree::
@@ -12,6 +12,8 @@ GHF's documentation
 
    RHF
    UHF
+   cUHF_s
+   cUHF_b
    GHF
    SCF_functions
    tests
