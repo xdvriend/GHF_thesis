@@ -353,8 +353,9 @@ class GHF:
         def get_mo():
             # Get the last Fock matrix.
             last_f = last_fock()
+            f_o = s_12_o.T @ last_f @ s_12_o
             # Diagonalise the Fock matrix.
-            val, vec = la.eigh(last_f)
+            val, vec = la.eigh(f_o)
             # calculate the coefficients.
             coeff = s_12_o @ vec
             return coeff
@@ -377,7 +378,7 @@ class GHF:
         """
         self.scf(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
-        # s_values = ghf_spin(self.get_mo_coeff(), expand_matrix(self.get_ovlp()), self.number_of_electrons)
+        s_values = ghf_spin(self.get_mo_coeff(), self.number_of_electrons, trans_matrix(self.get_ovlp()))
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
@@ -387,7 +388,7 @@ class GHF:
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
-    # print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[1]))
+        print("<S_z> = " + str(s_values[0]) + " <S^2> = " + str(s_values[1]))
         return self.energy
 
     def get_mo_coeff(self):
@@ -808,8 +809,9 @@ class GHF:
         def get_mo():
             # Get the last Fock matrix.
             last_f = last_fock()
+            f_o = s_12_o.T @ last_f @ s_12_o
             # Diagonalise the Fock matrix.
-            val, vec = la.eigh(last_f)
+            val, vec = la.eigh(f_o)
             # calculate the coefficients.
             coeff = s_12_o @ vec
             return coeff
@@ -845,6 +847,7 @@ class GHF:
         """
         self.diis(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
+        s_values = ghf_spin(self.get_mo_coeff(), self.number_of_electrons, trans_matrix(self.get_ovlp()))
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
@@ -854,4 +857,6 @@ class GHF:
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
+            print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
+                  str(s_values[2]))
         return self.energy

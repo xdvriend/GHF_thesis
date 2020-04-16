@@ -207,25 +207,28 @@ def spin_blocked(block_1, block_2, block_3, block_4):
     return np.vstack((top, bottom))
 
 
-def ghf_spin(coeff, overlap, number_of_electrons):
+def ghf_spin(coeff, n_e, trans):
     number_of_orbitals = coeff.shape[0] // 2
-    overlap = overlap[:number_of_orbitals, :number_of_orbitals]
-    mo_occ = np.arange(number_of_electrons)
     mo_a = coeff[:number_of_orbitals]
     mo_b = coeff[number_of_orbitals:]
-    saa = mo_a.conj().T @ overlap @ mo_a
-    sbb = mo_b.conj().T @ overlap @ mo_b
-    sab = mo_a.conj().T @ overlap @ mo_b
-    sba = mo_b.conj().T @ overlap @ mo_a
-    number_occ_a = saa.trace()
-    number_occ_b = sbb.trace()
-    ss_xy = (number_occ_a + number_occ_b) * .5
-    ss_xy += sba.trace() * sab.trace() - np.einsum('ij,ji->', sba, sab)
-    ss_z = (number_occ_a + number_occ_b) * .25
-    ss_z += (number_occ_a - number_occ_b) ** 2 * .25
-    tmp = saa - sbb
-    ss_z -= np.einsum('ij,ji', tmp, tmp) * .25
-    s_z = m.sqrt(ss_z.real)
-    ss = (ss_xy + ss_z).real
-    s = np.sqrt(ss + .25) - .5
-    return ss, s_z, s * 2 + 1
+    mo_a = la.inv(trans) @ mo_a
+    mo_b = la.inv(trans) @ mo_b
+    mo_a_occ = mo_a[:, :n_e]
+    mo_b_occ = mo_b[:, :n_e]
+
+    ovlp_a = mo_a_occ.conj().T @ mo_a_occ
+    ovlp_b = mo_b_occ.conj().T @ mo_b_occ
+    ovlp_ab = mo_a_occ.conj().T @ mo_b_occ
+    ovlp_ba = mo_b_occ.conj().T @ mo_a_occ
+
+    number_occ_a = ovlp_a.trace()
+    number_occ_b = ovlp_b.trace()
+    s_z = 0.5 * (number_occ_a - number_occ_b)
+
+    temp = ovlp_a - ovlp_b
+    ss_z = (s_z ** 2) + 0.25 * ((number_occ_a + number_occ_b) - np.einsum('ij, ij', temp, temp))
+    ss_mp = number_occ_b + ((ovlp_ba.trace() * ovlp_ab.trace()) - np.einsum('ij, ji', ovlp_ba, ovlp_ab))
+    s_2 = ss_mp + s_z + ss_z
+
+    s = np.sqrt(s_2 + .25) - .5
+    return s_z, s_2, 2*s + 1
