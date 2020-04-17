@@ -1,0 +1,16 @@
+name: ghf
+channels:
+  - pyscf
+  - psi4
+  - conda-forge
+  - defaults
+dependencies:
+  - pyscf
+  - psi4
+  - numpy
+  - scipy
+  - matplotlib
+  - pandas
+  - jupyter
+  - ipython
+  - pytest
