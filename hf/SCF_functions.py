@@ -208,6 +208,13 @@ def spin_blocked(block_1, block_2, block_3, block_4):
 
 
 def ghf_spin(coeff, n_e, trans):
+    """
+    A function used to calculate the spin expectation values in the generalised hartree fock formalism.
+    :param coeff: The generalised MO coefficients
+    :param n_e: number of electrons
+    :param trans: transformation matrix, eg.: S^(-1/2)
+    :return: The expectation values of S_z, S^2 and the multiplicity (2S+1)
+    """
     number_of_orbitals = coeff.shape[0] // 2
     mo_a = coeff[:number_of_orbitals]
     mo_b = coeff[number_of_orbitals:]

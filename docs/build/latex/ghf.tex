@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Apr 15, 2020}
+\date{Apr 17, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1345,6 +1345,18 @@ A function to calculate your integrals \& nuclear repulsion with psi4.
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.get_integrals_pyscf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{get\_integrals\_pyscf}}}{\emph{molecule}}{}
 A function to calculate your integrals \& nuclear repulsion with pyscf.
+
+\end{fulllineitems}
+
+\index{ghf\_spin() (in module hf.SCF\_functions)@\spxentry{ghf\_spin()}\spxextra{in module hf.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:hf.SCF_functions.ghf_spin}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{ghf\_spin}}}{\emph{coeff}, \emph{n\_e}, \emph{trans}}{}
+A function used to calculate the spin expectation values in the generalised hartree fock formalism.
+:param coeff: The generalised MO coefficients
+:param n\_e: number of electrons
+:param trans: transformation matrix, eg.: S\textasciicircum{}(-1/2)
+:return: The expectation values of S\_z, S\textasciicircum{}2 and the multiplicity (2S+1)
 
 \end{fulllineitems}
 
