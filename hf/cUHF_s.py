@@ -337,7 +337,6 @@ class CUHF:
         self.mo = get_mo()
 
         self.energy = energies[-1]
-        print(energies)
 
         return energies[-1], i
 
