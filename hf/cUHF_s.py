@@ -107,7 +107,7 @@ class CUHF:
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
-        :return: A random hermitian matrix.
+        :return: A random unitary matrix.
         """
         dim = int(np.shape(self.get_ovlp())[0])
 
@@ -128,7 +128,7 @@ class CUHF:
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
-        :parma intital_guess: Random initial guess, if none is given the Core Hamiltonian is used.
+        :param intital_guess: Random initial guess, if none is given the Core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
