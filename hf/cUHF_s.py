@@ -95,10 +95,40 @@ class CUHF:
         """
         return self.integrals[3]
 
-    def scf(self, convergence=1e-12, diis=True):
+    def random_guess(self):
+        """
+        A function that creates a matrix with random values that can be used as an initial guess
+        for the SCF calculations.
+
+        To use this guess:
+
+        >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
+        >>> x = CUHF(h3, 3)
+        >>> guess = x.random_guess()
+        >>> x.get_scf_solution(guess)
+
+        :return: A random hermitian matrix.
+        """
+        dim = int(np.shape(self.get_ovlp())[0])
+
+        def random_unitary_matrix(dimension):
+            # fill a matrix of the given dimensions with random numbers.
+            np.random.seed(2)
+            x = np.random.rand(dimension, dimension)
+            # Make the matrix symmetric by adding it's transpose.
+            # Get the eigenvectors to use them, since they form a unitary matrix.
+            x_t = x.T
+            y = x + x_t
+            val, vec = la.eigh(y)
+            return vec
+
+        return random_unitary_matrix(dim), random_unitary_matrix(dim)
+
+    def scf(self, initial_guess=None, convergence=1e-12, diis=True):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
+        :parma intital_guess: Random initial guess, if none is given the Core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
@@ -220,8 +250,25 @@ class CUHF:
             return f_a, f_b
 
         # core Hamiltonian guess
-        c_a, guess_d_a = density(self.get_one_e(), self.n_a)
-        c_b, guess_d_b = density(self.get_one_e(), self.n_b)
+
+        # If no initial guess is given, use the orthogonalised core Hamiltonian
+        # Else, use the given initial guess.
+        if initial_guess is None:
+            # create guess density matrix from core guess, separate for alpha and beta and put them into an array
+            c_a, guess_d_a = density(self.get_one_e(), self.n_a)
+            c_b, guess_d_b = density(self.get_one_e(), self.n_b)
+        else:
+            # Make the coefficients orthogonal in the correct basis.
+            c_a = s_12 @ initial_guess[0]
+            c_b = s_12 @ initial_guess[1]
+
+            # Get C_alpha and C_beta
+            coeff_r_a = c_a[:, 0:self.n_a]
+            coeff_r_b = c_b[:, 0:self.n_b]
+
+            guess_d_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+            guess_d_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+
         dens_a = [guess_d_a]
         dens_b = [guess_d_b]
         mo_a = [c_a]
@@ -294,16 +341,17 @@ class CUHF:
 
         return energies[-1], i
 
-    def get_scf_solution(self, convergence=1e-12, diis=True):
+    def get_scf_solution(self, guess=None, convergence=1e-12, diis=True):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
 
+        :param guess: Initial scf guess
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
         :return: The converged scf energy.
         """
-        self.scf(convergence=convergence, diis=diis)
+        self.scf(guess, convergence=convergence, diis=diis)
         s_values = spin(self.n_a, self.n_b, CUHF.get_mo_coeff(self)[0], CUHF.get_mo_coeff(self)[1], self.get_ovlp())
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF)")
