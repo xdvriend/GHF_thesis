@@ -116,7 +116,7 @@ class CUHF:
             np.random.seed(2)
             x = np.random.rand(dimension, dimension)
             # Make the matrix symmetric by adding it's transpose.
-            # Get the eigenvectors to use them, since they form a unitary matrix.
+            # Get the eigenvectors, since they form a unitary matrix.
             x_t = x.T
             y = x + x_t
             val, vec = la.eigh(y)
