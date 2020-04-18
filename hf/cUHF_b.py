@@ -503,7 +503,7 @@ class CUHF:
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
-    def get_MOs(self, i=-1):
+    def get_mo(self, i=-1):
         """
         Gets the mo coefficients of the converged solution.
         Alpha coefficients in the first matrix, beta coefficients in the second.
@@ -511,10 +511,12 @@ class CUHF:
         :param i: Iteration of which the mo coefficients are given. If None, the ones of the last iteration are given.
         :return: The (last) mo coefficients
         """
-        return self.coeff_list[i][0], self.mo[i][1]
+        if i != -1:
+            return self.coeff_list[i]
+        return self.coeff_list[self.iterations-1]
 
 
-    def get_constrained_MOs(self, i=-1):
+    def get_constrained_mo(self, i=-1):
         """
         Gets the constrained mo coefficients of the converged solution.
         Alpha coefficients in the first matrix, beta coefficients in the second.
@@ -522,7 +524,9 @@ class CUHF:
         :param i: Iteration of which the mo coefficients are given. If None, the ones of the last iteration are given.
         :return: The (last) mo coefficients
         """
-        return self.constrained_coeff_list[i][0], self.constrained_coeff_list[i][1]
+        if i != -1:
+            return self.constrained_coeff_list[i]
+        return self.mo
 
     def get_dens(self, i=-1):
         """
@@ -532,7 +536,9 @@ class CUHF:
         :param i: Iteration of which the densities are given. If None, the ones of the last iteration are given.
         :return: The (last) density matrix.
         """
-        return self.density_list[i][0], self.density_list[i][1]
+        if i != -1:
+            return self.density_list[i]
+        return self.last_dens
 
     def get_fock(self, i=-1):
         """
@@ -542,7 +548,9 @@ class CUHF:
         :param i: Iteration of which the focks are given. If None, the ones of the last iteration are given.
         :return: The (last) Fock matrix.
         """
-        return self.fock_list[i][0], self.fock_list[i][0]
+        if i != -1:
+            return self.fock_list[i]
+        return self.last_fock
 
     def get_orth_fock(self, i=-1):
         """
@@ -552,4 +560,6 @@ class CUHF:
         :param i: Iteration of which the focks are given. If None, the ones of the last iteration are given.
         :return: The (last) orthonormal Fock matrix.
         """
-        return self.fock_orth_list[i][0], self.fock_orth_list[i][0]
+        if i != -1:
+            return self.fock_orth_list[i]
+        return self.fock_orth_list[self.iterations-1]
