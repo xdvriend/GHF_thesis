@@ -128,6 +128,7 @@ class CUHF:
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
+
         :param initial_guess: Random initial guess, if none is given the Core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
