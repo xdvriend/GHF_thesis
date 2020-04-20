@@ -515,7 +515,6 @@ class CUHF:
             return self.coeff_list[i]
         return self.coeff_list[self.iterations-1]
 
-
     def get_constrained_mo(self, i=-1):
         """
         Gets the constrained mo coefficients of the converged solution.
@@ -563,4 +562,3 @@ class CUHF:
         if i != -1:
             return self.fock_orth_list[i]
         return self.fock_orth_list[self.iterations-1]
-        
