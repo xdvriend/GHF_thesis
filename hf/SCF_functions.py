@@ -158,12 +158,11 @@ def expand_tensor(tensor, complexity=False):
     return np.vstack((top, bottom))
 
 
-def eri_ao_to_mo(eri, coeff, complexity=False):
+def eri_ao_to_mo(eri, coeff):
     """
     Transform the two electron tensor to MO basis. Scales as N^5.
     :param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
     :param coeff: coefficient matrix in spinor basis
-    :param complexity: specify whether you are working with real or complex tensors. Default is real.
     :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
     """
     # Old method: Slow. Left in as comments to provide clarity on how the transformation works.
