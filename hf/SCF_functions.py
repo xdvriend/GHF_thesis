@@ -166,14 +166,8 @@ def eri_ao_to_mo(eri, coeff, complexity=False):
     :param complexity: specify whether you are working with real or complex tensors. Default is real.
     :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
     """
-    # Old method: Slow but definitely correct.
-    # dim = len(eri)
-    # if complexity:
-    #     eri_mo = np.zeros((dim, dim, dim, dim)).astype(complex)
-    #     mo_1 = np.zeros((dim, dim, dim, dim)).astype(complex)
-    #     mo_2 = np.zeros((dim, dim, dim, dim)).astype(complex)
-    #     mo_3 = np.zeros((dim, dim, dim, dim)).astype(complex)
-    # else:
+    # Old method: Slow. Left in as comments to provide clarity on how the transformation works.
+    # -----------------------------------------------------------------------------------------
     #     eri_mo = np.zeros((dim, dim, dim, dim))
     #     mo_1 = np.zeros((dim, dim, dim, dim))
     #     mo_2 = np.zeros((dim, dim, dim, dim))
@@ -195,11 +189,13 @@ def eri_ao_to_mo(eri, coeff, complexity=False):
     #                 for mu in range(0, len(coeff)):
     #                     eri_mo[p, q, r, s] += coeff[mu, p] * mo_3[mu, q, r, s]
 
-    # New method: fast and I think it's correct as well.
+    # New method: fast, but formula's might be less clear.
+    # ----------------------------------------------------
     mo_1 = np.einsum('as,pqra->pqrs', coeff, eri)
     mo_2 = np.einsum('lr,pqls->pqrs', coeff, mo_1)
     mo_3 = np.einsum('nq,pnrs->pqrs', coeff, mo_2)
     eri_mo = np.einsum('mp,mqrs->pqrs', coeff, mo_3)
+
     return eri_mo
 
 
