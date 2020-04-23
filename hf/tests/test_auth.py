@@ -7,7 +7,6 @@ Simple tests to check whether or not the functions return the correct value.
 from hf.RHF import RHF
 from hf.UHF import UHF
 from hf.GHF import GHF
-from hf.SCF_functions import *
 import numpy as np
 from pyscf import *
 import psi4
@@ -142,42 +141,3 @@ def test_diis_real_ghf():
     x = GHF(h2o, 10)
     assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
     assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]
-
-
-def test_tensor_transform():
-    """
-    Test whether tensor transformation happens correctly.
-    """
-    # Create a test tensor
-    ss = np.zeros((2, 2, 2, 2))
-    for i in range(2):
-        for j in range(2):
-            for k in range(2):
-                for l in range(2):
-                    ss[i, j, k, l] = 1
-
-    # Create a transformation matrix
-    t = np.array([[2, 3],
-                  [3, 4]])
-
-    # Set up the tensor transformation function
-    x = eri_ao_to_mo(ss, t)
-
-    # Set up the control
-    control = np.zeros_like(ss)
-    for i in range(2):
-        for j in range(2):
-            for k in range(2):
-                for l in range(2):
-                    if (i + j + k + l) == 0:
-                        control[i, j, k, l] = 625.0
-                    elif (i + j + k + l) == 1:
-                        control[i, j, k, l] = 875.0
-                    elif (i + j + k + l) == 2:
-                        control[i, j, k, l] = 1225.0
-                    elif (i + j + k + l) == 3:
-                        control[i, j, k, l] = 1715.0
-                    elif (i + j + k + l) == 4:
-                        control[i, j, k, l] = 2401.0
-
-    assert np.allclose(x, control)

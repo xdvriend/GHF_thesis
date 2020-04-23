@@ -445,8 +445,10 @@ class GHF:
         # Determine the two electron integrals in spinor basis.
         eri_ao = self.get_two_e()
         eri_ao_spinor = expand_tensor(eri_ao)
-
-        eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff)
+        if isinstance(self.energy, complex):
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff, complexity=True)
+        else:
+            eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff)
 
         eri_spinor_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
         eri_spinor_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
