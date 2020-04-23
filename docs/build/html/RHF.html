@@ -88,6 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
@@ -153,28 +155,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-hf.RHF"></span><div class="section" id="restricted-hartree-fock-by-means-of-scf-procedure">
+  <span class="target" id="module-hf.HartreeFock.RHF"></span><div class="section" id="restricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Restricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#restricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This class is used to calculate the RHF energy of a given molecule and the number of electrons.
 The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)</p>
 <dl class="class">
-<dt id="hf.RHF.RHF">
-<em class="property">class </em><code class="sig-prename descclassname">hf.RHF.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF">
+<em class="property">class </em><code class="sig-prename descclassname">hf.HartreeFock.RHF.</code><code class="sig-name descname">MF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns RHF energy of h_2
 and the number of iterations needed to get this value.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="p">(</span><span class="n">h_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h_2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;sto-3g&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
 <span class="go">Number of iterations: 6</span>
 <span class="go">Converged SCF energy in Hartree: -1.0661086493179357 (RHF)</span>
 </pre></div>
 </div>
 <dl class="method">
-<dt id="hf.RHF.RHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.diis">
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -190,8 +193,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_last_dens">
-<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_last_dens">
+<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_last_dens" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the last density matrix of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -201,8 +204,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_last_fock">
-<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_last_fock">
+<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_last_fock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the last fock matrix of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -212,8 +215,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_mo_coeff">
-<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_mo_coeff">
+<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns mo coefficients of the converged solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -223,8 +226,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_one_e">
-<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_one_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_one_e">
+<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_one_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The one electron integral matrix: T + V</p>
@@ -233,8 +236,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_ovlp">
-<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_ovlp" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_ovlp">
+<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_ovlp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The overlap matrix</p>
@@ -243,8 +246,8 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_scf_solution">
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -260,12 +263,13 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_scf_solution_diis">
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0&#39;</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h2</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0&#39;</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution_diis</span><span class="p">()</span>
 <span class="go">Number of iterations: 5</span>
 <span class="go">Converged SCF energy in Hartree: -1.100153764878446 (RHF)</span>
@@ -285,8 +289,8 @@ a normal scf, but the energy value will be the same. Example:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.get_two_e">
-<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.get_two_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.get_two_e">
+<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.get_two_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The electron repulsion interaction tensor</p>
@@ -295,8 +299,8 @@ a normal scf, but the energy value will be the same. Example:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.nuc_rep">
-<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.nuc_rep">
+<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.nuc_rep" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The nuclear repulsion value</p>
@@ -305,8 +309,8 @@ a normal scf, but the energy value will be the same. Example:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.RHF.RHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.RHF.RHF.scf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.RHF.MF.scf">
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.RHF.MF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest RHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

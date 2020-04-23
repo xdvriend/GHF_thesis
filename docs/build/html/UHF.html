@@ -88,6 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
@@ -153,30 +155,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-hf.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
+  <span class="target" id="module-hf.HartreeFock.UHF"></span><div class="section" id="unrestricted-hartree-fock-by-means-of-scf-procedure">
 <h1>Unrestricted Hartree Fock, by means of SCF procedure<a class="headerlink" href="#unrestricted-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>This class is used to calculate the UHF energy for a given molecule and the number of electrons of that molecule.
 Several options are available to make sure you get the lowest energy from your calculation, as well as some useful
 functions to get intermediate values such as MO coefficients, density and fock matrices.</p>
 <dl class="class">
-<dt id="hf.UHF.UHF">
-<em class="property">class </em><code class="sig-prename descclassname">hf.UHF.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF">
+<em class="property">class </em><code class="sig-prename descclassname">hf.HartreeFock.UHF.</code><code class="sig-name descname">MF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Input is a molecule and the number of electrons.</p>
 <p>Molecules are made in pySCF and calculations are performed as follows, eg.:
 The following snippet prints and returns UHF energy of h_3
 and the number of iterations needed to get this value.</p>
-<p>For a normal scf calculation your input looks like the following example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">()</span>
-<span class="go">Number of iterations: 47</span>
-<span class="go">Converged SCF energy in Hartree: -1.506274320261134 (UHF)</span>
-<span class="go">&lt;S^2&gt; = 0.7735672504295973, &lt;S_z&gt; = 0.5, Multiplicity = 2.023430009098014</span>
-</pre></div>
-</div>
+<p>For a normal scf calculation your input looks like the following example:
+&gt;&gt;&gt; from hf.HartreeFock import *
+&gt;&gt;&gt; h3 = gto.M(atom = ‘h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1’, spin = 1, basis = ‘cc-pvdz’)
+&gt;&gt;&gt; x = UHF.MF(h3, 3)
+&gt;&gt;&gt; x.get_scf_solution()
+Number of iterations: 47
+Converged SCF energy in Hartree: -1.506274320261134 (UHF)
+&lt;S^2&gt; = 0.7735672504295973, &lt;S_z&gt; = 0.5, Multiplicity = 2.023430009098014</p>
 <dl class="method">
-<dt id="hf.UHF.UHF.diis">
-<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.diis">
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>When needed, DIIS can be used to speed up the UHF calculations by reducing the needed iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -193,14 +194,15 @@ and the number of iterations needed to get this value.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.extra_electron_guess">
-<code class="sig-name descname">extra_electron_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.extra_electron_guess" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.extra_electron_guess">
+<code class="sig-name descname">extra_electron_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.extra_electron_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method adds two electrons to the system in order to get coefficients that can be used as a better guess
 for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt; = 0 state.</p>
 <p>!!!IMPORTANT!!! Only supported with pyscf.</p>
 <p>To perform a calculation with this method, you will have to work as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h4</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0&#39;</span> <span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h4</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0&#39;</span> <span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">extra_electron_guess</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
 <span class="go">Number of iterations: 60</span>
@@ -216,15 +218,15 @@ for the scf procedure. This essentially forces the system into it’s &lt;S_z&gt
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_hessian">
-<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_hessian" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_hessian">
+<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_hessian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Hessian matrix after performing a stability analysis.
 :return: The hessian matrix</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_last_dens">
-<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_last_dens" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_last_dens">
+<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_last_dens" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the last density matrix of the converged solution.
 Alpha density in the first matrix, beta density in the second.</p>
 <dl class="field-list simple">
@@ -235,8 +237,8 @@ Alpha density in the first matrix, beta density in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_last_fock">
-<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_last_fock" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_last_fock">
+<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_last_fock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the last fock matrix of the converged solution.
 Alpha Fock matrix first, beta Fock matrix second.</p>
 <dl class="field-list simple">
@@ -247,8 +249,8 @@ Alpha Fock matrix first, beta Fock matrix second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_mo_coeff">
-<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_mo_coeff">
+<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the mo coefficients of the converged solution.
 Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 <dl class="field-list simple">
@@ -259,8 +261,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_one_e">
-<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_one_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_one_e">
+<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_one_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The one electron integral matrix: T + V</p>
@@ -269,8 +271,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_ovlp">
-<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_ovlp" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_ovlp">
+<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_ovlp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The overlap matrix</p>
@@ -279,8 +281,8 @@ Alpha coefficients in the first matrix, beta coefficients in the second.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_scf_solution">
-<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_scf_solution">
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged scf energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -298,8 +300,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_scf_solution_diis">
-<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_scf_solution_diis">
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the number of iterations and the converged diis energy.
 Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 <dl class="field-list simple">
@@ -317,8 +319,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.get_two_e">
-<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.get_two_e" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.get_two_e">
+<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.get_two_e" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The electron repulsion interaction tensor</p>
@@ -327,8 +329,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.nuc_rep">
-<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.nuc_rep" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.nuc_rep">
+<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.nuc_rep" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The nuclear repulsion value</p>
@@ -337,8 +339,8 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.scf">
-<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.scf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.scf">
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">initial_guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.scf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a self consistent field calculation to find the lowest UHF energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -355,14 +357,15 @@ Also prints the expectation value of S_z, S^2 and the multiplicity.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.stability">
-<code class="sig-name descname">stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.stability" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.stability">
+<code class="sig-name descname">stability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.stability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
 value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
 of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.</p>
 <p>To perform a stability analysis, use the following syntax:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h4</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0&#39;</span> <span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="p">(</span><span class="n">h4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h4</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0&#39;</span> <span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">UHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">stability</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
 <span class="go">There is an internal instability in the UHF wave function.</span>
@@ -379,8 +382,8 @@ of the lowest eigenvalue. These new MO’s can then be used to start a new scf p
 </dd></dl>
 
 <dl class="method">
-<dt id="hf.UHF.UHF.stability_analysis">
-<code class="sig-name descname">stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">step_size=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.UHF.UHF.stability_analysis" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.HartreeFock.UHF.MF.stability_analysis">
+<code class="sig-name descname">stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">step_size=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.UHF.MF.stability_analysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.

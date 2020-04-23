@@ -7,13 +7,15 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from hf.SCF_functions import *
+import hf.utilities.SCF_functions as Scf
+import hf.utilities.spin as spin
+import numpy as np
 from pyscf import *
 import numpy.linalg as la
 import collections as c
 
 
-class CUHF:
+class MF:
     """
     Calculate cUHF energy.
     -----------------------
@@ -25,8 +27,9 @@ class CUHF:
 
     For a normal scf calculation your input looks like the following example:
 
+    >>> from hf.HartreeFock import *
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = CUHF(h3, 3)
+    >>> x = cUHF_s.MF(h3, 3)
     >>> x.get_scf_solution()
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
@@ -43,9 +46,9 @@ class CUHF:
         # If there's an uneven number of electrons, there will be one more alpha than beta electron.
         self.molecule = molecule
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
@@ -102,8 +105,9 @@ class CUHF:
 
         To use this guess:
 
+        >>> from hf.HartreeFock import *
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = CUHF(h3, 3)
+        >>> x = cUHF_s.MF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
@@ -135,7 +139,7 @@ class CUHF:
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix (X_)
-        s_12 = trans_matrix(self.get_ovlp())
+        s_12 = Scf.trans_matrix(self.get_ovlp())
 
         def density(f, occ):
             f_o = s_12.conj().T @ f @ s_12
@@ -352,7 +356,7 @@ class CUHF:
         :return: The converged scf energy.
         """
         self.scf(guess, convergence=convergence, diis=diis)
-        s_values = spin(self.n_a, self.n_b, CUHF.get_mo_coeff(self)[0], CUHF.get_mo_coeff(self)[1], self.get_ovlp())
+        s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF)")
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))

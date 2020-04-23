@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Generalised Hartree Fock, by means of SCF procedure &mdash; GHF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Useful functions for SCF procedure" href="SCF_functions.html" />
+    <link rel="prev" title="Constrained unrestricted Hartree Fock by P. Bultinck" href="cUHF_b.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GHF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_s.html">Constrained unrestricted Hartree Fock by Scuseria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GHF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Generalised Hartree Fock, by means of SCF procedure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/GHF.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-hf.HartreeFock.GHF"></span><div class="section" id="generalised-hartree-fock-by-means-of-scf-procedure">
+<h1>Generalised Hartree Fock, by means of SCF procedure<a class="headerlink" href="#generalised-hartree-fock-by-means-of-scf-procedure" title="Permalink to this headline">¶</a></h1>
+<p>This class creates a generalised Hartree-Fock object which can be used for scf calculations. Different initial guesses
+are provided as well as the option to perform a stability analysis.
+The molecule has to be created in pySCF:
+molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)</p>
+<dl class="class">
+<dt id="hf.HartreeFock.GHF.MF">
+<em class="property">class </em><code class="sig-prename descclassname">hf.HartreeFock.GHF.</code><code class="sig-name descname">MF</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em>, <em class="sig-param">int_method='pyscf'</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input is a molecule and the number of electrons.</p>
+<p>Molecules are made in pySCF and calculations are performed as follows, eg.:
+The following snippet prints and returns UHF energy of h3
+and the number of iterations needed to get this value.</p>
+<p>For a normal scf calculation your input looks like the following example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span> <span class="n">get_scf_solution</span><span class="p">()</span>
+<span class="go">Number of iterations: 81</span>
+<span class="go">Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.diis">
+<code class="sig-name descname">diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.diis" title="Permalink to this definition">¶</a></dt>
+<dd><p>The DIIS method is an alternative to the standard scf procedure. It reduces the number of iterations needed to
+find a solution. The same guesses can be used as for a standard scf calculation. Stability analysis can be
+done as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>guess</strong> – The initial guess matrix, if none is specified, the spin blocked core Hamiltonian is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scf_energy, iterations, mo coefficients, last density matrix &amp; last Fock matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_hessian">
+<code class="sig-name descname">get_hessian</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_hessian" title="Permalink to this definition">¶</a></dt>
+<dd><p>After stability analysis is performed, the hessian is stored and can be used for further studying.
+:return: The Hessian matrix</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_last_dens">
+<code class="sig-name descname">get_last_dens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_last_dens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the last density matrix of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last density matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_last_fock">
+<code class="sig-name descname">get_last_fock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_last_fock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the last fock matrix of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last Fock matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_mo_coeff">
+<code class="sig-name descname">get_mo_coeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_mo_coeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the mo coefficients of the converged solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mo coefficients</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_one_e">
+<code class="sig-name descname">get_one_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_one_e" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The one electron integral matrix: T + V</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_ovlp">
+<code class="sig-name descname">get_ovlp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_ovlp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The overlap matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_scf_solution">
+<code class="sig-name descname">get_scf_solution</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_scf_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the number of iterations and the converged scf energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guess</strong> – Initial guess for scf. If none is specified: expanded core Hamiltonian.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converged scf energy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_scf_solution_diis">
+<code class="sig-name descname">get_scf_solution_diis</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_scf_solution_diis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the number of iterations and the converged energy after a diis calculation. Guesses can also be specified
+just like with a normal scf calculation.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">random_guess</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution_diis</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
+<span class="go">Number of iterations: 23</span>
+<span class="go">Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)</span>
+</pre></div>
+</div>
+<p>Without DIIS, 81 iterations are needed to find this solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guess</strong> – Initial guess for scf. None specified: expanded core Hamiltonian</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.cd</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converged scf energy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.get_two_e">
+<code class="sig-name descname">get_two_e</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.get_two_e" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The electron repulsion interaction tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.nuc_rep">
+<code class="sig-name descname">nuc_rep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.nuc_rep" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The nuclear repulsion value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.random_guess">
+<code class="sig-name descname">random_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.random_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that creates a matrix with random values that can be used as an initial guess
+for the SCF calculations.</p>
+<p>To use this guess:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">random_guess</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A random hermitian matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.scf">
+<code class="sig-name descname">scf</code><span class="sig-paren">(</span><em class="sig-param">guess=None</em>, <em class="sig-param">convergence=1e-12</em>, <em class="sig-param">complex_method=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.scf" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function performs the SCF calculation by using the generalised Hartree-Fock formulas. Since we’re working
+in the real class, all values throughout are real. For complex, see the “complex_GHF” class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guess</strong> – Initial guess to start SCF. If none is given, core hamiltonian will be used.</p></li>
+<li><p><strong>convergence</strong> – Set the convergence criterion. If none is given, 1e-12 is used.</p></li>
+<li><p><strong>complex_method</strong> – Specify whether or not you want to work in the complex space. Default is real.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scf_energy, iterations, mo coefficients, last density matrix &amp; last Fock matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.stability_analysis">
+<code class="sig-name descname">stability_analysis</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">step_size=0.0001</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.stability_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:param step_size: Step size for orbital rotation. standard is 1e-4.
+:return: In case of internal stability analysis, it returns a new set of coefficients.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hf.HartreeFock.GHF.MF.unitary_rotation_guess">
+<code class="sig-name descname">unitary_rotation_guess</code><span class="sig-paren">(</span><em class="sig-param">init=None</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.GHF.MF.unitary_rotation_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that creates an initial guess matrix by performing a unitary transformation on the core Hamiltonian
+matrix.</p>
+<p>To use this guess:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">hf.HartreeFock</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unitary_rotation_guess</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A rotated guess matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="SCF_functions.html" class="btn btn-neutral float-right" title="Useful functions for SCF procedure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cUHF_b.html" class="btn btn-neutral float-left" title="Constrained unrestricted Hartree Fock by P. Bultinck" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Xeno De Vriendt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

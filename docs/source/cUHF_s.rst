@@ -1,2 +1,2 @@
-.. automodule:: hf.cUHF_s
+.. automodule:: hf.HartreeFock.cUHF_s
     :members:

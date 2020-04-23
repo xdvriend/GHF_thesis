@@ -87,7 +87,8 @@
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
 </ul>
 
             
@@ -159,6 +160,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
+ | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -169,28 +171,24 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF">CUHF (class in hf.cUHF_b)</a>
-
-      <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF">(class in hf.cUHF_s)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.calc_mo">calc_mo() (in module hf.utilities.SCF_functions)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SCF_functions.html#hf.SCF_functions.density_matrix">density_matrix() (in module hf.SCF_functions)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.density_matrix">density_matrix() (in module hf.utilities.SCF_functions)</a>
 </li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.diis">diis() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.diis">diis() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="GHF.html#hf.GHF.GHF.diis">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.diis">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.diis">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.diis">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.diis">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.diis">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -199,15 +197,13 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SCF_functions.html#hf.SCF_functions.eri_ao_to_mo">eri_ao_to_mo() (in module hf.SCF_functions)</a>
-</li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.expand_matrix">expand_matrix() (in module hf.SCF_functions)</a>
+      <li><a href="transform.html#hf.utilities.transform.expand_matrix">expand_matrix() (in module hf.utilities.transform)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SCF_functions.html#hf.SCF_functions.expand_tensor">expand_tensor() (in module hf.SCF_functions)</a>
+      <li><a href="transform.html#hf.utilities.transform.expand_tensor">expand_tensor() (in module hf.utilities.transform)</a>
 </li>
-      <li><a href="UHF.html#hf.UHF.UHF.extra_electron_guess">extra_electron_guess() (hf.UHF.UHF method)</a>
+      <li><a href="UHF.html#hf.HartreeFock.UHF.MF.extra_electron_guess">extra_electron_guess() (hf.HartreeFock.UHF.MF method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -215,113 +211,129 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_dens">get_dens() (hf.cUHF_s.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_constrained_mo">get_constrained_mo() (hf.HartreeFock.cUHF_b.MF method)</a>
 </li>
-      <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_fock">get_fock() (hf.cUHF_s.CUHF method)</a>
-</li>
-      <li><a href="GHF.html#hf.GHF.GHF.get_hessian">get_hessian() (hf.GHF.GHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_dens">get_dens() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="UHF.html#hf.UHF.UHF.get_hessian">(hf.UHF.UHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_dens">(hf.HartreeFock.cUHF_s.MF method)</a>
+</li>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_dens">(hf.HartreeFock.RHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.get_integrals_psi4">get_integrals_psi4() (in module hf.SCF_functions)</a>
-</li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.get_integrals_pyscf">get_integrals_pyscf() (in module hf.SCF_functions)</a>
-</li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_last_dens">get_last_dens() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_fock">get_fock() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="GHF.html#hf.GHF.GHF.get_last_dens">(hf.GHF.GHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_fock">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_last_dens">(hf.RHF.RHF method)</a>
-</li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_last_dens">(hf.UHF.UHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_fock">(hf.HartreeFock.RHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_last_fock">get_last_fock() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_fock_orth">get_fock_orth() (hf.HartreeFock.RHF.MF method)</a>
+</li>
+      <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_hessian">get_hessian() (hf.HartreeFock.GHF.MF method)</a>
 
       <ul>
-        <li><a href="GHF.html#hf.GHF.GHF.get_last_fock">(hf.GHF.GHF method)</a>
-</li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_last_fock">(hf.RHF.RHF method)</a>
-</li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_last_fock">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_hessian">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_mo_coeff">get_mo_coeff() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.get_integrals_psi4">get_integrals_psi4() (in module hf.utilities.SCF_functions)</a>
+</li>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.get_integrals_pyscf">get_integrals_pyscf() (in module hf.utilities.SCF_functions)</a>
+</li>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_last_dens">get_last_dens() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_mo_coeff">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_last_dens">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.get_mo_coeff">(hf.GHF.GHF method)</a>
-</li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_mo_coeff">(hf.RHF.RHF method)</a>
-</li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_mo_coeff">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_last_dens">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_one_e">get_one_e() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_last_fock">get_last_fock() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_one_e">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_last_fock">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.get_one_e">(hf.GHF.GHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_last_fock">(hf.HartreeFock.UHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_one_e">(hf.RHF.RHF method)</a>
+      </ul></li>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_mo">get_mo() (hf.HartreeFock.cUHF_b.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_one_e">(hf.UHF.UHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_mo_coeff">get_mo_coeff() (hf.HartreeFock.cUHF_b.MF method)</a>
+
+      <ul>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_mo_coeff">(hf.HartreeFock.cUHF_s.MF method)</a>
+</li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_mo_coeff">(hf.HartreeFock.GHF.MF method)</a>
+</li>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_mo_coeff">(hf.HartreeFock.RHF.MF method)</a>
+</li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_mo_coeff">(hf.HartreeFock.UHF.MF method)</a>
+</li>
+      </ul></li>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_one_e">get_one_e() (hf.HartreeFock.cUHF_b.MF method)</a>
+
+      <ul>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_one_e">(hf.HartreeFock.cUHF_s.MF method)</a>
+</li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_one_e">(hf.HartreeFock.GHF.MF method)</a>
+</li>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_one_e">(hf.HartreeFock.RHF.MF method)</a>
+</li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_one_e">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_ovlp">get_ovlp() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_orth_fock">get_orth_fock() (hf.HartreeFock.cUHF_b.MF method)</a>
+</li>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_ovlp">get_ovlp() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_ovlp">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_ovlp">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.get_ovlp">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_ovlp">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_ovlp">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_ovlp">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_ovlp">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_ovlp">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_scf_solution">get_scf_solution() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_scf_solution">get_scf_solution() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_scf_solution">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_scf_solution">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.get_scf_solution">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_scf_solution">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_scf_solution">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_scf_solution">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_scf_solution">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_scf_solution">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_scf_solution_diis">get_scf_solution_diis() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_scf_solution_diis">get_scf_solution_diis() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="GHF.html#hf.GHF.GHF.get_scf_solution_diis">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_scf_solution_diis">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_scf_solution_diis">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_scf_solution_diis">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_scf_solution_diis">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_scf_solution_diis">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.get_two_e">get_two_e() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_two_e">get_two_e() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.get_two_e">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_two_e">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.get_two_e">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_two_e">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.get_two_e">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_two_e">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.get_two_e">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_two_e">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="GHF.html#hf.GHF.GHF">GHF (class in hf.GHF)</a>
+      <li><a href="spin.html#hf.utilities.spin.ghf">ghf() (in module hf.utilities.spin)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -329,38 +341,58 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#module-hf.cUHF_b">hf.cUHF_b (module)</a>
+      <li><a href="cUHF_b.html#module-hf.HartreeFock.cUHF_b">hf.HartreeFock.cUHF_b (module)</a>
 </li>
-      <li><a href="cUHF_s.html#module-hf.cUHF_s">hf.cUHF_s (module)</a>
+      <li><a href="cUHF_s.html#module-hf.HartreeFock.cUHF_s">hf.HartreeFock.cUHF_s (module)</a>
 </li>
-      <li><a href="GHF.html#module-hf.GHF">hf.GHF (module)</a>
+      <li><a href="GHF.html#module-hf.HartreeFock.GHF">hf.HartreeFock.GHF (module)</a>
+</li>
+      <li><a href="RHF.html#module-hf.HartreeFock.RHF">hf.HartreeFock.RHF (module)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="RHF.html#module-hf.RHF">hf.RHF (module)</a>
+      <li><a href="UHF.html#module-hf.HartreeFock.UHF">hf.HartreeFock.UHF (module)</a>
 </li>
-      <li><a href="SCF_functions.html#module-hf.SCF_functions">hf.SCF_functions (module)</a>
+      <li><a href="SCF_functions.html#module-hf.utilities.SCF_functions">hf.utilities.SCF_functions (module)</a>
 </li>
-      <li><a href="tests.html#module-hf.tests.test_auth">hf.tests.test_auth (module)</a>
+      <li><a href="spin.html#module-hf.utilities.spin">hf.utilities.spin (module)</a>
 </li>
-      <li><a href="UHF.html#module-hf.UHF">hf.UHF (module)</a>
+      <li><a href="transform.html#module-hf.utilities.transform">hf.utilities.transform (module)</a>
 </li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF">MF (class in hf.HartreeFock.cUHF_b)</a>
+
+      <ul>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF">(class in hf.HartreeFock.cUHF_s)</a>
+</li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF">(class in hf.HartreeFock.GHF)</a>
+</li>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF">(class in hf.HartreeFock.RHF)</a>
+</li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF">(class in hf.HartreeFock.UHF)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.nuc_rep">nuc_rep() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.nuc_rep">nuc_rep() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.nuc_rep">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.nuc_rep">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.nuc_rep">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.nuc_rep">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.nuc_rep">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.nuc_rep">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.nuc_rep">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.nuc_rep">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -369,46 +401,42 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.random_guess">random_guess() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.random_guess">random_guess() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="GHF.html#hf.GHF.GHF.random_guess">(hf.GHF.GHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.random_guess">(hf.HartreeFock.cUHF_s.MF method)</a>
+</li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.random_guess">(hf.HartreeFock.GHF.MF method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="RHF.html#hf.RHF.RHF">RHF (class in hf.RHF)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cUHF_b.html#hf.cUHF_b.CUHF.scf">scf() (hf.cUHF_b.CUHF method)</a>
+      <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.scf">scf() (hf.HartreeFock.cUHF_b.MF method)</a>
 
       <ul>
-        <li><a href="cUHF_s.html#hf.cUHF_s.CUHF.scf">(hf.cUHF_s.CUHF method)</a>
+        <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.scf">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
-        <li><a href="GHF.html#hf.GHF.GHF.scf">(hf.GHF.GHF method)</a>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.scf">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="RHF.html#hf.RHF.RHF.scf">(hf.RHF.RHF method)</a>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.scf">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.UHF.UHF.scf">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.scf">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SCF_functions.html#hf.SCF_functions.spin">spin() (in module hf.SCF_functions)</a>
+      <li><a href="transform.html#hf.utilities.transform.spin_blocked">spin_blocked() (in module hf.utilities.transform)</a>
 </li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.spin_blocked">spin_blocked() (in module hf.SCF_functions)</a>
+      <li><a href="UHF.html#hf.HartreeFock.UHF.MF.stability">stability() (hf.HartreeFock.UHF.MF method)</a>
 </li>
-      <li><a href="UHF.html#hf.UHF.UHF.stability">stability() (hf.UHF.UHF method)</a>
-</li>
-      <li><a href="GHF.html#hf.GHF.GHF.stability_analysis">stability_analysis() (hf.GHF.GHF method)</a>
+      <li><a href="GHF.html#hf.HartreeFock.GHF.MF.stability_analysis">stability_analysis() (hf.HartreeFock.GHF.MF method)</a>
 
       <ul>
-        <li><a href="UHF.html#hf.UHF.UHF.stability_analysis">(hf.UHF.UHF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.stability_analysis">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -417,31 +445,11 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tests.html#hf.tests.test_auth.test_diis_real_ghf">test_diis_real_ghf() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_diis_rhf">test_diis_rhf() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_diis_uhf">test_diis_uhf() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_extra_e">test_extra_e() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_one_e">test_one_e() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_overlap">test_overlap() (in module hf.tests.test_auth)</a>
+      <li><a href="transform.html#hf.utilities.transform.tensor_basis_transform">tensor_basis_transform() (in module hf.utilities.transform)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tests.html#hf.tests.test_auth.test_pyscf_vs_psi4">test_pyscf_vs_psi4() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_rhf">test_rhf() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_stability">test_stability() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_two_e">test_two_e() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="tests.html#hf.tests.test_auth.test_uhf">test_uhf() (in module hf.tests.test_auth)</a>
-</li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.trans_matrix">trans_matrix() (in module hf.SCF_functions)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.trans_matrix">trans_matrix() (in module hf.utilities.SCF_functions)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -449,15 +457,15 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="UHF.html#hf.UHF.UHF">UHF (class in hf.UHF)</a>
+      <li><a href="spin.html#hf.utilities.spin.uhf">uhf() (in module hf.utilities.spin)</a>
 </li>
-      <li><a href="SCF_functions.html#hf.SCF_functions.uhf_fock_matrix">uhf_fock_matrix() (in module hf.SCF_functions)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.uhf_fock_matrix">uhf_fock_matrix() (in module hf.utilities.SCF_functions)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="SCF_functions.html#hf.SCF_functions.uhf_scf_energy">uhf_scf_energy() (in module hf.SCF_functions)</a>
+      <li><a href="SCF_functions.html#hf.utilities.SCF_functions.uhf_scf_energy">uhf_scf_energy() (in module hf.utilities.SCF_functions)</a>
 </li>
-      <li><a href="GHF.html#hf.GHF.GHF.unitary_rotation_guess">unitary_rotation_guess() (hf.GHF.GHF method)</a>
+      <li><a href="GHF.html#hf.HartreeFock.GHF.MF.unitary_rotation_guess">unitary_rotation_guess() (hf.HartreeFock.GHF.MF method)</a>
 </li>
   </ul></td>
 </tr></table>

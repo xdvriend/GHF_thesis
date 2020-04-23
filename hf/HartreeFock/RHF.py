@@ -6,11 +6,13 @@ The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
 """
 
-from hf.SCF_functions import *
+import hf.utilities.SCF_functions as Scf
+import numpy as np
 import collections as c
+from pyscf import *
 
 
-class RHF:
+class MF:
     """
         calculate RHF energy.
         ---------------------
@@ -20,11 +22,10 @@ class RHF:
         The following snippet prints and returns RHF energy of h_2
         and the number of iterations needed to get this value.
 
-        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
-        >>> x = RHF(h_2, 2)
+        >>> from hf.HartreeFock import *
+        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'sto-3g')
+        >>> x = RHF.MF(h_2, 2)
         >>> x.get_scf_solution()
-        Number of iterations: 6
-        Converged SCF energy in Hartree: -1.0661086493179357 (RHF)
         """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
@@ -36,16 +37,17 @@ class RHF:
         """
         self.molecule = molecule
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
         self.energy = None
         self.mo = None
-        self.last_dens = None
-        self.last_fock = None
+        self.dens = None
+        self.fock = None
+        self.fock_orth = None
         self.iterations = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
@@ -91,22 +93,22 @@ class RHF:
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         if complex_method:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
             core_guess = core_guess.astype(complex)
-            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
             guess_density[0, :] += 0.1j
             guess_density[:, 0] -= 0.1j
         else:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = density_matrix(core_guess, self.occupied, s_12)
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
 
         densities = [guess_density]  # put the guess density in an array
 
-        def rhf_scf_energy(dens_matrix, fock):
+        def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + fock), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
 
         energies = [0.0]
 
@@ -117,20 +119,28 @@ class RHF:
             # double summation of density matrix * (coulomb - exchange)
             return self.get_one_e() + np.einsum('kl,ijkl->ij', dens_matrix, jk_integrals)
 
-        delta_e = []  # create an energy difference array
+        # create arrays to store the wanted components
+        delta_e = []
+        f_list = []
+        f_o_list = []
+        mo_list = []
 
         def iteration():
             """create an iteration procedure, calculate fock from density,
             orthogonalise, new density from new fock,..."""
-            fock = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
+            f = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
+            f_list.append(f)
             # calculate the electronic energy and put it into the energies array
-            energies.append(rhf_scf_energy(densities[-1], fock) + self.nuc_rep())
+            energies.append(rhf_scf_energy(densities[-1], f) + self.nuc_rep())
             # calculate the energy difference and add it to the correct array
             delta_e.append(energies[-1] - energies[-2])
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
-            fock_orth = s_12.conj().T.dot(fock).dot(s_12)
-            new_density = density_matrix(fock_orth, self.occupied, s_12)
+            fock_orth = s_12.conj().T.dot(f).dot(s_12)
+            mos = Scf.calc_mo(fock_orth, s_12)
+            mo_list.append(mos)
+            f_o_list.append(fock_orth)
+            new_density = Scf.density_matrix(fock_orth, self.occupied, s_12)
             # put new density matrix in the densities array
             densities.append(new_density)
 
@@ -143,28 +153,26 @@ class RHF:
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure
-        def last_dens():
-            return densities[-1]
-        self.last_dens = last_dens()
+        def dens():
+            return densities
+        self.dens = dens()
 
         # a function that gives the last Fock matrix of the scf procedure
-        def last_fock():
-            return rhf_fock_matrix(densities[-2])
-        self.last_fock = last_fock()
+        def fock():
+            return f_list
+        self.fock = fock()
+        self.fock_orth = f_o_list
 
         # A function that returns the converged mo coefficients
         def get_mo():
-            last_f = rhf_fock_matrix(densities[-2])  # get the last fock matrix
-            f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
-            coefficients = s_12.dot(f_eigenvectors)  # transform to mo basis
-            return coefficients
+            return mo_list
         self.mo = get_mo()
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies[-1]
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution(self, convergence=1e-12, complex_method=False):
         """
@@ -187,29 +195,37 @@ class RHF:
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF)")
         return self.energy
 
-    def get_mo_coeff(self):
+    def get_mo_coeff(self, i=-1):
         """
-        Returns mo coefficients of the converged solution.
+        Returns mo coefficients.
 
         :return: The mo coefficients
         """
-        return self.mo
+        return self.mo[i]
 
-    def get_last_dens(self):
+    def get_dens(self, i=-1):
         """
-        Returns the last density matrix of the converged solution.
+        Returns the (last) density matrix.
 
         :return: The last density matrix.
         """
-        return self.last_dens
+        return self.dens[i]
 
-    def get_last_fock(self):
+    def get_fock(self, i=-1):
         """
-        Returns the last fock matrix of the converged solution.
+        Returns the (last) fock matrix.
 
         :return: The last Fock matrix.
         """
-        return self.last_fock
+        return self.fock[i]
+
+    def get_fock_orth(self, i=-1):
+        """
+        Returns the (last) fock matrix in the orthonormal basis.
+
+        :return: The last Fock matrix.
+        """
+        return self.fock_orth[i]
 
     def diis(self, convergence=1e-12, complex_method=False):
         """
@@ -219,16 +235,16 @@ class RHF:
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         if complex_method:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
             core_guess = core_guess.astype(complex)
-            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
             guess_density[0, :] += 0.1j
             guess_density[:, 0] -= 0.1j
         else:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = density_matrix(core_guess, self.occupied, s_12)
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -237,14 +253,14 @@ class RHF:
             # double summation of density matrix * (coulomb - exchange)
             return self.get_one_e() + np.einsum('kl,ijkl->ij', dens_matrix, jk_integrals)
 
-        def residual(density, fock):
+        def residual(density, f):
             """
             Function that calculates the error matrix for the DIIS algorithm
             :param density: density matrix
-            :param fock: fock matrix
+            :param f: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.conj().T
+            return s_12 @ (f @ density @ self.get_ovlp() - self.get_ovlp() @ density @ f) @ s_12.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -282,43 +298,52 @@ class RHF:
 
             # Create a fock as a linear combination of previous focks
             if complex_method:
-                fock = np.zeros(focks[0].shape).astype(complex)
+                f = np.zeros(focks[0].shape).astype(complex)
             else:
-                fock = np.zeros(focks[0].shape)
+                f = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
-                fock += coeff[x] * focks[x]
-            return fock
+                f += coeff[x] * focks[x]
+            return f
 
-        def rhf_scf_energy(dens_matrix, fock):
+        def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + fock), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
 
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis = [guess_density]
         energies_diis = [0.0]
         delta_e = []
+        f_list = []
+        f_o_list = []
+        mo_list = []
 
         def diis_iteration(number_of_iterations):
             # Calculate the fock matrix and the residual
-            fock = rhf_fock_matrix(densities_diis[-1])
-            resid = residual(densities_diis[-1], fock)
+            f = rhf_fock_matrix(densities_diis[-1])
+            resid = residual(densities_diis[-1], f)
 
             # Add them to their respective lists
-            fock_list.append(fock)
+            fock_list.append(f)
             error_list.append(resid)
 
             # Calculate the energy and the energy difference
-            energies_diis.append(rhf_scf_energy(densities_diis[-1], fock) + self.nuc_rep())
+            energies_diis.append(rhf_scf_energy(densities_diis[-1], f) + self.nuc_rep())
             delta_e.append(energies_diis[-1] - energies_diis[-2])
 
             # Starting at two iterations, use the DIIS acceleration
             if number_of_iterations >= 2:
-                fock = diis_fock(fock_list, error_list)
+                f = diis_fock(fock_list, error_list)
+
+            # fill the arrays
+            f_list.append(f)
 
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
-            fock_orth = s_12.conj().T.dot(fock).dot(s_12)
-            new_density = density_matrix(fock_orth, self.occupied, s_12)
+            fock_orth = s_12.conj().T.dot(f).dot(s_12)
+            f_o_list.append(fock_orth)
+            mos = Scf.calc_mo(fock_orth, s_12)
+            mo_list.append(mos)
+            new_density = Scf.density_matrix(fock_orth, self.occupied, s_12)
 
             # put new density matrix in the densities array
             densities_diis.append(new_density)
@@ -331,23 +356,21 @@ class RHF:
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure
-        def last_dens():
-            return densities_diis[-1]
+        def dens():
+            return densities_diis
 
-        self.last_dens = last_dens()
+        self.dens = dens()
 
         # a function that gives the last Fock matrix of the scf procedure
-        def last_fock():
-            return fock_list[-1]
+        def fock():
+            return f_list
 
-        self.last_fock = last_fock()
+        self.fock = fock()
+        self.fock_orth = f_o_list
 
         # A function that returns the converged mo coefficients
         def get_mo():
-            last_f = last_fock()  # get the last fock matrix
-            f_eigenvalues, f_eigenvectors = la.eigh(last_f)  # eigenvalues are initial orbital energies
-            coeff = s_12.dot(f_eigenvectors)  # transform to mo basis
-            return coeff
+            return mo_list
 
         self.mo = get_mo()
 
@@ -355,18 +378,17 @@ class RHF:
         scf_e = energies_diis[-1]
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution_diis(self, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
 
+        >>> from hf.HartreeFock import *
         >>> h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
-        >>> x = RHF(h2, 2)
+        >>> x = RHF.MF(h2, 2)
         >>> x.get_scf_solution_diis()
-        Number of iterations: 5
-        Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.

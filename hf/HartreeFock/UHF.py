@@ -6,14 +6,17 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from hf.SCF_functions import *
+import hf.utilities.SCF_functions as Scf
+import hf.utilities.spin as spin
+import hf.utilities.transform as t
+import numpy as np
 from functools import reduce
 from pyscf import *
 import scipy.linalg as la
 import collections as c
 
 
-class UHF:
+class MF:
     """
     Calculate UHF energy.
     ---------------------
@@ -25,12 +28,10 @@ class UHF:
 
     For a normal scf calculation your input looks like the following example:
 
+    >>> from hf.HartreeFock import *
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = UHF(h3, 3)
+    >>> x = UHF.MF(h3, 3)
     >>> x.get_scf_solution()
-    Number of iterations: 47
-    Converged SCF energy in Hartree: -1.506274320261134 (UHF)
-    <S^2> = 0.7735672504295973, <S_z> = 0.5, Multiplicity = 2.023430009098014
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
@@ -46,9 +47,9 @@ class UHF:
         # If there's an uneven number of electrons, there will be one more alpha than beta electron.
         self.molecule = molecule
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
@@ -109,7 +110,7 @@ class UHF:
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
-        s_12 = trans_matrix(self.get_ovlp())
+        s_12 = Scf.trans_matrix(self.get_ovlp())
         # If no initial guess is given, use the orthogonalised core Hamiltonian
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
@@ -117,16 +118,16 @@ class UHF:
             if complex_method:
                 initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
                 initial_guess = initial_guess.astype(complex)
-                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
                 guess_density_a[0, :] += 0.1j
                 guess_density_a[:, 0] -= 0.1j
-                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
                 guess_density_b[0, :] += 0.1j
                 guess_density_b[:, 0] -= 0.1j
             else:
                 initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
-                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
 
         else:
             # Make the coefficients orthogonal in the correct basis.
@@ -156,12 +157,12 @@ class UHF:
         # create an iteration procedure
         def iteration():
             # create a fock matrix for alpha from last alpha density
-            fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
+            fock_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
             # create a fock matrix for beta from last beta density
-            fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
+            fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
 
             # calculate the improved scf energy and add it to the array
-            energies.append(uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
+            energies.append(Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
             # calculate the energy difference and add it to the delta_E array
             delta_e.append(energies[-1] - energies[-2])
 
@@ -170,8 +171,8 @@ class UHF:
             fock_orth_b = s_12.conj().T.dot(fock_b).dot(s_12)
 
             # create a new alpha and beta density matrix
-            new_density_a = density_matrix(fock_orth_a, self.n_a, s_12)
-            new_density_b = density_matrix(fock_orth_b, self.n_b, s_12)
+            new_density_a = Scf.density_matrix(fock_orth_a, self.n_a, s_12)
+            new_density_b = Scf.density_matrix(fock_orth_b, self.n_b, s_12)
 
             # put the density matrices in their respective arrays
             densities_a.append(new_density_a)
@@ -191,15 +192,15 @@ class UHF:
         self.last_dens = last_dens()
 
         def last_fock():
-            last_fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
-            last_fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
+            last_fock_a = Scf.uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
+            last_fock_b = Scf.uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
             return last_fock_a, last_fock_b
         self.last_fock = last_fock()
 
         def get_mo():
             # Calculate the last fock matrix for both alpha and beta
-            fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
-            fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
+            fock_a = Scf.uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
+            fock_b = Scf.uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
 
             # orthogonalize both fock matrices
             fock_a_ = s_12.T.dot(fock_a).dot(s_12)
@@ -232,7 +233,7 @@ class UHF:
         """
         self.scf(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
-        s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
+        s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
@@ -284,13 +285,11 @@ class UHF:
 
         To perform a calculation with this method, you will have to work as follows:
 
+        >>> from hf.HartreeFock import *
         >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
-        >>> x = UHF(h4, 4)
+        >>> x = UHF.MF(h4, 4)
         >>> guess = x.extra_electron_guess()
         >>> x.get_scf_solution(guess)
-        Number of iterations: 60
-        Converged SCF energy in Hartree: -2.0210882477030547 (UHF)
-        <S^2> = 1.0565277001056579, <S_z> = 0.0, Multiplicity = 2.2860688529487976
 
         :return: A new guess matrix to use for the scf procedure.
         """
@@ -299,19 +298,19 @@ class UHF:
         self.molecule.build()
 
         # calculate the integrals for the new test system (_t)
-        overlap_t = get_integrals_pyscf(self.molecule)[0]
-        one_electron_t = get_integrals_pyscf(self.molecule)[1]
-        two_electron_t = get_integrals_pyscf(self.molecule)[2]
+        overlap_t = Scf.get_integrals_pyscf(self.molecule)[0]
+        one_electron_t = Scf.get_integrals_pyscf(self.molecule)[1]
+        two_electron_t = Scf.get_integrals_pyscf(self.molecule)[2]
 
         # Calculate the orthogonalisation matrix and the core guess for the new test system (_t)
-        s_12_t = trans_matrix(overlap_t)
+        s_12_t = Scf.trans_matrix(overlap_t)
         core_guess_t = s_12_t.T.dot(one_electron_t).dot(s_12_t)
 
         # Calculate a guess density for the test system, both for alpha and beta.
         # add the two extra electrons to alpha
         # add the density matrices to respective arrays
-        guess_density_a_t = density_matrix(core_guess_t, self.n_a + 2, s_12_t)
-        guess_density_b_t = density_matrix(core_guess_t, self.n_b, s_12_t)
+        guess_density_a_t = Scf.density_matrix(core_guess_t, self.n_a + 2, s_12_t)
+        guess_density_b_t = Scf.density_matrix(core_guess_t, self.n_b, s_12_t)
         densities_a = [guess_density_a_t]
         densities_b = [guess_density_b_t]
 
@@ -322,8 +321,8 @@ class UHF:
         def iteration_t():
             # create a fock matrix for alpha from last alpha density, and the integrals from the test system
             # create a fock matrix for beta from last beta density, and the integrals from the test system
-            fock_matrix_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
-            fock_matrix_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
+            fock_matrix_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], one_electron_t, two_electron_t)
+            fock_matrix_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], one_electron_t, two_electron_t)
 
             # orthogonalize both fock matrices
             orth_fock_a = s_12_t.T.dot(fock_matrix_a).dot(s_12_t)
@@ -332,8 +331,8 @@ class UHF:
             # create a new alpha density matrix, with the test system's orthogonalisation matrix
             # create a new beta density matrix, with the test system's orthogonalisation matrix
             # add the densities to an array
-            new_density_a = density_matrix(orth_fock_a, self.n_a + 2, s_12_t)
-            new_density_b = density_matrix(orth_fock_b, self.n_b, s_12_t)
+            new_density_a = Scf.density_matrix(orth_fock_a, self.n_a + 2, s_12_t)
+            new_density_b = Scf.density_matrix(orth_fock_b, self.n_b, s_12_t)
             densities_a.append(new_density_a)
             densities_b.append(new_density_b)
 
@@ -348,8 +347,8 @@ class UHF:
         # Now that the test system has converged, we use the last calculated density matrices
         # to calculate new orbital coefficients. These coefficients can then be used to start a new scf procedure.
         # for both alpha and beta
-        fock_a = uhf_fock_matrix(densities_a[-2], densities_b[-2], one_electron_t, two_electron_t)
-        fock_b = uhf_fock_matrix(densities_b[-2], densities_a[-2], one_electron_t, two_electron_t)
+        fock_a = Scf.uhf_fock_matrix(densities_a[-2], densities_b[-2], one_electron_t, two_electron_t)
+        fock_b = Scf.uhf_fock_matrix(densities_b[-2], densities_a[-2], one_electron_t, two_electron_t)
 
         # orthogonalize both fock matrices
         fock_orth_a = s_12_t.T @ fock_a @ s_12_t
@@ -375,26 +374,23 @@ class UHF:
 
         To perform a stability analysis, use the following syntax:
 
+        >>> from hf.HartreeFock import *
         >>> h4 = gto.M(atom = 'h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0' , spin = 2, basis = 'cc-pvdz')
-        >>> x = UHF(h4, 4)
+        >>> x = UHF.MF(h4, 4)
         >>> guess = x.stability()
         >>> x.get_scf_solution(guess)
-        There is an internal instability in the UHF wave function.
-        Number of iterations: 66
-        Converged SCF energy in Hartree: -2.0210882477030716 (UHF)
-        <S^2> = 1.056527700105677, <S_z> = 0.0, Multiplicity = 2.2860688529488145
 
         :return: New and improved MO's.
         """
         # The trans_matrix function calculates the orthogonalisation matrix from a given overlap matrix.
         # core_guess = the guess in the case where the electrons don't interact with each other
-        s_12 = trans_matrix(self.get_ovlp())
+        s_12 = Scf.trans_matrix(self.get_ovlp())
         core_guess = s_12.T.dot(self.get_one_e()).dot(s_12)
 
         # create guess density matrix from core guess, separate for alpha and beta and put it into an array
         # Switch the spin state by adding one alpha and removing one beta electron
-        guess_density_a = density_matrix(core_guess, self.n_a + 1, s_12)
-        guess_density_b = density_matrix(core_guess, self.n_b - 1, s_12)
+        guess_density_a = Scf.density_matrix(core_guess, self.n_a + 1, s_12)
+        guess_density_b = Scf.density_matrix(core_guess, self.n_b - 1, s_12)
         densities_a = [guess_density_a]
         densities_b = [guess_density_b]
 
@@ -405,8 +401,8 @@ class UHF:
         def iteration():
             # create a fock matrix for alpha from last alpha density
             # create a fock matrix for beta from last alpha density
-            fock_matrix_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
-            fock_matrix_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
+            fock_matrix_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
+            fock_matrix_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
 
             # orthogonalize the fock matrices
             orth_fock_a = s_12.T.dot(fock_matrix_a).dot(s_12)
@@ -415,8 +411,8 @@ class UHF:
             # create a new alpha density matrix
             # create a new beta density matrix
             # And add the density matrices to an array.
-            new_density_a = density_matrix(orth_fock_a, self.n_a + 1, s_12)
-            new_density_b = density_matrix(orth_fock_b, self.n_b - 1, s_12)
+            new_density_a = Scf.density_matrix(orth_fock_a, self.n_a + 1, s_12)
+            new_density_b = Scf.density_matrix(orth_fock_b, self.n_b - 1, s_12)
             densities_a.append(new_density_a)
             densities_b.append(new_density_b)
 
@@ -430,8 +426,8 @@ class UHF:
 
         # Now that the system has converged, calculate the system's orbital coefficients from the last calculated
         # density matrix. First calculate the Fock matrices.
-        fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
-        fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
+        fock_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
+        fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
         # orthogonalize the fock matrices
         fock_orth_a = s_12.T.dot(fock_a).dot(s_12)
         fock_orth_b = s_12.T.dot(fock_b).dot(s_12)
@@ -463,8 +459,8 @@ class UHF:
 
             # initial fock matrix for stability analysis is the last fock matrix from the first iteration process,
             # for both alpha and beta
-            fock_a_init = uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
-            fock_b_init = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
+            fock_a_init = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
+            fock_b_init = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
 
             # orthogonolize the initial fock matrix with the coefficients, calculated from the first iteration process
             # reduce() is a short way to write calculations, the first argument is an operation,
@@ -628,16 +624,14 @@ class UHF:
         # Set Fock matrices to the basis of the MO's
         mo_fock_a = mo_a.T @ fock_a @ mo_a
         mo_fock_b = mo_b.T @ fock_b @ mo_b
-        mo_fock_gen = spin_blocked(mo_fock_a, zero, zero, mo_fock_b)
+        mo_fock_gen = t.spin_blocked(mo_fock_a, zero, zero, mo_fock_b)
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_ao_gen = expand_tensor(eri_ao)
-        mo_coeff_gen = spin_blocked(mo_a, zero, zero, mo_b)
-        if isinstance(self.energy, complex):
-            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen, complexity=True)
-        else:
-            eri_mo = eri_ao_to_mo(eri_ao_gen, mo_coeff_gen)
+        eri_ao_gen = t.expand_tensor(eri_ao)
+        mo_coeff_gen = t.spin_blocked(mo_a, zero, zero, mo_b)
+
+        eri_mo = t.tensor_basis_transform(eri_ao_gen, mo_coeff_gen)
 
         eri_mo_abrs = eri_mo
         eri_mo_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
@@ -742,15 +736,15 @@ class UHF:
                     for s in range(n_occ_a, n_orb):
                         b_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_abrs[a][b][r][s]
 
-        a = spin_blocked(a_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
-                         a_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
-                         a_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
-                         a_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+        a = t.spin_blocked(a_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                           a_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                           a_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                           a_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
 
-        b = spin_blocked(b_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
-                         b_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
-                         b_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
-                         b_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+        b = t.spin_blocked(b_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
+                           b_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
+                           b_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
+                           b_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
 
         # Create a function to rotate the orbitals in case of internal instability
         def rotate_to_eigenvec(eigenvec):
@@ -772,14 +766,14 @@ class UHF:
             block_off_diag_b_vv = np.zeros((n_vir_b, n_vir_b))
 
             # Create the general K matrix
-            k_a = spin_blocked(block_off_diag_a_oo, block_a_ov, block_a_ov.conj().T, block_off_diag_a_vv)
-            k_b = spin_blocked(block_off_diag_b_oo, block_b_ov, block_b_ov.conj().T, block_off_diag_b_vv)
+            k_a = t.spin_blocked(block_off_diag_a_oo, block_a_ov, block_a_ov.conj().T, block_off_diag_a_vv)
+            k_b = t.spin_blocked(block_off_diag_b_oo, block_b_ov, block_b_ov.conj().T, block_off_diag_b_vv)
             zeros = np.zeros((n_orb, n_orb))
-            k = spin_blocked(k_a, zeros, zeros, k_b)
+            k = t.spin_blocked(k_a, zeros, zeros, k_b)
 
             # Generalise the notation for the coefficients to make working with them more efficient
             # Then use the DEM algorithm to take a step towards the lowest eigenvector
-            coeff_gen = spin_blocked(self.get_mo_coeff()[0], zeros, zeros, self.get_mo_coeff()[1])
+            coeff_gen = t.spin_blocked(self.get_mo_coeff()[0], zeros, zeros, self.get_mo_coeff()[1])
             exp = la.expm(step_size * k)
             new_coeff_gen = coeff_gen @ exp
 
@@ -793,7 +787,7 @@ class UHF:
             if method == 'internal':
                 # the stability matrix for the real sub problem consists of a + b
                 stability_matrix = a + b
-                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -809,7 +803,7 @@ class UHF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix = a - b
-                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -825,7 +819,7 @@ class UHF:
         else:
             if method == 'internal':
                 # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
-                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                stability_matrix = t.spin_blocked(a, b, b.conj(), a.conj())
                 self.hessian = stability_matrix
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
@@ -857,7 +851,7 @@ class UHF:
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         # If no initial guess is given, use the orthogonalised core Hamiltonian
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
@@ -865,16 +859,16 @@ class UHF:
             if complex_method:
                 initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
                 initial_guess = initial_guess.astype(complex)
-                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
                 guess_density_a[0, :] += 0.1j
                 guess_density_a[:, 0] -= 0.1j
-                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
                 guess_density_b[0, :] += 0.1j
                 guess_density_b[:, 0] -= 0.1j
             else:
                 initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
-                guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-                guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+                guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
+                guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
 
         else:
             # Make the coefficients orthogonal in the correct basis.
@@ -982,7 +976,8 @@ class UHF:
             error_list_b.append(resid_b)
 
             # Calculate the energy and energy difference
-            energies_diis.append(uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b, self.get_one_e()))
+            energies_diis.append(Scf.uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b,
+                                                    self.get_one_e()))
             delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
 
             # Starting at two iterations, use the DIIS acceleration
@@ -995,8 +990,8 @@ class UHF:
             f_orth_b = s_12.conj().T @ f_b @ s_12
 
             # Calculate the new density matrices
-            new_density_a = density_matrix(f_orth_a, self.n_a, s_12)
-            new_density_b = density_matrix(f_orth_b, self.n_b, s_12)
+            new_density_a = Scf.density_matrix(f_orth_a, self.n_a, s_12)
+            new_density_b = Scf.density_matrix(f_orth_b, self.n_b, s_12)
 
             # Add them to their respective lists
             densities_diis_a.append(new_density_a)
@@ -1063,7 +1058,7 @@ class UHF:
         """
         self.diis(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
-        s_values = spin(self.n_a, self.n_b, UHF.get_mo_coeff(self)[0], UHF.get_mo_coeff(self)[1], self.get_ovlp())
+        s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
