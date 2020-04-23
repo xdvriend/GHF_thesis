@@ -25,6 +25,7 @@ install:
 
   - conda env create -f environment.yml
   - conda activate ghf
+  - python setup.py install
   - pip install ".[test]" #install the hf project in development mode
 
 script:
