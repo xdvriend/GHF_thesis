@@ -27,8 +27,6 @@ class MF:
         >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'sto-3g')
         >>> x = RHF.MF(h_2, 2)
         >>> x.get_scf_solution()
-        Number of iterations: 6
-        Converged SCF energy in Hartree: -1.0661086493179357 (RHF)
         """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
@@ -370,8 +368,6 @@ class MF:
         >>> h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
         >>> x = RHF.MF(h2, 2)
         >>> x.get_scf_solution_diis()
-        Number of iterations: 5
-        Converged SCF energy in Hartree: -1.100153764878446 (RHF)
 
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.

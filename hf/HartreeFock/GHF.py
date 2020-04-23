@@ -36,8 +36,6 @@ class MF:
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
     >>> x = GHF.MF(h3, 3)
     >>> x. get_scf_solution()
-    Number of iterations: 81
-    Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
@@ -841,10 +839,6 @@ class MF:
         >>> x = GHF.MF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
-        Number of iterations: 23
-        Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)
-
-        Without DIIS, 81 iterations are needed to find this solution.
 
         :param guess: Initial guess for scf. None specified: expanded core Hamiltonian
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.

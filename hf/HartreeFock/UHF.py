@@ -32,9 +32,6 @@ class MF:
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
     >>> x = UHF.MF(h3, 3)
     >>> x.get_scf_solution()
-    Number of iterations: 47
-    Converged SCF energy in Hartree: -1.506274320261134 (UHF)
-    <S^2> = 0.7735672504295973, <S_z> = 0.5, Multiplicity = 2.023430009098014
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
@@ -293,9 +290,6 @@ class MF:
         >>> x = UHF.MF(h4, 4)
         >>> guess = x.extra_electron_guess()
         >>> x.get_scf_solution(guess)
-        Number of iterations: 60
-        Converged SCF energy in Hartree: -2.0210882477030547 (UHF)
-        <S^2> = 1.0565277001056579, <S_z> = 0.0, Multiplicity = 2.2860688529487976
 
         :return: A new guess matrix to use for the scf procedure.
         """
@@ -385,10 +379,6 @@ class MF:
         >>> x = UHF.MF(h4, 4)
         >>> guess = x.stability()
         >>> x.get_scf_solution(guess)
-        There is an internal instability in the UHF wave function.
-        Number of iterations: 66
-        Converged SCF energy in Hartree: -2.0210882477030716 (UHF)
-        <S^2> = 1.056527700105677, <S_z> = 0.0, Multiplicity = 2.2860688529488145
 
         :return: New and improved MO's.
         """

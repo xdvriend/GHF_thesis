@@ -109,8 +109,6 @@ and the number of iterations needed to get this value.
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h\PYGZus{}2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{sto\PYGZhy{}3g}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h\PYGZus{}2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 6}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.0661086493179357 (RHF)}
 \end{sphinxVerbatim}
 \index{diis() (hf.HartreeFock.RHF.MF method)@\spxentry{diis()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
@@ -229,8 +227,6 @@ a normal scf, but the energy value will be the same. Example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h2} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{RHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h2}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 5}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.100153764878446 (RHF)}
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -320,9 +316,6 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 47}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.506274320261134 (UHF)}
-\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 0.7735672504295973, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.5, Multiplicity = 2.023430009098014}
 \end{sphinxVerbatim}
 \index{diis() (hf.HartreeFock.UHF.MF method)@\spxentry{diis()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
@@ -366,9 +359,6 @@ To perform a calculation with this method, you will have to work as follows:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{extra\PYGZus{}electron\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 60}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030547 (UHF)}
-\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.0565277001056579, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529487976}
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -566,10 +556,6 @@ To perform a stability analysis, use the following syntax:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{There is an internal instability in the UHF wave function.}
-\PYG{g+go}{Number of iterations: 66}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}2.0210882477030716 (UHF)}
-\PYG{g+go}{\PYGZlt{}S\PYGZca{}2\PYGZgt{} = 1.056527700105677, \PYGZlt{}S\PYGZus{}z\PYGZgt{} = 0.0, Multiplicity = 2.2860688529488145}
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -1124,8 +1110,6 @@ For a normal scf calculation your input looks like the following example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h3} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{GHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.} \PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 81}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202607725 (Real GHF)}
 \end{sphinxVerbatim}
 \index{diis() (hf.HartreeFock.GHF.MF method)@\spxentry{diis()}\spxextra{hf.HartreeFock.GHF.MF method}}
 
@@ -1264,11 +1248,7 @@ Example:
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{GHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h3}\PYG{p}{,} \PYG{l+m+mi}{3}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{random\PYGZus{}guess}\PYG{p}{(}\PYG{p}{)}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution\PYGZus{}diis}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\PYG{g+go}{Number of iterations: 23}
-\PYG{g+go}{Converged SCF energy in Hartree: \PYGZhy{}1.5062743202915496 (Real GHF)}
 \end{sphinxVerbatim}
-
-Without DIIS, 81 iterations are needed to find this solution.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
