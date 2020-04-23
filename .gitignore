@@ -2,6 +2,7 @@ ghf.egg-info/
 hf/__pycache__/
 hf/.DS_Store
 hf/tests/.DS_Store
+hf/tests/timer.dat
 hf/tests/__pycache__/
 hf/utilities/__pycache__/
 hf/HartreeFock/__pycache__/
@@ -9,6 +10,7 @@ docs/.DS_Store
 docs/build/.DS_Store
 docs/source/.DS_Store
 docs/build/latex
+docs/build/timer.dat
 !docs/build/latex/ghf.tex
 !docs/build/latex/ghf.pdf
 docs/build/html/_sources

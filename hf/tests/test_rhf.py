@@ -25,7 +25,7 @@ def test_scf():
 
     """
     x = RHF.MF(h2o, 10)
-    assert np.isclose(-74.94207992819219, x.get_scf_solution()) is True
+    assert np.isclose(-74.94207992819219, x.scf()[0]) is True
 
 
 def test_diis():
@@ -34,7 +34,7 @@ def test_diis():
 
     """
     x = RHF.MF(h2o, 10)
-    assert np.isclose(-74.94207992819219, x.get_scf_solution_diis()) is True
+    assert np.isclose(-74.94207992819219, x.diis()[0]) is True
 
 
 def test_scf_vs_diis():
