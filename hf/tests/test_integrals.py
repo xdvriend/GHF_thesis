@@ -6,7 +6,7 @@ Simple tests to check whether or not using the pySCF and psi4 integral calculato
 """
 from hf.HartreeFock import *
 import numpy as np
-from pyscf import *
+from pyscf import gto
 import psi4
 import os
 import sys

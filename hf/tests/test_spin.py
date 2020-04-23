@@ -8,7 +8,7 @@ from hf.HartreeFock import *
 from hf.utilities import spin as spin
 from hf.utilities import SCF_functions as Scf
 import numpy as np
-from pyscf import *
+from pyscf import gto
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

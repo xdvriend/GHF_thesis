@@ -6,7 +6,7 @@ Simple tests to check whether or not the functions return the correct value.
 """
 from hf.HartreeFock import *
 import numpy as np
-from pyscf import *
+from pyscf import gto
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
