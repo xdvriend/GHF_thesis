@@ -7,7 +7,6 @@ notifications:
 before_install:
   - sudo apt-get update
   - pip install --upgrade pip
-  - python setup.py install
 install:
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
