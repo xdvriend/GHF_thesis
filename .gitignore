@@ -1,6 +1,7 @@
 ghf.egg-info/
 hf/__pycache__/
 hf/.DS_Store
+hf/tests/.DS_Store
 hf/tests/__pycache__/
 hf/utilities/__pycache__/
 hf/HartreeFock/__pycache__/
