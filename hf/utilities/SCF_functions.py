@@ -64,6 +64,18 @@ def density_matrix(f_matrix, occ, trans):
     return density
 
 
+def calc_mo(f_o, t):
+    """
+    Calculate the mo coefficients.
+    :param f_o: Fock matrix in orthonormal basis.
+    :param t: Transformation matrix.
+    :return: mo coefficients
+    """
+    val, vec = la.eigh(f_o)
+    coeff = t @ vec
+    return coeff
+
+
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
     """
     - calculate a fock matrix from a given alpha and beta density matrix
