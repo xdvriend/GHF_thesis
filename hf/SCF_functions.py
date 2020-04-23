@@ -158,41 +158,43 @@ def expand_tensor(tensor, complexity=False):
     return np.vstack((top, bottom))
 
 
-def eri_ao_to_mo(eri, coeff, complexity=False):
+def eri_ao_to_mo(eri, coeff):
     """
     Transform the two electron tensor to MO basis. Scales as N^5.
     :param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
     :param coeff: coefficient matrix in spinor basis
-    :param complexity: specify whether you are working with real or complex tensors. Default is real.
     :return: Electron repulsion interaction, in mo notation, tensor in spinor basis
     """
-    dim = len(eri)
-    if complexity:
-        eri_mo = np.zeros((dim, dim, dim, dim)).astype(complex)
-        mo_1 = np.zeros((dim, dim, dim, dim)).astype(complex)
-        mo_2 = np.zeros((dim, dim, dim, dim)).astype(complex)
-        mo_3 = np.zeros((dim, dim, dim, dim)).astype(complex)
-    else:
-        eri_mo = np.zeros((dim, dim, dim, dim))
-        mo_1 = np.zeros((dim, dim, dim, dim))
-        mo_2 = np.zeros((dim, dim, dim, dim))
-        mo_3 = np.zeros((dim, dim, dim, dim))
+    # Old method: Slow. Left in as comments to provide clarity on how the transformation works.
+    # -----------------------------------------------------------------------------------------
+    #     eri_mo = np.zeros((dim, dim, dim, dim))
+    #     mo_1 = np.zeros((dim, dim, dim, dim))
+    #     mo_2 = np.zeros((dim, dim, dim, dim))
+    #     mo_3 = np.zeros((dim, dim, dim, dim))
 
-    for s in range(0, len(coeff)):
-        for sig in range(0, len(coeff)):
-            mo_1[:, :, :, s] += coeff[sig, s] * eri[:, :, :, sig]
+    # for s in range(0, len(coeff)):
+    #     for sig in range(0, len(coeff)):
+    #         mo_1[:, :, :, s] += coeff[sig, s] * eri[:, :, :, sig]
+    #
+    #     for r in range(0, len(coeff)):
+    #         for lam in range(0, len(coeff)):
+    #             mo_2[:, :, r, s] += coeff[lam, r] * mo_1[:, :, lam, s]
+    #
+    #         for q in range(0, len(coeff)):
+    #             for nu in range(0, len(coeff)):
+    #                 mo_3[:, q, r, s] += coeff[nu, q] * mo_2[:, nu, r, s]
+    #
+    #             for p in range(0, len(coeff)):
+    #                 for mu in range(0, len(coeff)):
+    #                     eri_mo[p, q, r, s] += coeff[mu, p] * mo_3[mu, q, r, s]
 
-        for r in range(0, len(coeff)):
-            for lam in range(0, len(coeff)):
-                mo_2[:, :, r, s] += coeff[lam, r] * mo_1[:, :, lam, s]
+    # New method: fast, but formula's might be less clear.
+    # ----------------------------------------------------
+    mo_1 = np.einsum('as,pqra->pqrs', coeff, eri)
+    mo_2 = np.einsum('lr,pqls->pqrs', coeff, mo_1)
+    mo_3 = np.einsum('nq,pnrs->pqrs', coeff, mo_2)
+    eri_mo = np.einsum('mp,mqrs->pqrs', coeff, mo_3)
 
-            for q in range(0, len(coeff)):
-                for nu in range(0, len(coeff)):
-                    mo_3[:, q, r, s] += coeff[nu, q] * mo_2[:, nu, r, s]
-
-                for p in range(0, len(coeff)):
-                    for mu in range(0, len(coeff)):
-                        eri_mo[p, q, r, s] += coeff[mu, p] * mo_3[mu, q, r, s]
     return eri_mo
 
 
