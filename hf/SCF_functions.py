@@ -237,7 +237,7 @@ def ghf_spin(coeff, n_e, trans):
     temp = ovlp_a - ovlp_b
     ss_z = (s_z ** 2) + 0.25 * ((number_occ_a + number_occ_b) - np.einsum('ij, ij', temp, temp))
     ss_mp = number_occ_b + ((ovlp_ba.trace() * ovlp_ab.trace()) - np.einsum('ij, ji', ovlp_ba, ovlp_ab))
-    s_2 = ss_mp + s_z + ss_z
+    s_2 = (ss_mp + s_z + ss_z).real
 
-    s = np.sqrt(s_2 + .25) - .5
+    s = (np.sqrt(s_2 + .25) - .5).real
     return s_z, s_2, 2*s + 1
