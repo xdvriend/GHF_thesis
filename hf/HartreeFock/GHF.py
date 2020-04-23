@@ -10,14 +10,17 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 
 """
 
-from hf.SCF_functions import *
+from hf.utilities import SCF_functions as Scf
+from hf.utilities import spin as spin
+from hf.utilities import transform as t
 import numpy as np
 from numpy import linalg as la
 from scipy import linalg as la2
 import collections as c
+from pyscf import *
 
 
-class GHF:
+class MF:
     """
     Calculate the GHF energy.
     --------------------------------
@@ -29,8 +32,9 @@ class GHF:
 
     For a normal scf calculation your input looks like the following example:
 
+    >>> from hf.HartreeFock import *
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = GHF(h3, 3)
+    >>> x = GHF.MF(h3, 3)
     >>> x. get_scf_solution()
     Number of iterations: 81
     Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)
@@ -48,9 +52,9 @@ class GHF:
         self.molecule = molecule
         self.number_of_electrons = number_of_electrons
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is given as a string.')
@@ -102,18 +106,19 @@ class GHF:
 
         To use this guess:
 
+        >>> from hf.HartreeFock import *
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = GHF(h3, 3)
+        >>> x = GHF.MF(h3, 3)
         >>> guess = x.unitary_rotation_guess()
         >>> x.get_scf_solution(guess)
 
         :return: A rotated guess matrix.
         """
         if init is None:
-            c_ham = expand_matrix(self.get_one_e())
+            c_ham = t.expand_matrix(self.get_one_e())
         else:
             if np.shape(init)[0] == np.shape(self.get_ovlp())[0]:
-                c_ham = expand_matrix(init)
+                c_ham = t.expand_matrix(init)
             else:
                 c_ham = init
 
@@ -145,8 +150,9 @@ class GHF:
 
         To use this guess:
 
+        >>> from hf.HartreeFock import *
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = GHF(h3, 3)
+        >>> x = GHF.MF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
@@ -179,9 +185,9 @@ class GHF:
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
         # Also define the core Hamiltonian matrix in it's spin-blocked notation.
-        s_min_12 = trans_matrix(self.get_ovlp())
-        s_12_o = expand_matrix(s_min_12)
-        c_ham = expand_matrix(self.get_one_e())
+        s_min_12 = Scf.trans_matrix(self.get_ovlp())
+        s_12_o = t.expand_matrix(s_min_12)
+        c_ham = t.expand_matrix(self.get_one_e())
 
         def density(fock):
             """
@@ -290,7 +296,7 @@ class GHF:
             """
            Calculates the scf energy for the GHF method
             """
-            return np.sum(dens * (expand_matrix(self.get_one_e()) + fock)) / 2
+            return np.sum(dens * (t.expand_matrix(self.get_one_e()) + fock)) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
@@ -308,7 +314,7 @@ class GHF:
             f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
 
             # Calculate the new energy and add it to the energies array.
             # Calculate the energy difference and add it to the delta_e array.
@@ -345,7 +351,7 @@ class GHF:
             f_ba = fock_block('b', 'a', densities[-2])
             f_bb = fock_block('b', 'b', densities[-2])
             # Add the blocks together.
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
             return f
         self.last_fock = last_fock()
 
@@ -378,7 +384,7 @@ class GHF:
         """
         self.scf(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
-        s_values = ghf_spin(self.get_mo_coeff(), self.number_of_electrons, trans_matrix(self.get_ovlp()))
+        s_values = spin.ghf(self.get_mo_coeff(), self.number_of_electrons, Scf.trans_matrix(self.get_ovlp()))
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")
@@ -436,7 +442,7 @@ class GHF:
         # Calculate the A & B blocks needed for stability analysis.
         # Determine the number of occupied and virtual orbitals.
         occ = int(self.number_of_electrons)
-        vir = int(np.shape(expand_matrix(self.get_ovlp()))[0] - self.number_of_electrons)
+        vir = int(np.shape(t.expand_matrix(self.get_ovlp()))[0] - self.number_of_electrons)
 
         # Determine the Fock matrices needed.
         coeff = self.get_mo_coeff()
@@ -445,9 +451,9 @@ class GHF:
 
         # Determine the two electron integrals in spinor basis.
         eri_ao = self.get_two_e()
-        eri_ao_spinor = expand_tensor(eri_ao)
+        eri_ao_spinor = t.expand_tensor(eri_ao)
 
-        eri_mo = eri_ao_to_mo(eri_ao_spinor, coeff)
+        eri_mo = t.tensor_basis_transform(eri_ao_spinor, coeff)
 
         eri_spinor_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
         eri_spinor_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
@@ -494,7 +500,7 @@ class GHF:
             block_bb = np.zeros((occ, occ))
             block_ab = -1 * block_ba.conj().T
             block_aa = np.zeros((vir, vir))
-            k = spin_blocked(block_aa, block_ab, block_ba, block_bb)
+            k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
             coeff_init = self.get_mo_coeff()
             exp = la2.expm(-1 * step_size * k)
             return coeff_init @ exp
@@ -504,7 +510,7 @@ class GHF:
             if method == 'internal':
                 # the stability matrix for the real sub problem consists of a + b
                 stability_matrix = a + b
-                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -520,7 +526,7 @@ class GHF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix = a - b
-                self.hessian = spin_blocked(a, b, b.conj(), a.conj())
+                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
@@ -536,7 +542,7 @@ class GHF:
         else:
             if method == 'internal':
                 # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
-                stability_matrix = spin_blocked(a, b, b.conj(), a.conj())
+                stability_matrix = t.spin_blocked(a, b, b.conj(), a.conj())
                 self.hessian = stability_matrix
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
@@ -576,9 +582,9 @@ class GHF:
         """
         # Get the transformation matrix, S^1/2, and write it in spin blocked notation.
         # Also define the core Hamiltonian matrix in it's spin-blocked notation.
-        s_min_12 = trans_matrix(self.get_ovlp())
-        s_12_o = expand_matrix(s_min_12)
-        c_ham = expand_matrix(self.get_one_e())
+        s_min_12 = Scf.trans_matrix(self.get_ovlp())
+        s_12_o = t.expand_matrix(s_min_12)
+        c_ham = t.expand_matrix(self.get_one_e())
 
         def density(fock):
             """
@@ -690,8 +696,8 @@ class GHF:
             :param fock: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12_o @ (fock @ dens @ expand_matrix(self.get_ovlp()) -
-                             expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.conj().T
+            return s_12_o @ (fock @ dens @ t.expand_matrix(self.get_ovlp()) -
+                             t.expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -741,7 +747,7 @@ class GHF:
             """
             Calculates the scf energy for the GHF method
             """
-            return np.sum(dens * (expand_matrix(self.get_one_e()) + fock)) / 2
+            return np.sum(dens * (t.expand_matrix(self.get_one_e()) + fock)) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
@@ -756,7 +762,7 @@ class GHF:
             f_bb = fock_block('b', 'b', densities_diis[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
 
             # Calculate the residual
             resid = residual(densities_diis[-1], f)
@@ -830,8 +836,9 @@ class GHF:
 
         Example:
 
+        >>> from hf.HartreeFock import *
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = GHF(h3, 3)
+        >>> x = GHF.MF(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution_diis(guess)
         Number of iterations: 23
@@ -846,7 +853,7 @@ class GHF:
         """
         self.diis(guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
-        s_values = ghf_spin(self.get_mo_coeff(), self.number_of_electrons, trans_matrix(self.get_ovlp()))
+        s_values = spin.ghf(self.get_mo_coeff(), self.number_of_electrons, Scf.trans_matrix(self.get_ovlp()))
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
                 print("Energy value is complex." + " (" + str(np.imag(e)) + "i)")

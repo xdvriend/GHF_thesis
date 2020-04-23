@@ -16,4 +16,6 @@ HF's documentation
    cUHF_b
    GHF
    SCF_functions
+   spin
+   transform
    tests

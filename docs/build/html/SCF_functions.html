@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Testing the RHF and UHF methods" href="tests.html" />
+    <link rel="next" title="Functions to calculate spin expectation values" href="spin.html" />
     <link rel="prev" title="Generalised Hartree Fock, by means of SCF procedure" href="GHF.html" /> 
 </head>
 
@@ -88,6 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Useful functions for SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
@@ -153,12 +155,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-hf.SCF_functions"></span><div class="section" id="useful-functions-for-scf-procedure">
+  <span class="target" id="module-hf.utilities.SCF_functions"></span><div class="section" id="useful-functions-for-scf-procedure">
 <h1>Useful functions for SCF procedure<a class="headerlink" href="#useful-functions-for-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>A number of functions used throughout the UHF and RHF calculations are summarised here.</p>
 <dl class="function">
-<dt id="hf.SCF_functions.density_matrix">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.density_matrix">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>density() creates a density matrix from a fock matrix and the number of occupied orbitals.</p></li>
 <li><p>Input is a fock matrix, the number of occupied orbitals, which can be separate for alpha and beta in case of UHF.
@@ -167,81 +169,22 @@ And a transformation matrix X.</p></li>
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.SCF_functions.eri_ao_to_mo">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">eri_ao_to_mo</code><span class="sig-paren">(</span><em class="sig-param">eri</em>, <em class="sig-param">coeff</em>, <em class="sig-param">complexity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.eri_ao_to_mo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform the two electron tensor to MO basis. Scales as N^5.
-:param eri: Electron repulsion interaction, in ao notation, tensor in spinor basis
-:param coeff: coefficient matrix in spinor basis
-:param complexity: specify whether you are working with real or complex tensors. Default is real.
-:return: Electron repulsion interaction, in mo notation, tensor in spinor basis</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="hf.SCF_functions.expand_matrix">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.expand_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>matrix</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a matrix double the size, where blocks of zero’s are added top right and bottom left.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="hf.SCF_functions.expand_tensor">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">expand_tensor</code><span class="sig-paren">(</span><em class="sig-param">tensor</em>, <em class="sig-param">complexity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.expand_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand every matrix within the tensor, in the same way the expand matrix function works.
-:param tensor: The tensor, usually eri, that you wish to expand.
-:param complexity: Is your tensor complex or not? Default is false.
-:return: a tensor where each dimension is doubled.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="hf.SCF_functions.get_integrals_psi4">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">get_integrals_psi4</code><span class="sig-paren">(</span><em class="sig-param">mol</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.get_integrals_psi4" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.get_integrals_psi4">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">get_integrals_psi4</code><span class="sig-paren">(</span><em class="sig-param">mol</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.get_integrals_psi4" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function to calculate your integrals &amp; nuclear repulsion with psi4.
 :param mol: Psi4 instance
 :return: overlap, core hamiltonian, eri tensor and nuclear repulsion</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.SCF_functions.get_integrals_pyscf">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">get_integrals_pyscf</code><span class="sig-paren">(</span><em class="sig-param">molecule</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.get_integrals_pyscf" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.get_integrals_pyscf">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">get_integrals_pyscf</code><span class="sig-paren">(</span><em class="sig-param">molecule</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.get_integrals_pyscf" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function to calculate your integrals &amp; nuclear repulsion with pyscf.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.SCF_functions.spin">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">spin</code><span class="sig-paren">(</span><em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">coeff_a</em>, <em class="sig-param">coeff_b</em>, <em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.spin" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>occ_a</strong> – number of occupied alpha orbitals</p></li>
-<li><p><strong>occ_b</strong> – number of occupied beta orbitals</p></li>
-<li><p><strong>coeff_a</strong> – MO coefficients of alpha orbitals</p></li>
-<li><p><strong>coeff_b</strong> – MO coefficients of beta orbitals</p></li>
-<li><p><strong>overlap</strong> – overlap matrix of the molecule</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>S^2, S_z and spin multiplicity</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="hf.SCF_functions.spin_blocked">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">spin_blocked</code><span class="sig-paren">(</span><em class="sig-param">block_1</em>, <em class="sig-param">block_2</em>, <em class="sig-param">block_3</em>, <em class="sig-param">block_4</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.spin_blocked" title="Permalink to this definition">¶</a></dt>
-<dd><p>When creating the blocks of the density or fock matrix separately, this function is used to add them together,
-and create the total density or Fock matrix in spin Blocked notation.
-:return: a density matrix in the spin-blocked notation</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="hf.SCF_functions.trans_matrix">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.trans_matrix">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">trans_matrix</code><span class="sig-paren">(</span><em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.trans_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>Define a transformation matrix X, used to orthogonalize different matrices throughout the calculation.</p></li>
 <li><p>Input should be an overlap matrix.</p></li>
@@ -249,8 +192,8 @@ and create the total density or Fock matrix in spin Blocked notation.
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.SCF_functions.uhf_fock_matrix">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">uhf_fock_matrix</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_1</em>, <em class="sig-param">density_matrix_2</em>, <em class="sig-param">one_electron</em>, <em class="sig-param">two_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.uhf_fock_matrix" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.uhf_fock_matrix">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">uhf_fock_matrix</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_1</em>, <em class="sig-param">density_matrix_2</em>, <em class="sig-param">one_electron</em>, <em class="sig-param">two_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.uhf_fock_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>calculate a fock matrix from a given alpha and beta density matrix</p></li>
 <li><p>fock alpha if 1 = alpha and 2 = beta and vice versa</p></li>
@@ -259,8 +202,8 @@ and create the total density or Fock matrix in spin Blocked notation.
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.SCF_functions.uhf_scf_energy">
-<code class="sig-prename descclassname">hf.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="hf.utilities.SCF_functions.uhf_scf_energy">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">uhf_scf_energy</code><span class="sig-paren">(</span><em class="sig-param">density_matrix_a</em>, <em class="sig-param">density_matrix_b</em>, <em class="sig-param">fock_a</em>, <em class="sig-param">fock_b</em>, <em class="sig-param">one_electron</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.uhf_scf_energy" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
 <li><p>calculate the scf energy value from a given density matrix and a given fock matrix for both alpha and beta,
 so 4 matrices in total.</p></li>
@@ -280,7 +223,7 @@ matrix.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tests.html" class="btn btn-neutral float-right" title="Testing the RHF and UHF methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="spin.html" class="btn btn-neutral float-right" title="Functions to calculate spin expectation values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="GHF.html" class="btn btn-neutral float-left" title="Generalised Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

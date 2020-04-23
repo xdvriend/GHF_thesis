@@ -8,13 +8,15 @@ Several options are available to make sure you get the lowest energy from your c
 functions to get intermediate values such as MO coefficients, density and fock matrices.
 """
 
-from hf.SCF_functions import *
+import hf.utilities.SCF_functions as Scf
+import hf.utilities.spin as spin
+import numpy as np
 from pyscf import *
 import scipy.linalg as la
 import collections as c
 
 
-class CUHF:
+class MF:
     """
     Calculate contrained UHF energy.
     ----------------------------------
@@ -26,8 +28,9 @@ class CUHF:
 
     For a normal scf calculation your input looks like the following example:
 
+    >>> from hf.HartreeFock import *
     >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-    >>> x = CUHF(h3, 3)
+    >>> x = cUHF_b.MF(h3, 3)
     >>> x.get_scf_solution()
     """
     def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
@@ -44,9 +47,9 @@ class CUHF:
         # If there's an uneven number of electrons, there will be one more alpha than beta electron.
         self.molecule = molecule
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
@@ -109,8 +112,9 @@ class CUHF:
 
         To use this guess:
 
+        >>> from hf.HartreeFock import *
         >>> h3 = gto.M(atom = 'h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin = 1, basis = 'cc-pvdz')
-        >>> x = CUHF(h3, 3)
+        >>> x = cUHF_b(h3, 3)
         >>> guess = x.random_guess()
         >>> x.get_scf_solution(guess)
 
@@ -140,14 +144,14 @@ class CUHF:
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix
-        s_12 = trans_matrix(self.get_ovlp())
+        s_12 = Scf.trans_matrix(self.get_ovlp())
         # If no initial guess is given, use the orthogonalised core Hamiltonian
         # Else, use the given initial guess.
         if initial_guess is None:
             # create guess density matrix from core guess, separate for alpha and beta and put them into an array
             initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
+            guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
         else:
             # Make the coefficients orthogonal in the correct basis.
             coeff_a = s_12 @ initial_guess[0]
@@ -189,15 +193,15 @@ class CUHF:
         def iteration(n_i):
             self.density_list[n_i] = [densities_a[-1], densities_b[-1]]
             # create a fock matrix for alpha from last alpha density
-            fock_a = uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
+            fock_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
             # create a fock matrix for beta from last beta density
-            fock_b = uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
+            fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
             self.fock_list[n_i] = [fock_a, fock_b]
 
             # calculate the improved scf energy and add it to the array
-            energies.append(uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
-            self.energy_list[n_i] = uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b,
-                                                   self.get_one_e()) + self.nuc_rep()
+            energies.append(Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
+            self.energy_list[n_i] = Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b,
+                                                       self.get_one_e()) + self.nuc_rep()
             # calculate the energy difference and add it to the delta_E array
             delta_e.append(energies[-1] - energies[-2])
 
@@ -260,7 +264,7 @@ class CUHF:
         :return: The converged scf energy.
         """
         self.scf(guess, convergence=convergence)
-        s_values = spin(self.n_a, self.n_b, CUHF.get_mo_coeff(self)[0], CUHF.get_mo_coeff(self)[1], self.get_ovlp())
+        s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF)")
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
@@ -301,14 +305,14 @@ class CUHF:
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         # If no initial guess is given, use the orthogonalised core Hamiltonian
         # Else, use the given initial guess.
         # create guess density matrix from core guess, separate for alpha and beta and put them into an array
         if initial_guess is None:
             initial_guess = s_12.conj().T @ self.get_one_e() @ s_12
-            guess_density_a = density_matrix(initial_guess, self.n_a, s_12)
-            guess_density_b = density_matrix(initial_guess, self.n_b, s_12)
+            guess_density_a = Scf.density_matrix(initial_guess, self.n_a, s_12)
+            guess_density_b = Scf.density_matrix(initial_guess, self.n_b, s_12)
 
         else:
             # Make the coefficients orthogonal in the correct basis.
@@ -421,7 +425,8 @@ class CUHF:
             error_list_b.append(resid_b)
 
             # Calculate the energy and energy difference
-            energies_diis.append(uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b, self.get_one_e()))
+            energies_diis.append(Scf.uhf_scf_energy(densities_diis_a[-1], densities_diis_b[-1], f_a, f_b,
+                                                    self.get_one_e()))
             delta_e_diis.append(energies_diis[-1] - energies_diis[-2])
 
             # Starting at two iterations, use the DIIS acceleration
@@ -496,7 +501,7 @@ class CUHF:
         :return: The converged diis energy.
         """
         self.diis(guess, convergence=convergence)
-        s_values = spin(self.n_a, self.n_b, CUHF.get_mo_coeff(self)[0], CUHF.get_mo_coeff(self)[1], self.get_ovlp())
+        s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
 
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF, DIIS)")

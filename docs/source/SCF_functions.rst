@@ -1,2 +1,2 @@
-.. automodule:: hf.SCF_functions
+.. automodule:: hf.utilities.SCF_functions
     :members:

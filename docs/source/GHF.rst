@@ -1,2 +1,2 @@
-.. automodule:: hf.GHF
+.. automodule:: hf.HartreeFock.GHF
     :members:

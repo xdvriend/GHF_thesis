@@ -6,11 +6,14 @@ The molecule has to be created in pySCF:
 molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basis = basis set)
 """
 
-from hf.SCF_functions import *
+import hf.utilities.SCF_functions as Scf
+import numpy as np
+from scipy import linalg as la
 import collections as c
+from pyscf import *
 
 
-class RHF:
+class MF:
     """
         calculate RHF energy.
         ---------------------
@@ -20,8 +23,9 @@ class RHF:
         The following snippet prints and returns RHF energy of h_2
         and the number of iterations needed to get this value.
 
-        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'cc-pvdz')
-        >>> x = RHF(h_2, 2)
+        >>> from hf.HartreeFock import *
+        >>> h_2 = gto.M(atom = 'h 0 0 0; h 0 0 1', spin = 0, basis = 'sto-3g')
+        >>> x = RHF.MF(h_2, 2)
         >>> x.get_scf_solution()
         Number of iterations: 6
         Converged SCF energy in Hartree: -1.0661086493179357 (RHF)
@@ -36,9 +40,9 @@ class RHF:
         """
         self.molecule = molecule
         if int_method == 'pyscf':
-            self.integrals = get_integrals_pyscf(molecule)
+            self.integrals = Scf.get_integrals_pyscf(molecule)
         elif int_method == 'psi4':
-            self.integrals = get_integrals_psi4(molecule)
+            self.integrals = Scf.get_integrals_psi4(molecule)
         else:
             raise Exception('Unsupported method to calculate integrals. Supported methods are pyscf or psi4. '
                             'Make sure the molecule instance matches the method and is gives as a string.')
@@ -91,16 +95,16 @@ class RHF:
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         if complex_method:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
             core_guess = core_guess.astype(complex)
-            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
             guess_density[0, :] += 0.1j
             guess_density[:, 0] -= 0.1j
         else:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = density_matrix(core_guess, self.occupied, s_12)
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
 
         densities = [guess_density]  # put the guess density in an array
 
@@ -130,7 +134,7 @@ class RHF:
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
             fock_orth = s_12.conj().T.dot(fock).dot(s_12)
-            new_density = density_matrix(fock_orth, self.occupied, s_12)
+            new_density = Scf.density_matrix(fock_orth, self.occupied, s_12)
             # put new density matrix in the densities array
             densities.append(new_density)
 
@@ -219,16 +223,16 @@ class RHF:
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
-        s_12 = trans_matrix(self.get_ovlp())  # calculate the transformation matrix
+        s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
         if complex_method:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
             core_guess = core_guess.astype(complex)
-            guess_density = density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
             guess_density[0, :] += 0.1j
             guess_density[:, 0] -= 0.1j
         else:
             core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = density_matrix(core_guess, self.occupied, s_12)
+            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -318,7 +322,7 @@ class RHF:
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
             fock_orth = s_12.conj().T.dot(fock).dot(s_12)
-            new_density = density_matrix(fock_orth, self.occupied, s_12)
+            new_density = Scf.density_matrix(fock_orth, self.occupied, s_12)
 
             # put new density matrix in the densities array
             densities_diis.append(new_density)
@@ -362,8 +366,9 @@ class RHF:
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
 
+        >>> from hf.HartreeFock import *
         >>> h2 = gto.M(atom = 'h 0 0 0; h 1 0 0', basis = 'cc-pvdz')
-        >>> x = RHF(h2, 2)
+        >>> x = RHF.MF(h2, 2)
         >>> x.get_scf_solution_diis()
         Number of iterations: 5
         Converged SCF energy in Hartree: -1.100153764878446 (RHF)

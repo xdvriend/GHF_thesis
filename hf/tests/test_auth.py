@@ -4,10 +4,8 @@ Testing the RHF and UHF methods
 
 Simple tests to check whether or not the functions return the correct value.
 """
-from hf.RHF import RHF
-from hf.UHF import UHF
-from hf.GHF import GHF
-from hf.SCF_functions import *
+from hf.HartreeFock import *
+from hf.utilities import transform as tr
 import numpy as np
 from pyscf import *
 import psi4
@@ -39,8 +37,8 @@ def test_rhf():
     test_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10^-11.
 
     """
-    x = RHF(h4, 4)
-    assert np.allclose(-1.94035983928, x.get_scf_solution())
+    x = RHF.MF(h4, 4)
+    assert np.allclose(-1.94035983928, x.get_scf_solution(), x.get_scf_solution_diis()) is True
 
 
 def test_uhf():
@@ -48,8 +46,8 @@ def test_uhf():
     test_UHF will test the regular UHF method, by checking whether or not it returns the expected result.
     The accuracy is 10^-6.
     """
-    x = UHF(h3, 3)
-    assert -1.506275 <= x.get_scf_solution() <= -1.506274
+    x = UHF.MF(h3, 3)
+    assert np.allclose(-1.506274, x.get_scf_solution(), x.get_scf_solution_diis()) is True
 
 
 def test_extra_e():
@@ -58,9 +56,9 @@ def test_extra_e():
     those coefficients for the actual system, by checking whether or not it returns the expected result.
     The accuracy is 10^-6.
     """
-    x = UHF(h4, 4)
+    x = UHF.MF(h4, 4)
     guess = x.extra_electron_guess()
-    assert -2.021089 <= x.get_scf_solution(guess) <= -2.021088
+    assert np.allclose(-2.021088, x.get_scf_solution(guess)) is True
 
 
 def test_stability():
@@ -68,20 +66,20 @@ def test_stability():
     test_stability will test the UHF method, with stability analysis, by checking whether or not it returns
     the expected result. The accuracy is 10^-6.
     """
-    x = UHF(h4, 4)
+    x = UHF.MF(h4, 4)
     guess = x.stability()
-    assert -2.021089 <= x.get_scf_solution(guess) <= -2.021088
+    assert np.allclose(-2.021088, x.get_scf_solution(guess)) is True
 
 
 def test_overlap():
     """
     Test whether or not psi4 and pyscf give the same overlap integrals.
     """
-    x = RHF(h2o, 10)
-    y = RHF(h2o_psi4, 10, 'psi4')
+    x = RHF.MF(h2o, 10)
+    y = RHF.MF(h2o_psi4, 10, 'psi4')
     ovlp1 = np.sum(x.get_ovlp())
     ovlp2 = np.sum(y.get_ovlp())
-    assert np.isclose(ovlp1, ovlp2) == True
+    assert np.isclose(ovlp1, ovlp2) is True
 
 
 def test_one_e():
@@ -89,31 +87,31 @@ def test_one_e():
     Test whether or not psi4 and pyscf give the same core Hamiltonian integrals.
     :return:
     """
-    x = RHF(h2o, 10)
-    y = RHF(h2o_psi4, 10, 'psi4')
+    x = RHF.MF(h2o, 10)
+    y = RHF.MF(h2o_psi4, 10, 'psi4')
     one_e_1 = np.sum(x.get_one_e())
     one_e_2 = np.sum(y.get_one_e())
-    assert np.isclose(one_e_1, one_e_2) == True
+    assert np.isclose(one_e_1, one_e_2) is True
 
 
 def test_two_e():
     """
     Test whether or not psi4 and pyscf give the same two electron integrals.
     """
-    x = RHF(h2o, 10)
-    y = RHF(h2o_psi4, 10, 'psi4')
+    x = RHF.MF(h2o, 10)
+    y = RHF.MF(h2o_psi4, 10, 'psi4')
     two_e_1 = np.sum(x.get_two_e())
     two_e_2 = np.sum(y.get_two_e())
-    assert np.isclose(two_e_1, two_e_2) == True
+    assert np.isclose(two_e_1, two_e_2) is True
 
 
 def test_pyscf_vs_psi4():
     """
     Test a pyscf energy calculation vs a psi4 energy calculation.
     """
-    x = RHF(h2o, 10)
-    y = RHF(h2o_psi4, 10, 'psi4')
-    assert np.isclose(x.scf(convergence=1e-6)[0], y.scf(convergence=1e-6)[0])
+    x = RHF.MF(h2o, 10)
+    y = RHF.MF(h2o_psi4, 10, 'psi4')
+    assert np.isclose(x.scf(convergence=1e-6)[0], y.scf(convergence=1e-6)[0]) is True
     assert x.scf(convergence=1e-6)[1] == y.scf(convergence=1e-6)[1]
 
 
@@ -121,8 +119,8 @@ def test_diis_rhf():
     """
     Test whether diis gives the same energy in fewer iterations.
     """
-    x = RHF(h2o, 10)
-    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
+    x = RHF.MF(h2o, 10)
+    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0]) is True
     assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]
 
 
@@ -130,8 +128,8 @@ def test_diis_uhf():
     """
     Test whether diis gives the same energy in fewer iterations.
     """
-    x = UHF(h2o, 10)
-    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
+    x = UHF.MF(h2o, 10)
+    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0]) is True
     assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]
 
 
@@ -139,8 +137,8 @@ def test_diis_real_ghf():
     """
     Test whether diis gives the same energy in fewer iterations.
     """
-    x = GHF(h2o, 10)
-    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0])
+    x = GHF.MF(h2o, 10)
+    assert np.isclose(x.scf(convergence=1e-6)[0], x.diis(convergence=1e-6)[0]) is True
     assert x.scf(convergence=1e-6)[1] >= x.diis(convergence=1e-6)[1]
 
 
@@ -161,7 +159,7 @@ def test_tensor_transform():
                   [3, 4]])
 
     # Set up the tensor transformation function
-    x = eri_ao_to_mo(ss, t)
+    x = tr.tensor_basis_transform(ss, t)
 
     # Set up the control
     control = np.zeros_like(ss)
