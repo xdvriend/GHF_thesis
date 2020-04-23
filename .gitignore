@@ -10,8 +10,11 @@ docs/source/.DS_Store
 docs/build/latex
 !docs/build/latex/ghf.tex
 !docs/build/latex/ghf.pdf
-docs/build/html
-!docs/build/html/*.html
+docs/build/html/_sources
+docs/build/html/_static
+docs/build/html/.buildinfo
+docs/build/html/objects.inv
+docs/build/html/searchindex.js
 polygons.py
 refactor_test.py
 energy_calcs.py
