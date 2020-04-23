@@ -18,4 +18,3 @@ HF's documentation
    SCF_functions
    spin
    transform
-   tests

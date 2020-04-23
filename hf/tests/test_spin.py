@@ -23,7 +23,7 @@ def test_uhf_spin():
     s = spin.uhf(x.n_a, x.n_b, x.get_mo_coeff()[0], x.get_mo_coeff()[1], x.get_ovlp())
     assert np.isclose(0.773570840069661, s[0])
     assert np.isclose(0.5, s[1])
-    assert np.isclose(2.02343355716926, s[0])
+    assert np.isclose(2.02343355716926, s[2])
 
 
 def test_ghf_spin():

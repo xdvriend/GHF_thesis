@@ -132,11 +132,11 @@ scf energy, number of iterations, mo coefficients, last density matrix, last foc
 
 \end{fulllineitems}
 
-\index{get\_last\_dens() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_last\_dens()}\spxextra{hf.HartreeFock.RHF.MF method}}
+\index{get\_dens() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_dens()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
-Returns the last density matrix of the converged solution.
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_dens}}}{\emph{i=-1}}{}
+Returns the (last) density matrix.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The last density matrix.
@@ -145,11 +145,24 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_last\_fock()}\spxextra{hf.HartreeFock.RHF.MF method}}
+\index{get\_fock() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_fock()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
-Returns the last fock matrix of the converged solution.
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock}}}{\emph{i=-1}}{}
+Returns the (last) fock matrix.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock\_orth() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_fock\_orth()}\spxextra{hf.HartreeFock.RHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_fock_orth}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock\_orth}}}{\emph{i=-1}}{}
+Returns the (last) fock matrix in the orthonormal basis.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The last Fock matrix.
@@ -161,8 +174,8 @@ The last Fock matrix.
 \index{get\_mo\_coeff() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
-Returns mo coefficients of the converged solution.
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{\emph{i=-1}}{}
+Returns mo coefficients.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The mo coefficients
@@ -1385,6 +1398,17 @@ A rotated guess matrix.
 \chapter{Useful functions for SCF procedure}
 \label{\detokenize{SCF_functions:useful-functions-for-scf-procedure}}\label{\detokenize{SCF_functions::doc}}
 A number of functions used throughout the UHF and RHF calculations are summarised here.
+\index{calc\_mo() (in module hf.utilities.SCF\_functions)@\spxentry{calc\_mo()}\spxextra{in module hf.utilities.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:hf.utilities.SCF_functions.calc_mo}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{calc\_mo}}}{\emph{f\_o}, \emph{t}}{}
+Calculate the mo coefficients.
+:param f\_o: Fock matrix in orthonormal basis.
+:param t: Transformation matrix.
+:return: mo coefficients
+
+\end{fulllineitems}
+
 \index{density\_matrix() (in module hf.utilities.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module hf.utilities.SCF\_functions}}
 
 \begin{fulllineitems}
@@ -1615,112 +1639,6 @@ The tensor in the basis of the transformation matrix.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{tests:module-hf.tests.test_auth}}\index{hf.tests.test\_auth (module)@\spxentry{hf.tests.test\_auth}\spxextra{module}}
-
-\chapter{Testing the RHF and UHF methods}
-\label{\detokenize{tests:testing-the-rhf-and-uhf-methods}}\label{\detokenize{tests::doc}}
-Simple tests to check whether or not the functions return the correct value.
-\index{test\_diis\_real\_ghf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_real\_ghf()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_real_ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_real\_ghf}}}{}{}
-Test whether diis gives the same energy in fewer iterations.
-
-\end{fulllineitems}
-
-\index{test\_diis\_rhf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_rhf()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_rhf}}}{}{}
-Test whether diis gives the same energy in fewer iterations.
-
-\end{fulllineitems}
-
-\index{test\_diis\_uhf() (in module hf.tests.test\_auth)@\spxentry{test\_diis\_uhf()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_diis_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_diis\_uhf}}}{}{}
-Test whether diis gives the same energy in fewer iterations.
-
-\end{fulllineitems}
-
-\index{test\_extra\_e() (in module hf.tests.test\_auth)@\spxentry{test\_extra\_e()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_extra_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_extra\_e}}}{}{}
-test\_extra\_e will test the UHF method, with the added option of first adding 2 electrons to the system and using
-those coefficients for the actual system, by checking whether or not it returns the expected result.
-The accuracy is 10\textasciicircum{}-6.
-
-\end{fulllineitems}
-
-\index{test\_one\_e() (in module hf.tests.test\_auth)@\spxentry{test\_one\_e()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_one_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_one\_e}}}{}{}
-Test whether or not psi4 and pyscf give the same core Hamiltonian integrals.
-:return:
-
-\end{fulllineitems}
-
-\index{test\_overlap() (in module hf.tests.test\_auth)@\spxentry{test\_overlap()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_overlap}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_overlap}}}{}{}
-Test whether or not psi4 and pyscf give the same overlap integrals.
-
-\end{fulllineitems}
-
-\index{test\_pyscf\_vs\_psi4() (in module hf.tests.test\_auth)@\spxentry{test\_pyscf\_vs\_psi4()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_pyscf_vs_psi4}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_pyscf\_vs\_psi4}}}{}{}
-Test a pyscf energy calculation vs a psi4 energy calculation.
-
-\end{fulllineitems}
-
-\index{test\_rhf() (in module hf.tests.test\_auth)@\spxentry{test\_rhf()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_rhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_rhf}}}{}{}
-test\_RHF will test whether or not the RHF method returns the wanted result. The accuracy is 10\textasciicircum{}-11.
-
-\end{fulllineitems}
-
-\index{test\_stability() (in module hf.tests.test\_auth)@\spxentry{test\_stability()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_stability}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_stability}}}{}{}
-test\_stability will test the UHF method, with stability analysis, by checking whether or not it returns
-the expected result. The accuracy is 10\textasciicircum{}-6.
-
-\end{fulllineitems}
-
-\index{test\_tensor\_transform() (in module hf.tests.test\_auth)@\spxentry{test\_tensor\_transform()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_tensor_transform}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_tensor\_transform}}}{}{}
-Test whether tensor transformation happens correctly.
-
-\end{fulllineitems}
-
-\index{test\_two\_e() (in module hf.tests.test\_auth)@\spxentry{test\_two\_e()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_two_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_two\_e}}}{}{}
-Test whether or not psi4 and pyscf give the same two electron integrals.
-
-\end{fulllineitems}
-
-\index{test\_uhf() (in module hf.tests.test\_auth)@\spxentry{test\_uhf()}\spxextra{in module hf.tests.test\_auth}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{tests:hf.tests.test_auth.test_uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.tests.test\_auth.}}\sphinxbfcode{\sphinxupquote{test\_uhf}}}{}{}
-test\_UHF will test the regular UHF method, by checking whether or not it returns the expected result.
-The accuracy is 10\textasciicircum{}-6.
-
-\end{fulllineitems}
-
 
 
 \renewcommand{\indexname}{Python Module Index}
@@ -1732,7 +1650,6 @@ The accuracy is 10\textasciicircum{}-6.
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-hf.HartreeFock.GHF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-hf.HartreeFock.RHF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-hf.HartreeFock.UHF}}
-\item\relax\sphinxstyleindexentry{hf.tests.test\_auth}\sphinxstyleindexpageref{tests:\detokenize{module-hf.tests.test_auth}}
 \item\relax\sphinxstyleindexentry{hf.utilities.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-hf.utilities.SCF_functions}}
 \item\relax\sphinxstyleindexentry{hf.utilities.spin}\sphinxstyleindexpageref{spin:\detokenize{module-hf.utilities.spin}}
 \item\relax\sphinxstyleindexentry{hf.utilities.transform}\sphinxstyleindexpageref{transform:\detokenize{module-hf.utilities.transform}}
