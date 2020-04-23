@@ -388,7 +388,8 @@ class GHF:
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF)")
-        print("<S_z> = " + str(s_values[0]) + " <S^2> = " + str(s_values[1]))
+        print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
+              str(s_values[2]))
         return self.energy
 
     def get_mo_coeff(self):
