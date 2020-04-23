@@ -7,7 +7,7 @@ This repository contains everything from restricted to generalised Hartree-Fock 
 
 ## Using the code
 
-To run the code, please follow the ![ghf](INSTALL.md) file. To install the code in your virtual environment, run:
+To run the code, please follow the [install file](INSTALL.md). To install the code in your virtual environment, run:
 
 ```
 python setup.py install
