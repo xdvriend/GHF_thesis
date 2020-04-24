@@ -9,7 +9,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 """
 
 import hf.utilities.SCF_functions as Scf
-import hf.utilities.spin as spin
+import hf.properties.spin as spin
 import numpy as np
 from pyscf import *
 import scipy.linalg as la
