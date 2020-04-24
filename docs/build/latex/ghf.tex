@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Apr 23, 2020}
+\date{Apr 24, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -181,6 +181,15 @@ Returns mo coefficients.
 The mo coefficients
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_energy() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_mo\_energy()}\spxextra{hf.HartreeFock.RHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_mo_energy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_energy}}}{}{}
+Returns the MO energies.
+:return: an array of MO energies.
 
 \end{fulllineitems}
 
@@ -299,6 +308,17 @@ Performs a self consistent field calculation to find the lowest RHF energy.
 number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{stability\_analysis() (hf.HartreeFock.RHF.MF method)@\spxentry{stability\_analysis()}\spxextra{hf.HartreeFock.RHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}}{}
+Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
 
@@ -1409,6 +1429,16 @@ Calculate the mo coefficients.
 
 \end{fulllineitems}
 
+\index{calc\_mo\_e() (in module hf.utilities.SCF\_functions)@\spxentry{calc\_mo\_e()}\spxextra{in module hf.utilities.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:hf.utilities.SCF_functions.calc_mo_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{calc\_mo\_e}}}{\emph{f\_o}}{}
+Calculate mo energies.
+:param f\_o: Fock matrix in orthonormal basis.
+:return: mo energies
+
+\end{fulllineitems}
+
 \index{density\_matrix() (in module hf.utilities.SCF\_functions)@\spxentry{density\_matrix()}\spxextra{in module hf.utilities.SCF\_functions}}
 
 \begin{fulllineitems}
@@ -1498,15 +1528,15 @@ matrix.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{spin:module-hf.utilities.spin}}\index{hf.utilities.spin (module)@\spxentry{hf.utilities.spin}\spxextra{module}}
+\phantomsection\label{\detokenize{spin:module-hf.properties.spin}}\index{hf.properties.spin (module)@\spxentry{hf.properties.spin}\spxextra{module}}
 
 \chapter{Functions to calculate spin expectation values}
 \label{\detokenize{spin:functions-to-calculate-spin-expectation-values}}\label{\detokenize{spin::doc}}
 This file contains functions that calculate the expectation values of the different spin operators.
-\index{ghf() (in module hf.utilities.spin)@\spxentry{ghf()}\spxextra{in module hf.utilities.spin}}
+\index{ghf() (in module hf.properties.spin)@\spxentry{ghf()}\spxextra{in module hf.properties.spin}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{spin:hf.utilities.spin.ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.spin.}}\sphinxbfcode{\sphinxupquote{ghf}}}{\emph{coeff}, \emph{n\_e}, \emph{trans}}{}
+\phantomsection\label{\detokenize{spin:hf.properties.spin.ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.properties.spin.}}\sphinxbfcode{\sphinxupquote{ghf}}}{\emph{coeff}, \emph{n\_e}, \emph{trans}}{}
 A function used to calculate the spin expectation values in the generalised hartree fock formalism.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1528,10 +1558,10 @@ The expectation values of S\_z, S\textasciicircum{}2 and the multiplicity (2S+1)
 
 \end{fulllineitems}
 
-\index{uhf() (in module hf.utilities.spin)@\spxentry{uhf()}\spxextra{in module hf.utilities.spin}}
+\index{uhf() (in module hf.properties.spin)@\spxentry{uhf()}\spxextra{in module hf.properties.spin}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{spin:hf.utilities.spin.uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.spin.}}\sphinxbfcode{\sphinxupquote{uhf}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}
+\phantomsection\label{\detokenize{spin:hf.properties.spin.uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.properties.spin.}}\sphinxbfcode{\sphinxupquote{uhf}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}
 A function used to calculate the spin expectation values in the unrestricted hartree fock formalism.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1650,8 +1680,8 @@ The tensor in the basis of the transformation matrix.
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-hf.HartreeFock.GHF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-hf.HartreeFock.RHF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-hf.HartreeFock.UHF}}
+\item\relax\sphinxstyleindexentry{hf.properties.spin}\sphinxstyleindexpageref{spin:\detokenize{module-hf.properties.spin}}
 \item\relax\sphinxstyleindexentry{hf.utilities.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-hf.utilities.SCF_functions}}
-\item\relax\sphinxstyleindexentry{hf.utilities.spin}\sphinxstyleindexpageref{spin:\detokenize{module-hf.utilities.spin}}
 \item\relax\sphinxstyleindexentry{hf.utilities.transform}\sphinxstyleindexpageref{transform:\detokenize{module-hf.utilities.transform}}
 \end{sphinxtheindex}
 

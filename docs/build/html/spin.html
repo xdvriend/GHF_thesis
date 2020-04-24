@@ -90,7 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
             
@@ -155,23 +154,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-hf.utilities.spin"></span><div class="section" id="functions-to-calculate-spin-expectation-values">
+  <span class="target" id="module-hf.properties.spin"></span><div class="section" id="functions-to-calculate-spin-expectation-values">
 <h1>Functions to calculate spin expectation values<a class="headerlink" href="#functions-to-calculate-spin-expectation-values" title="Permalink to this headline">¶</a></h1>
 <p>This file contains functions that calculate the expectation values of the different spin operators.</p>
 <dl class="function">
-<dt id="hf.utilities.spin.ghf">
-<code class="sig-prename descclassname">hf.utilities.spin.</code><code class="sig-name descname">ghf</code><span class="sig-paren">(</span><em class="sig-param">coeff</em>, <em class="sig-param">n_e</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.spin.ghf" title="Permalink to this definition">¶</a></dt>
-<dd><p>A function used to calculate the spin expectation values in the generalised hartree fock formalism.
-:param coeff: The generalised MO coefficients
-:param n_e: number of electrons
-:param trans: transformation matrix, eg.: S^(-1/2)
-:return: The expectation values of S_z, S^2 and the multiplicity (2S+1)</p>
+<dt id="hf.properties.spin.ghf">
+<code class="sig-prename descclassname">hf.properties.spin.</code><code class="sig-name descname">ghf</code><span class="sig-paren">(</span><em class="sig-param">coeff</em>, <em class="sig-param">n_e</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.properties.spin.ghf" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function used to calculate the spin expectation values in the generalised hartree fock formalism.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coeff</strong> – The generalised MO coefficients</p></li>
+<li><p><strong>n_e</strong> – number of electrons</p></li>
+<li><p><strong>trans</strong> – transformation matrix, eg.: S^(-1/2)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The expectation values of S_z, S^2 and the multiplicity (2S+1)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
-<dt id="hf.utilities.spin.uhf">
-<code class="sig-prename descclassname">hf.utilities.spin.</code><code class="sig-name descname">uhf</code><span class="sig-paren">(</span><em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">coeff_a</em>, <em class="sig-param">coeff_b</em>, <em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.spin.uhf" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dt id="hf.properties.spin.uhf">
+<code class="sig-prename descclassname">hf.properties.spin.</code><code class="sig-name descname">uhf</code><span class="sig-paren">(</span><em class="sig-param">occ_a</em>, <em class="sig-param">occ_b</em>, <em class="sig-param">coeff_a</em>, <em class="sig-param">coeff_b</em>, <em class="sig-param">overlap</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.properties.spin.uhf" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function used to calculate the spin expectation values in the unrestricted hartree fock formalism.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>occ_a</strong> – number of occupied alpha orbitals</p></li>

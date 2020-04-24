@@ -76,6 +76,16 @@ def calc_mo(f_o, t):
     return coeff
 
 
+def calc_mo_e(f_o):
+    """
+    Calculate mo energies.
+    :param f_o: Fock matrix in orthonormal basis.
+    :return: mo energies
+    """
+    val, vec = la.eigh(f_o)
+    return val
+
+
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):
     """
     - calculate a fock matrix from a given alpha and beta density matrix

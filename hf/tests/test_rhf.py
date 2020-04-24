@@ -65,3 +65,14 @@ def test_pyscf_vs_psi4():
     y = RHF.MF(h2o_psi4, 10, 'psi4')
     assert np.isclose(x.scf(convergence=1e-6)[0], y.scf(convergence=1e-6)[0])
     assert x.scf(convergence=1e-6)[1] == y.scf(convergence=1e-6)[1]
+
+
+def test_stability():
+    """
+    A test for the RHF stability analysis.
+    """
+    x = RHF.MF(h2o, 10)
+    x.stability_analysis('internal')
+    x.stability_analysis('external')
+    assert x.int_instability is None
+    assert x.ext_instability is None

@@ -90,7 +90,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
             
@@ -159,6 +158,23 @@
 <h1>Useful functions for SCF procedure<a class="headerlink" href="#useful-functions-for-scf-procedure" title="Permalink to this headline">¶</a></h1>
 <p>A number of functions used throughout the UHF and RHF calculations are summarised here.</p>
 <dl class="function">
+<dt id="hf.utilities.SCF_functions.calc_mo">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">calc_mo</code><span class="sig-paren">(</span><em class="sig-param">f_o</em>, <em class="sig-param">t</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.calc_mo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the mo coefficients.
+:param f_o: Fock matrix in orthonormal basis.
+:param t: Transformation matrix.
+:return: mo coefficients</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="hf.utilities.SCF_functions.calc_mo_e">
+<code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">calc_mo_e</code><span class="sig-paren">(</span><em class="sig-param">f_o</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.calc_mo_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate mo energies.
+:param f_o: Fock matrix in orthonormal basis.
+:return: mo energies</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="hf.utilities.SCF_functions.density_matrix">
 <code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">density_matrix</code><span class="sig-paren">(</span><em class="sig-param">f_matrix</em>, <em class="sig-param">occ</em>, <em class="sig-param">trans</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.density_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
@@ -171,9 +187,15 @@ And a transformation matrix X.</p></li>
 <dl class="function">
 <dt id="hf.utilities.SCF_functions.get_integrals_psi4">
 <code class="sig-prename descclassname">hf.utilities.SCF_functions.</code><code class="sig-name descname">get_integrals_psi4</code><span class="sig-paren">(</span><em class="sig-param">mol</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.SCF_functions.get_integrals_psi4" title="Permalink to this definition">¶</a></dt>
-<dd><p>A function to calculate your integrals &amp; nuclear repulsion with psi4.
-:param mol: Psi4 instance
-:return: overlap, core hamiltonian, eri tensor and nuclear repulsion</p>
+<dd><p>A function to calculate your integrals &amp; nuclear repulsion with psi4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mol</strong> – Psi4 instance</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>overlap, core hamiltonian, eri tensor and nuclear repulsion</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">

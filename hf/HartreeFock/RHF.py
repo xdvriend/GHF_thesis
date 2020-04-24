@@ -7,7 +7,9 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 """
 
 import hf.utilities.SCF_functions as Scf
+import hf.utilities.transform as t
 import numpy as np
+from scipy import linalg as la
 import collections as c
 from pyscf import *
 
@@ -49,6 +51,8 @@ class MF:
         self.fock = None
         self.fock_orth = None
         self.iterations = None
+        self.int_instability = None
+        self.ext_instability = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
         if number_of_electrons % 2 == 0:
@@ -226,6 +230,14 @@ class MF:
         :return: The last Fock matrix.
         """
         return self.fock_orth[i]
+
+    def get_mo_energy(self):
+        """
+        Returns the MO energies.
+        :return: an array of MO energies.
+        """
+        e = Scf.calc_mo_e(self.get_fock_orth())
+        return e
 
     def diis(self, convergence=1e-12, complex_method=False):
         """
@@ -406,3 +418,125 @@ class MF:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy
+
+    def stability_analysis(self, method):
+        """
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
+        """
+        # Calculate the A & B blocks needed for stability analysis.
+        # Determine the number of occupied and virtual orbitals.
+        occ = int(self.occupied)
+        vir = int(np.shape(self.get_ovlp())[0] - occ)
+
+        # Determine the Fock matrices needed.
+        coeff = self.get_mo_coeff()
+        mo_e = self.get_mo_energy()
+        mo_e_vir = mo_e[occ:]
+        mo_e_occ = mo_e[:occ]
+
+        # Determine the two electron integrals in MO basis.
+        eri_ao = self.get_two_e()
+        eri_mo = t.tensor_basis_transform(eri_ao, coeff)
+
+        # Create A_singlet
+        a1 = np.einsum('ckld->kcld', eri_mo[occ:, :occ, :occ, occ:]) * 2
+        a1 -= np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
+
+        e_values = np.zeros((int(len(mo_e_vir)), int(len(mo_e_occ))))
+        for i in range(len(mo_e_vir)):
+            for j in range(len(mo_e_occ)):
+                e_values[i][j] = mo_e_vir[i] + (-1 * mo_e_occ[j])
+
+        for a in range(vir):
+            for i in range(occ):
+                a1[i, a, i, a] += e_values[a, i]
+
+        # Create A_triplet
+        a3 = a1
+        a3 -= np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
+        for a in range(vir):
+            for i in range(occ):
+                a3[i, a, i, a] += e_values[a, i]
+
+        # Create B_singlet
+        b1 = np.einsum('ckdl->kcld', eri_mo[occ:, :occ, occ:, :occ]) * 2
+        b1 -= np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+
+        # Create B_triplet
+        b3 = b1
+        b3 -= np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+
+        # reshape to matrices
+        a1 = a1.reshape((occ * vir, occ * vir))
+        b1 = b1.reshape((occ * vir, occ * vir))
+        a3 = a3.reshape((occ * vir, occ * vir))
+        b3 = b3.reshape((occ * vir, occ * vir))
+
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a1 + b1  # real restricted internal
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real RHF wave function.")
+                    self.int_instability = True
+                else:
+                    print('The wave function is stable within the real RHF space.')
+                    self.int_instability = None
+
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix_1 = a1 - b1  # real -> complex
+                stability_matrix_3 = a3 + b3  # restricted -> unrestricted
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e_1, v_1 = la.eigh(stability_matrix_1)
+                e_3, v_3 = la.eigh(stability_matrix_3)
+                if np.amin(e_1) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real RHF wave function.")
+                    self.ext_instability = True
+                if np.amin(e_3) < -1e-5:
+                    print("There is an external restricted/unrestricted instability in the real RHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex & RHF/UHF space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = t.spin_blocked(a1, b1, b1.conj(), a1.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex RHF wave function.")
+                    self.int_instability = True
+
+                else:
+                    print('The wave function is stable within the complex RHF space.')
+                    self.int_instability = None
+            elif method == 'external':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = t.spin_blocked(a3, b3, b3.conj(), a3.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external RHF/UHF instability in the complex RHF wave function.")
+                    self.ext_instability = True
+
+                else:
+                    print('The wave function is stable within the complex RHF space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
