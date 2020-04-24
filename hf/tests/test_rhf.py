@@ -72,6 +72,7 @@ def test_stability():
     A test for the RHF stability analysis.
     """
     x = RHF.MF(h2o, 10)
+    x.diis()
     x.stability_analysis('internal')
     x.stability_analysis('external')
     assert x.int_instability is None
