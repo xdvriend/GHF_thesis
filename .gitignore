@@ -5,7 +5,10 @@ hf/tests/.DS_Store
 hf/tests/timer.dat
 hf/tests/__pycache__/
 hf/utilities/__pycache__/
+hf/utilities/.DS_Store
+hf/properties/.DS_Store
 hf/HartreeFock/__pycache__/
+hf/HartreeFock/.DS_Store
 docs/.DS_Store
 docs/build/.DS_Store
 docs/source/.DS_Store
