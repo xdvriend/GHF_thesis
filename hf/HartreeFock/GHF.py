@@ -11,7 +11,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 """
 
 from hf.utilities import SCF_functions as Scf
-from hf.utilities import spin as spin
+from hf.properties import spin as spin
 from hf.utilities import transform as t
 import numpy as np
 from numpy import linalg as la

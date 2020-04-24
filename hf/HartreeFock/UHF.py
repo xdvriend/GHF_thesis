@@ -7,7 +7,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 """
 
 import hf.utilities.SCF_functions as Scf
-import hf.utilities.spin as spin
+import hf.properties.spin as spin
 import hf.utilities.transform as t
 import numpy as np
 from functools import reduce

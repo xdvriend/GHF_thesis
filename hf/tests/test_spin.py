@@ -5,7 +5,7 @@ Testing the functions used to calculate the spin expectation value.
 Simple tests to check whether or not the functions return the correct value.
 """
 from hf.HartreeFock import *
-from hf.utilities import spin as spin
+from hf.properties import spin as spin
 from hf.utilities import SCF_functions as Scf
 import numpy as np
 from pyscf import gto
