@@ -216,7 +216,7 @@ class MF:
             return f
 
         # constraint function
-        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x):
+        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x): #Psi4 algorithm
             f_p = 0.5 * (2 * (j_a + j_b) - k_a - k_b)
             f_m = -0.5 * (k_a - k_b)
 
@@ -233,7 +233,7 @@ class MF:
             f_b = self.get_one_e() + f_p - f_m
             return f_a, f_b
 
-        def constrain2(d_a, d_b, f_a, f_b, x):
+        def constrain2(d_a, d_b, f_a, f_b, x): #paper algorithm
             p = (d_a + d_b) / 2.0
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
@@ -252,6 +252,26 @@ class MF:
 
             f_a = f_cs + delta_cuhf
             f_b = f_cs - delta_cuhf
+            return f_a, f_b
+
+        def constrain3(d_a, d_b, f_a, f_b, x): #thesis algorithm
+            f_cs = (f_a + f_b) / 2.0
+            delta_uhf = (f_a - f_b) / 2.0
+            f_aa = f_cs + delta_uhf
+            f_bb = f_cs - delta_uhf
+
+            p = (d_a + d_b) / 2
+            p = la.inv(x) @ p @ la.inv(x.T)
+            nat_occ_num, nat_occ_vec = la.eigh(p)
+
+            delta_uhf_no = la.inv(nat_occ_vec) @ la.inv(x) @ delta_uhf @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+            lam = np.zeros(np.shape(delta_uhf_no))
+            lam[:self.n_b, self.n_a:] = -delta_uhf_no[:self.n_b, self.n_a:]
+            lam[self.n_a:, :self.n_b] = -delta_uhf_no[self.n_a:, :self.n_b]
+            lam = x @ nat_occ_vec @ lam @ nat_occ_vec.T @ x.T
+
+            f_a = f_aa + lam
+            f_b = f_bb - lam
             return f_a, f_b
 
         # core Hamiltonian guess
