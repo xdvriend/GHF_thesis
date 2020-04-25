@@ -420,7 +420,7 @@ class MF:
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy
 
-    def stability_analysis(self, method, step_size):
+    def stability_analysis(self, method):
         """
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
