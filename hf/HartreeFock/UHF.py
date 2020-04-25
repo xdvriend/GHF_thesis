@@ -55,10 +55,12 @@ class MF:
                             'Make sure the molecule instance matches the method and is gives as a string.')
         self.energy = None
         self.mo = None
-        self.last_dens = None
-        self.last_fock = None
+        self.dens = None
+        self.focks = None
+        self.fock_orth = None
         self.iterations = None
-        self.hessian = None
+        self.hessian_p = None
+        self.hessian_pp = None
         self.int_instability = None
         self.ext_instability = None
         if number_of_electrons % 2 == 0:
@@ -153,6 +155,9 @@ class MF:
         # Create a second array to study the difference in energy between iterations.
         energies = [0.0]
         delta_e = []
+        f_list = []
+        fo_list = []
+        mo_list = []
 
         # create an iteration procedure
         def iteration():
@@ -160,7 +165,7 @@ class MF:
             fock_a = Scf.uhf_fock_matrix(densities_a[-1], densities_b[-1], self.get_one_e(), self.get_two_e())
             # create a fock matrix for beta from last beta density
             fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
-
+            f_list.append([fock_a, fock_b])
             # calculate the improved scf energy and add it to the array
             energies.append(Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
             # calculate the energy difference and add it to the delta_E array
@@ -169,7 +174,12 @@ class MF:
             # orthogonalize both fock matrices
             fock_orth_a = s_12.conj().T.dot(fock_a).dot(s_12)
             fock_orth_b = s_12.conj().T.dot(fock_b).dot(s_12)
+            fo_list.append([fock_orth_a, fock_orth_b])
 
+            # Calculate MO's
+            mos_a = Scf.calc_mo(fock_orth_a, s_12)
+            mos_b = Scf.calc_mo(fock_orth_b, s_12)
+            mo_list.append([mos_a, mos_b])
             # create a new alpha and beta density matrix
             new_density_a = Scf.density_matrix(fock_orth_a, self.n_a, s_12)
             new_density_b = Scf.density_matrix(fock_orth_b, self.n_b, s_12)
@@ -187,39 +197,24 @@ class MF:
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure, both for alpha and beta
-        def last_dens():
-            return densities_a[-1], densities_b[-1]
-        self.last_dens = last_dens()
+        def dens():
+            return densities_a, densities_b
+        self.dens = dens()
 
-        def last_fock():
-            last_fock_a = Scf.uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
-            last_fock_b = Scf.uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
-            return last_fock_a, last_fock_b
-        self.last_fock = last_fock()
+        def fock():
+            return f_list
+        self.focks = fock()
+        self.fock_orth = fo_list
 
         def get_mo():
-            # Calculate the last fock matrix for both alpha and beta
-            fock_a = Scf.uhf_fock_matrix(densities_a[-2], densities_b[-2], self.get_one_e(), self.get_two_e())
-            fock_b = Scf.uhf_fock_matrix(densities_b[-2], densities_a[-2], self.get_one_e(), self.get_two_e())
-
-            # orthogonalize both fock matrices
-            fock_a_ = s_12.T.dot(fock_a).dot(s_12)
-            fock_b_ = s_12.T.dot(fock_b).dot(s_12)
-
-            # Calculate the eigenvectors of both Fock matrices
-            # Orthogonalise both sets of eigenvectors to get the mo coefficients
-            val_a, vec_a = la.eigh(fock_a_)
-            val_b, vec_b = la.eigh(fock_b_)
-            coefficient_a = s_12 @ vec_a
-            coefficient_b = s_12 @ vec_b
-            return coefficient_a, coefficient_b
+            return mo_list
         self.mo = get_mo()
 
         # Calculate the final scf energy (electronic + nuclear repulsion)
         scf_e = energies[-1] + self.nuc_rep()
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -249,32 +244,49 @@ class MF:
                   ", Multiplicity = " + str(s_values[2]))
         return self.energy
 
-    def get_mo_coeff(self):
+    def get_mo_coeff(self, i=-1):
         """
         Gets the mo coefficients of the converged solution.
         Alpha coefficients in the first matrix, beta coefficients in the second.
 
         :return: The mo coefficients
         """
-        return self.mo
+        return self.mo[i][0], self.mo[i][1]
 
-    def get_last_dens(self):
+    def get_fock_orth(self, i=-1):
         """
-        Gets the last density matrix of the converged solution.
+        Get the fock matrices in the orthonormal basis. Defaults to the last one
+        :param i: index of the matrix you want.
+        :return: a and b orthonormal fock matrix
+        """
+        return self.fock_orth[i][0], self.fock_orth[i][1]
+
+    def get_mo_energy(self):
+        """
+        Returns the MO energies of the converged solution.
+        :return: an array of MO energies.
+        """
+        e_a = Scf.calc_mo_e(self.get_fock_orth()[0])
+        e_b = Scf.calc_mo_e(self.get_fock_orth()[1])
+        return e_a, e_b
+
+    def get_dens(self, i=-1):
+        """
+        Gets the (last) density matrix of the converged solution.
         Alpha density in the first matrix, beta density in the second.
 
         :return: The last density matrix.
         """
-        return self.last_dens
+        return self.dens[0][i], self.dens[1][i]
 
-    def get_last_fock(self):
+    def get_fock(self, i=-1):
         """
-        Gets the last fock matrix of the converged solution.
+        Gets the (last) fock matrix of the converged solution.
         Alpha Fock matrix first, beta Fock matrix second.
 
-        :return: The last Fock matrix.
+        :return: The requested Fock matrices.
         """
-        return self.last_fock
+        return self.focks[i][0], self.focks[i][1]
 
     def extra_electron_guess(self):
         """
@@ -601,217 +613,158 @@ class MF:
         :param step_size: Step size for orbital rotation. standard is 1e-5.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
-        # Get the total amount of orbitals
-        # Number of occupied alpha and beta orbitals
-        # number of virtual (unoccupied) alpha and beta orbitals
-        n_orb = np.shape(self.get_ovlp())[0]
-        n_occ_a = self.n_a
-        n_occ_b = self.n_b
-        n_vir_a = int(n_orb - self.n_a)
-        n_vir_b = int(n_orb - self.n_b)
-
         # Get the mo coefficients
         mo_a = self.get_mo_coeff()[0]
         mo_b = self.get_mo_coeff()[1]
 
-        # Create a zero matrix to form the general blocked matrix expression
-        zero = np.zeros_like(mo_a)
+        # Get MO energies
+        mo_e_a = self.get_mo_energy()[0]
+        mo_e_b = self.get_mo_energy()[1]
 
-        # Get the fock matrices
-        fock_a = self.get_last_fock()[0]
-        fock_b = self.get_last_fock()[1]
-
-        # Set Fock matrices to the basis of the MO's
-        mo_fock_a = mo_a.T @ fock_a @ mo_a
-        mo_fock_b = mo_b.T @ fock_b @ mo_b
-        mo_fock_gen = t.spin_blocked(mo_fock_a, zero, zero, mo_fock_b)
+        # Get the total amount of orbitals
+        # Number of occupied alpha and beta orbitals
+        # number of virtual (unoccupied) alpha and beta orbitals
+        n_orb = np.shape(self.get_ovlp())[0]
+        occ_a = self.n_a
+        occ_b = self.n_b
+        vir_a = int(n_orb - self.n_a)
+        vir_b = int(n_orb - self.n_b)
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_ao_gen = t.expand_tensor(eri_ao)
-        mo_coeff_gen = t.spin_blocked(mo_a, zero, zero, mo_b)
+        eri_mo_aa = t.tensor_basis_transform(eri_ao, mo_a)
+        eri_mo_bb = t.tensor_basis_transform(eri_ao, mo_b)
+        eri_mo_ab = t.mix_tensor_to_basis_transform(eri_ao, mo_a, mo_a, mo_b, mo_b)
 
-        eri_mo = t.tensor_basis_transform(eri_ao_gen, mo_coeff_gen)
+        # Create the alpha->alpha part of the a'+b' stability matrix
+        h_aa = np.einsum('aijb->iajb', eri_mo_aa[occ_a:, :occ_a, :occ_a, occ_a:]) * 2
+        h_aa -= np.einsum('abji->iajb', eri_mo_aa[occ_a:, occ_a:, :occ_a, :occ_a])
+        h_aa -= np.einsum('ajbi->iajb', eri_mo_aa[occ_a:, :occ_a, occ_a:, :occ_a])
+        for a in range(vir_a):
+            for i in range(occ_a):
+                h_aa[i, a, i, a] += mo_e_a[occ_a + a] - mo_e_a[i]
 
-        eri_mo_abrs = eri_mo
-        eri_mo_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
-        eri_mo_asrb = eri_mo.transpose(0, 1, 3, 2)
-        eri_mo_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
+        # Create the beta->beta part of the a'+b' stability matrix
+        h_bb = np.einsum('aijb->iajb', eri_mo_bb[occ_b:, :occ_b, :occ_b, occ_b:]) * 2
+        h_bb -= np.einsum('abji->iajb', eri_mo_bb[occ_b:, occ_b:, :occ_b, :occ_b])
+        h_bb -= np.einsum('ajbi->iajb', eri_mo_bb[occ_b:, :occ_b, occ_b:, :occ_b])
+        for a in range(vir_b):
+            for i in range(occ_b):
+                h_bb[i, a, i, a] += mo_e_b[occ_b + a] - mo_e_b[i]
 
-        # Fill the A' and B' tensor
-        # we have 4 blocks in each of these: aa, ab, ba & bb
-        if isinstance(self.energy, complex):
-            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
-            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
-            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
-            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
-            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a)).astype(complex)
-            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b)).astype(complex)
-            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a)).astype(complex)
-            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b)).astype(complex)
-        else:
-            a_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
-            a_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
-            a_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
-            a_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
-            b_arbs_aa = np.zeros((n_occ_a, n_vir_a, n_occ_a, n_vir_a))
-            b_arbs_ab = np.zeros((n_occ_a, n_vir_a, n_occ_b, n_vir_b))
-            b_arbs_ba = np.zeros((n_occ_b, n_vir_b, n_occ_a, n_vir_a))
-            b_arbs_bb = np.zeros((n_occ_b, n_vir_b, n_occ_b, n_vir_b))
+        # Create the (alpha->alpha, beta->beta) part of the a'+b' stability matrix
+        h_ab = np.einsum('aijb->iajb', eri_mo_ab[occ_a:, :occ_a, :occ_b, occ_b:]) * 2
 
-        # The A_alpha_alpha block
-        for a in range(n_occ_a):
-            for r in range(n_occ_a, n_orb):
-                for b in range(n_occ_a):
-                    for s in range(n_occ_a, n_orb):
-                        if r == s and a == b:
-                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] \
-                                                                        + eri_mo_anti_asrb[a][s][r][b]
-                        elif r == s and a != b:
-                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = -1 * mo_fock_gen[r][s] \
-                                                                        + eri_mo_anti_asrb[a][s][r][b]
-                        elif r != s and a == b:
-                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
-                        else:
-                            a_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_asrb[a][s][r][b]
+        # Create the complete a'+b' stability matrix
+        dim_a = occ_a * vir_a
+        dim_b = occ_b * vir_b
+        h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b))
+        h_a_plus_b[:dim_a, :dim_a] = h_aa.reshape(dim_a, dim_a)
+        h_a_plus_b[dim_a:, dim_a:] = h_bb.reshape(dim_b, dim_b)
+        h_a_plus_b[:dim_a, dim_a:] = h_ab.reshape(dim_a, dim_b)
+        h_a_plus_b[dim_a:, :dim_a] = h_ab.reshape(dim_a, dim_b).T
 
-        # The A_beta_beta block
-        for a in range(n_orb, n_orb + n_occ_b):
-            for r in range(n_orb + n_occ_b, 2 * n_orb):
-                for b in range(n_orb, n_orb + n_occ_b):
-                    for s in range(n_orb + n_occ_b, 2 * n_orb):
-                        if r == s and a == b:
-                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
-                                -1 * mo_fock_gen[r][s] + mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
-                        elif r == s and a != b:
-                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
-                                -1 * mo_fock_gen[r][s] + eri_mo_anti_asrb[a][s][r][b]
-                        elif r != s and a == b:
-                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
-                                mo_fock_gen[a][b] + eri_mo_anti_asrb[a][s][r][b]
-                        else:
-                            a_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
-                                eri_mo_anti_asrb[a][s][r][b]
+        # Create the alpha->alpha part of the a'-b' stability matrix
+        h_aa_m = - np.einsum('abji->iajb', eri_mo_aa[occ_a:, occ_a:, :occ_a, :occ_a])
+        h_aa_m += np.einsum('ajbi->iajb', eri_mo_aa[occ_a:, :occ_a, occ_a:, :occ_a])
+        for a in range(vir_a):
+            for i in range(occ_a):
+                h_aa_m[i, a, i, a] += mo_e_a[occ_a + a] - mo_e_a[i]
 
-        # The A_alpha_beta block
-        for a in range(n_occ_a):
-            for r in range(n_occ_a, n_orb):
-                for b in range(n_orb, n_orb + n_occ_b):
-                    for s in range(n_orb + n_occ_b, 2 * n_orb):
-                        a_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_asrb[a][s][r][b]
+        # Create the beta->beta part of the a'-b' stability matrix
+        h_bb_m = - np.einsum('abji->iajb', eri_mo_bb[occ_b:, occ_b:, :occ_b, :occ_b])
+        h_bb_m += np.einsum('ajbi->iajb', eri_mo_bb[occ_b:, :occ_b, occ_b:, :occ_b])
+        for a in range(vir_b):
+            for i in range(occ_b):
+                h_bb_m[i, a, i, a] += mo_e_b[occ_b + a] - mo_e_b[i]
 
-        # The A_beta_alpha block
-        for a in range(n_orb, n_orb + n_occ_b):
-            for r in range(n_orb + n_occ_b, 2 * n_orb):
-                for b in range(n_occ_a):
-                    for s in range(n_occ_a, n_orb):
-                        a_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_asrb[a][s][r][b]
+        # There is no need to create a mixed part since these terms become zero in the equations.
+        # Create the complete a'-b' stability matrix
+        h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b))
+        h_a_min_b[:dim_a, :dim_a] = h_aa_m.reshape(dim_a, dim_a)
+        h_a_min_b[dim_a:, dim_a:] = h_bb_m.reshape(dim_b, dim_b)
 
-        # B_alpha_alpha block
-        for a in range(n_occ_a):
-            for r in range(n_occ_a, n_orb):
-                for b in range(n_occ_a):
-                    for s in range(n_occ_a, n_orb):
-                        b_arbs_aa[a][r - n_occ_a][b][s - n_occ_a] = eri_mo_anti_abrs[a][b][r][s]
+        # For complex methods we must look at the entire hessian so we need A' and B'
+        # factor -1 when looking at a_p - b_p vs. h_a_min_b doesn't matter
+        a_p = (h_a_plus_b - h_a_min_b)/2
+        b_p = h_a_plus_b - a_p
 
-        # B_beta_beta block
-        for a in range(n_orb, n_orb + n_occ_b):
-            for r in range(n_orb + n_occ_b, 2 * n_orb):
-                for b in range(n_orb, n_orb + n_occ_b):
-                    for s in range(n_orb + n_occ_b, 2 * n_orb):
-                        b_arbs_bb[a - n_orb][r - (n_orb + n_occ_b)][b - n_orb][s - (n_orb + n_occ_b)] =\
-                            eri_mo_anti_abrs[a][b][r][s]
+        # From here we will start calculating the H'' components. These are used to check UHF->GHF instabilities.
+        # We will follow the same approach, so first, A''+B'' is calculated.
+        # first: the (alpha->beta, alpha->beta) and (beta->alpha, beta->alpha) part.
+        # This part only gets calculated once, since it's the same for A''-B''
+        h_abab = - np.einsum('abji->iajb', eri_mo_ab[occ_a:, occ_a:, :occ_b, :occ_b])
+        for a in range(vir_a):
+            for i in range(occ_b):
+                h_abab[i, a, i, a] += mo_e_a[occ_a + a] - mo_e_b[i]
+        h_baba = - np.einsum('jiab->iajb', eri_mo_ab[:occ_a, :occ_a, occ_b:, occ_b:])
+        for a in range(vir_b):
+            for i in range(occ_a):
+                h_baba[i, a, i, a] += mo_e_b[occ_b + a] - mo_e_a[i]
 
-        # B_alpha_beta block
-        for a in range(n_occ_a):
-            for r in range(n_occ_a, n_orb):
-                for b in range(n_orb, n_orb + n_occ_b):
-                    for s in range(n_orb + n_occ_b, 2 * n_orb):
-                        b_arbs_ab[a][r - n_occ_a][b - n_orb][s - (n_orb + n_occ_b)] = eri_mo_abrs[a][b][r][s]
+        # Create the (alpha->beta, beta->alpha) and (beta->alpha, alpha->beta) part of A''+B''
+        h_abba = - np.einsum('ajbi->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
+        h_baab = - np.einsum('biaj->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
 
-        # B_beta_alpha block
-        for a in range(n_orb, n_orb + n_occ_b):
-            for r in range(n_orb + n_occ_b, 2 * n_orb):
-                for b in range(n_occ_a):
-                    for s in range(n_occ_a, n_orb):
-                        b_arbs_ba[a - n_orb][r - (n_orb + n_occ_b)][b][s - n_occ_a] = eri_mo_abrs[a][b][r][s]
+        # Create the complete A''+B'' stability matrix
+        dim_mix_1 = occ_b * vir_a
+        dim_mix_2 = occ_a * vir_b
+        h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+        h_a_plus_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
+        h_a_plus_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
+        h_a_plus_b_p[:dim_mix_1, dim_mix_1:] = h_abba.reshape(dim_mix_1, dim_mix_2)
+        h_a_plus_b_p[dim_mix_1:, :dim_mix_1] = h_baab.reshape(dim_mix_2, dim_mix_1)
 
-        a = t.spin_blocked(a_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
-                           a_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
-                           a_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
-                           a_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+        # Create the (alpha->beta, beta->alpha) and (beta->alpha, alpha->beta) part of A''-B''
+        h_abba_m = np.einsum('ajbi->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
+        h_baab_m = np.einsum('biaj->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
 
-        b = t.spin_blocked(b_arbs_aa.reshape((n_occ_a * n_vir_a, n_occ_a * n_vir_a), order='F'),
-                           b_arbs_ab.reshape((n_occ_a * n_vir_a, n_occ_b * n_vir_b), order='F'),
-                           b_arbs_ba.reshape((n_occ_b * n_vir_b, n_occ_a * n_vir_a), order='F'),
-                           b_arbs_bb.reshape((n_occ_b * n_vir_b, n_occ_b * n_vir_b), order='F'))
+        # Create the complete A''-B'' stability matrix
+        h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+        h_a_min_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
+        h_a_min_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
+        h_a_min_b_p[:dim_mix_1, dim_mix_1:] = h_abba_m.reshape(dim_mix_1, dim_mix_2)
+        h_a_min_b_p[dim_mix_1:, :dim_mix_1] = h_baab_m.reshape(dim_mix_2, dim_mix_1)
 
-        # Create a function to rotate the orbitals in case of internal instability
-        def rotate_to_eigenvec(eigenvec):
-            # If it's a complex eigenvector, work only with k and ignore k*
-            if isinstance(self.energy, complex):
-                indx = int(np.shape(eigenvec)[0] / 2)
-                eigenvec = eigenvec[:indx]
-
-            # Split the eigenvector in alpha and beta components
-            dim = int(np.shape(eigenvec)[0] / 2)
-
-            # Create all the blocks to fill the matrix
-            block_a_ov = eigenvec[:dim].reshape((n_occ_a, n_vir_a), order='F')
-            block_b_ov = eigenvec[dim:].reshape((n_occ_b, n_vir_b), order='F')
-
-            block_off_diag_a_oo = np.zeros((n_occ_a, n_occ_a))
-            block_off_diag_a_vv = np.zeros((n_vir_a, n_vir_a))
-            block_off_diag_b_oo = np.zeros((n_occ_b, n_occ_b))
-            block_off_diag_b_vv = np.zeros((n_vir_b, n_vir_b))
-
-            # Create the general K matrix
-            k_a = t.spin_blocked(block_off_diag_a_oo, block_a_ov, block_a_ov.conj().T, block_off_diag_a_vv)
-            k_b = t.spin_blocked(block_off_diag_b_oo, block_b_ov, block_b_ov.conj().T, block_off_diag_b_vv)
-            zeros = np.zeros((n_orb, n_orb))
-            k = t.spin_blocked(k_a, zeros, zeros, k_b)
-
-            # Generalise the notation for the coefficients to make working with them more efficient
-            # Then use the DEM algorithm to take a step towards the lowest eigenvector
-            coeff_gen = t.spin_blocked(self.get_mo_coeff()[0], zeros, zeros, self.get_mo_coeff()[1])
-            exp = la.expm(step_size * k)
-            new_coeff_gen = coeff_gen @ exp
-
-            # Split the generalised coefficients once again in it's alpha and beta components
-            c_a = new_coeff_gen[:n_orb, :n_orb]
-            c_b = new_coeff_gen[n_orb:, :n_orb]
-            return c_a, c_b
+        # To get the separate A'' and B'' components
+        a_pp = (h_a_plus_b_p - h_a_min_b_p)/2
+        b_pp = h_a_plus_b_p - a_pp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
             if method == 'internal':
                 # the stability matrix for the real sub problem consists of a + b
-                stability_matrix = a + b
-                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
+                stability_matrix = h_a_plus_b
+                self.hessian_p = t.spin_blocked(a_p, b_p, b_p.conj(), a_p.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the real UHF wave function.")
                     self.int_instability = True
-                    lowest_eigenvec = v[:, 0]
-                    return rotate_to_eigenvec(lowest_eigenvec)
+                    # lowest_eigenvec = v[:, 0]
                 else:
                     print('The wave function is stable within the real UHF space.')
                     self.int_instability = None
 
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
-                stability_matrix = a - b
-                self.hessian = t.spin_blocked(a, b, b.conj(), a.conj())
+                stability_matrix_1 = h_a_min_b
+                self.hessian_p = t.spin_blocked(a_p, b_p, b_p.conj(), a_p.conj())
+                stability_matrix_2 = h_a_plus_b_p
+                self.hessian_pp = t.spin_blocked(a_pp, b_pp, b_pp.conj(), a_pp.conj())
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
-                e, v = la.eigh(stability_matrix)
-                if np.amin(e) < -1e-5:  # this points towards an instability
+                e_1, v_1 = la.eigh(stability_matrix_1)
+                e_2, v_2 = la.eigh(stability_matrix_2)
+                if np.amin(e_1) < -1e-5:  # this points towards an instability
                     print("There is an external real/complex instability in the real UHF wave function.")
                     self.ext_instability = True
+                if np.amin(e_2) < -1e-5:  # this points towards an instability
+                    print("There is an external unrestricted/generalised instability in the real UHF wave function.")
+                    self.ext_instability = True
                 else:
-                    print('The wave function is stable within the real/complex space.')
+                    print('The wave function is stable within the real/complex & unrestricted/generalised space.')
                     self.ext_instability = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
@@ -819,28 +772,49 @@ class MF:
         else:
             if method == 'internal':
                 # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
-                stability_matrix = t.spin_blocked(a, b, b.conj(), a.conj())
-                self.hessian = stability_matrix
+                stability_matrix_3 = t.spin_blocked(a_p, b_p, b_p.conj(), a_p.conj())
+                self.hessian_p = stability_matrix_3
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
-                e, v = la.eigh(stability_matrix)
-                if np.amin(e) < -1e-5:  # this points towards an instability
+                e_3, v_3 = la.eigh(stability_matrix_3)
+                if np.amin(e_3) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the complex UHF wave function.")
                     self.int_instability = True
-                    lowest_eigenvec = v[:, 0]
-                    return rotate_to_eigenvec(lowest_eigenvec)
+                    # lowest_eigenvec = v[:, 0]
                 else:
                     print('The wave function is stable in the complex UHF space.')
                     self.int_instability = None
-            else:
-                raise Exception('Only internal stability analysis is possible for complex GHF.')
 
-    def get_hessian(self):
+            elif method == 'external':
+                # The total stability matrix consists of a'' & b'' in the upper corners, and b''* and a''*
+                # in the lower corners
+                stability_matrix_4 = t.spin_blocked(a_pp, b_pp, b_pp.conj(), a_pp.conj())
+                self.hessian_pp = stability_matrix_4
+                e_4, v_4 = la.eigh(stability_matrix_4)
+
+                if np.amin(e_4) < -1e-5:  # this points towards an instability
+                    print("There is an external unrestricted/generalised instability in the complex UHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the complex UHF space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+
+    def get_hessian(self, prime):
         """
         Get the Hessian matrix after performing a stability analysis.
+        :param: specify whether you want to look at H' or H'' by putting 1 or 2
         :return: The hessian matrix
         """
-        return self.hessian
+        if prime == 1:
+            return self.hessian_p
+        elif prime == 2:
+            return self.hessian_pp
+        else:
+            raise Exception('Specify whether you want H prime or H double-prime, '
+                            'by giving either 1 or 2 to the function. Other numbers are invalid. ')
 
     def diis(self, initial_guess=None, convergence=1e-12, complex_method=False):
         """
@@ -896,17 +870,17 @@ class MF:
             j_1 = np.einsum('pqrs,rs->pq', self.get_two_e(), density_matrix_1)
             j_2 = np.einsum('pqrs,rs->pq', self.get_two_e(), density_matrix_2)
             k_1 = np.einsum('prqs,rs->pq', self.get_two_e(), density_matrix_1)
-            fock = self.get_one_e() + (j_1 + j_2) - k_1
-            return fock
+            f = self.get_one_e() + (j_1 + j_2) - k_1
+            return f
 
-        def residual(density, fock):
+        def residual(density, f):
             """
             Function that calculates the error matrix for the DIIS algorithm
             :param density: density matrix
-            :param fock: fock matrix
+            :param f: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12 @ (fock @ density @ self.get_ovlp() - self.get_ovlp() @ density @ fock) @ s_12.conj().T
+            return s_12 @ (f @ density @ self.get_ovlp() - self.get_ovlp() @ density @ f) @ s_12.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -947,18 +921,21 @@ class MF:
 
             # Create a fock as a linear combination of previous focks
             if complex_method:
-                fock = np.zeros(focks[0].shape).astype(complex)
+                f = np.zeros(focks[0].shape).astype(complex)
             else:
-                fock = np.zeros(focks[0].shape)
+                f = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
-                fock += coeff[x] * focks[x]
-            return fock
+                f += coeff[x] * focks[x]
+            return f
 
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis_a = [guess_density_a]
         densities_diis_b = [guess_density_b]
         energies_diis = [0.0]
         delta_e_diis = []
+        f_list = []
+        fo_list = []
+        mo_list = []
 
         def iteration_diis(number_of_iterations):
             # Create the alpha and beta fock matrices
@@ -985,9 +962,18 @@ class MF:
                 f_a = diis_fock(fock_list_a, error_list_a)
                 f_b = diis_fock(fock_list_b, error_list_b)
 
+            # fill the arrays
+            f_list.append([f_a, f_b])
+
             # Orthogonalise the fock matrices
             f_orth_a = s_12.conj().T @ f_a @ s_12
             f_orth_b = s_12.conj().T @ f_b @ s_12
+            fo_list.append([f_orth_a, f_orth_b])
+
+            # MO coefficients
+            mos_a = Scf.calc_mo(f_orth_a, s_12)
+            mos_b = Scf.calc_mo(f_orth_b, s_12)
+            mo_list.append([mos_a, mos_b])
 
             # Calculate the new density matrices
             new_density_a = Scf.density_matrix(f_orth_a, self.n_a, s_12)
@@ -1007,44 +993,26 @@ class MF:
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure
-        def last_dens():
-            return densities_diis_a[-1], densities_diis_b[-1]
-
-        self.last_dens = last_dens()
+        def dens():
+            return densities_diis_a, densities_diis_b
+        self.dens = dens()
 
         # a function that gives the last Fock matrix of the scf procedure
-        def last_fock():
-            last_fock_a = fock_list_a[-1]
-            last_fock_b = fock_list_b[-1]
-            return last_fock_a, last_fock_b
-
-        self.last_fock = last_fock()
+        def fock():
+            return f_list
+        self.focks = fock()
+        self.fock_orth = fo_list
 
         # A function that returns the converged mo coefficients
         def get_mo():
-            # Calculate the last fock matrix for both alpha and beta
-            fock_a = last_fock()[0]
-            fock_b = last_fock()[1]
-
-            # orthogonalize both fock matrices
-            fock_a_ = s_12.T.dot(fock_a).dot(s_12)
-            fock_b_ = s_12.T.dot(fock_b).dot(s_12)
-
-            # Calculate the eigenvectors of both Fock matrices
-            # Orthogonalise both sets of eigenvectors to get the mo coefficients
-            val_a, vec_a = la.eigh(fock_a_)
-            val_b, vec_b = la.eigh(fock_b_)
-            coefficient_a = s_12 @ vec_a
-            coefficient_b = s_12 @ vec_b
-            return coefficient_a, coefficient_b
-
+            return mo_list
         self.mo = get_mo()
 
         # calculate the total energy, taking nuclear repulsion into account
         scf_e = energies_diis[-1] + self.nuc_rep()
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """

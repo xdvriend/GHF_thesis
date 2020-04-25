@@ -420,7 +420,7 @@ class MF:
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy
 
-    def stability_analysis(self, method, step_size=1e-4):
+    def stability_analysis(self, method, step_size):
         """
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
@@ -428,8 +428,8 @@ class MF:
         :param step_size: Step size for orbital rotation. standard is 1e-4.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
-        # Calculate the A & B blocks needed for stability analysis.
         # Determine the number of occupied and virtual orbitals.
+        # Determine coefficients, mo energies, and other needed parameters.
         occ = int(self.occupied)
         vir = int(np.shape(self.get_ovlp())[0] - occ)
         coeff = self.get_mo_coeff()
@@ -473,20 +473,20 @@ class MF:
         a3 = a3.reshape((occ * vir, occ * vir))
         b3 = b3.reshape((occ * vir, occ * vir))
 
-        # Create a function to rotate the orbitals in case of internal instability
-        def rotate_to_eigenvec(eigenvec):
-            if isinstance(self.energy, complex):
-                indx = int(np.shape(eigenvec)[0] / 2)
-                eigenvec = eigenvec[:indx]
-
-            block_ba = eigenvec.reshape((occ, vir), order='F')
-            block_bb = np.zeros((occ, occ))
-            block_ab = block_ba.conj().T
-            block_aa = np.zeros((vir, vir))
-            k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
-            coeff_init = self.get_mo_coeff()
-            exp = la.expm(-1 * step_size * k)
-            return coeff_init @ exp
+        # # Create a function to rotate the orbitals in case of internal instability
+        # def rotate_to_eigenvec(eigenvec):
+        #     if isinstance(self.energy, complex):
+        #         indx = int(np.shape(eigenvec)[0] / 2)
+        #         eigenvec = eigenvec[:indx]
+        #
+        #     block_ba = eigenvec.reshape((occ, vir), order='F')
+        #     block_bb = np.zeros((occ, occ))
+        #     block_ab = block_ba.conj().T
+        #     block_aa = np.zeros((vir, vir))
+        #     k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
+        #     coeff_init = self.get_mo_coeff()
+        #     exp = la.expm(-1 * step_size * k)
+        #     return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -496,11 +496,10 @@ class MF:
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
-                lowest_eigenvec = v[:, 0]
+                # lowest_eigenvec = v[:, 0]
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the real RHF wave function.")
                     self.int_instability = True
-                    return rotate_to_eigenvec(lowest_eigenvec)
                 else:
                     print('The wave function is stable within the real RHF space.')
                     self.int_instability = None

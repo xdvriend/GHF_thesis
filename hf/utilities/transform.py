@@ -105,3 +105,22 @@ def tensor_basis_transform(tensor, matrix):
     tensor_nb = np.einsum('mp,mqrs->pqrs', matrix, temp_3)
 
     return tensor_nb
+
+
+def mix_tensor_to_basis_transform(tensor, matrix1, matrix2, matrix3, matrix4):
+    """
+    Transform a tensor to a mixed basis. Each index can have a separate transformation matrix.
+    Mostly useful in UHF calculations where tensors must be transformed to an alpha-beta basis.
+    :param tensor: The tensor you wish to transform
+    :param matrix1: matrix to transform index 1
+    :param matrix2: matrix to transform index 2
+    :param matrix3: matrix to transform index 3
+    :param matrix4: matrix to transform index 4
+    :return: The transformed tensor in the mixed basis.
+    """
+    temp_1 = np.einsum('as,pqra->pqrs', matrix4, tensor)
+    temp_2 = np.einsum('lr,pqls->pqrs', matrix3, temp_1)
+    temp_3 = np.einsum('nq,pnrs->pqrs', matrix2, temp_2)
+    tensor_nb = np.einsum('mp,mqrs->pqrs', matrix1, temp_3)
+
+    return tensor_nb
