@@ -53,6 +53,7 @@ class MF:
         self.iterations = None
         self.int_instability = None
         self.ext_instability = None
+        self.hessian = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
         if number_of_electrons % 2 == 0:
@@ -419,19 +420,18 @@ class MF:
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy
 
-    def stability_analysis(self, method):
+    def stability_analysis(self, method, step_size=1e-4):
         """
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
         be internal or external.
+        :param step_size: Step size for orbital rotation. standard is 1e-4.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Calculate the A & B blocks needed for stability analysis.
         # Determine the number of occupied and virtual orbitals.
         occ = int(self.occupied)
         vir = int(np.shape(self.get_ovlp())[0] - occ)
-
-        # Determine the Fock matrices needed.
         coeff = self.get_mo_coeff()
         mo_e = self.get_mo_energy()
         mo_e_vir = mo_e[occ:]
@@ -446,34 +446,47 @@ class MF:
         a1 -= np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
 
         e_values = np.zeros((int(len(mo_e_vir)), int(len(mo_e_occ))))
-        for i in range(len(mo_e_vir)):
-            for j in range(len(mo_e_occ)):
+        for i in range(vir):
+            for j in range(occ):
                 e_values[i][j] = mo_e_vir[i] + (-1 * mo_e_occ[j])
 
         for a in range(vir):
             for i in range(occ):
                 a1[i, a, i, a] += e_values[a, i]
 
-        # Create A_triplet
-        a3 = a1
-        a3 -= np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
-        for a in range(vir):
-            for i in range(occ):
-                a3[i, a, i, a] += e_values[a, i]
-
         # Create B_singlet
         b1 = np.einsum('ckdl->kcld', eri_mo[occ:, :occ, occ:, :occ]) * 2
         b1 -= np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
 
+        # Create A_triplet
+        a3 = - np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
+        for a in range(vir):
+            for i in range(occ):
+                a3[i, a, i, a] += e_values[a, i]
+
         # Create B_triplet
-        b3 = b1
-        b3 -= np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+        b3 = np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
 
         # reshape to matrices
         a1 = a1.reshape((occ * vir, occ * vir))
         b1 = b1.reshape((occ * vir, occ * vir))
         a3 = a3.reshape((occ * vir, occ * vir))
         b3 = b3.reshape((occ * vir, occ * vir))
+
+        # Create a function to rotate the orbitals in case of internal instability
+        def rotate_to_eigenvec(eigenvec):
+            if isinstance(self.energy, complex):
+                indx = int(np.shape(eigenvec)[0] / 2)
+                eigenvec = eigenvec[:indx]
+
+            block_ba = eigenvec.reshape((occ, vir), order='F')
+            block_bb = np.zeros((occ, occ))
+            block_ab = block_ba.conj().T
+            block_aa = np.zeros((vir, vir))
+            k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
+            coeff_init = self.get_mo_coeff()
+            exp = la.expm(-1 * step_size * k)
+            return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -483,9 +496,11 @@ class MF:
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
+                lowest_eigenvec = v[:, 0]
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the real RHF wave function.")
                     self.int_instability = True
+                    return rotate_to_eigenvec(lowest_eigenvec)
                 else:
                     print('The wave function is stable within the real RHF space.')
                     self.int_instability = None
@@ -493,7 +508,7 @@ class MF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix_1 = a1 - b1  # real -> complex
-                stability_matrix_3 = a3 + b3  # restricted -> unrestricted
+                stability_matrix_3 = a3 - b3  # restricted -> unrestricted
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e_1, v_1 = la.eigh(stability_matrix_1)

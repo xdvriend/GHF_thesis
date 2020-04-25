@@ -6,7 +6,7 @@ A number of functions used throughout the UHF and RHF calculations are summarise
 """
 from pyscf import *
 import numpy as np
-from numpy import linalg as la
+from scipy import linalg as la
 from scipy import diag
 import psi4
 
