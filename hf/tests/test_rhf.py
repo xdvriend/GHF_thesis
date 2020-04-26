@@ -83,7 +83,8 @@ def test_stability():
     x.stability_analysis('internal')
     x.stability_analysis('external')
     assert x.int_instability is None
-    assert x.ext_instability is None
+    assert x.ext_instability_rc is None
+    assert x.ext_instability_ru is None
 
 
 def test_follow_stability():

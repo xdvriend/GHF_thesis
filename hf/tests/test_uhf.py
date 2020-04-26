@@ -54,7 +54,8 @@ def test_stability_analysis():
     ber.stability_analysis('internal')
     ber.stability_analysis('external')
     assert ber.int_instability
-    assert ber.ext_instability
+    assert ber.ext_instability_rc is None
+    assert ber.ext_instability_ug
 
 
 def test_follow_stability_analysis():

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; GHF 0.1 documentation</title>
+  <title>Finding the lowest Hartree-Fock solution. &mdash; GHF 0.1 documentation</title>
   
 
   
@@ -35,9 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="Useful functions for SCF procedure" href="SCF_functions.html" />
+    <link rel="prev" title="Generalised Hartree Fock, by means of SCF procedure" href="GHF.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,13 +81,13 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="RHF.html">Restricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="UHF.html">Unrestricted Hartree Fock, by means of SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cUHF_s.html">Constrained unrestricted Hartree Fock by Scuseria</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lowest_HF.html">Finding the lowest Hartree-Fock solution.</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Finding the lowest Hartree-Fock solution.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
@@ -137,10 +136,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Python Module Index</li>
+      <li>Finding the lowest Hartree-Fock solution.</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/lowest_HF.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -152,75 +155,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
+  <span class="target" id="module-hf.HartreeFock.lowest_HF"></span><div class="section" id="finding-the-lowest-hartree-fock-solution">
+<h1>Finding the lowest Hartree-Fock solution.<a class="headerlink" href="#finding-the-lowest-hartree-fock-solution" title="Permalink to this headline">¶</a></h1>
+<p>This class uses all other Hartree fock methods to find the lowest possible HF energy,
+all while breaking as little symmetry as possible. ROHF is not included in this method, so for open shell molecules
+UHF is the starting point.</p>
+<dl class="class">
+<dt id="hf.HartreeFock.lowest_HF.Find">
+<em class="property">class </em><code class="sig-prename descclassname">hf.HartreeFock.lowest_HF.</code><code class="sig-name descname">Find</code><span class="sig-paren">(</span><em class="sig-param">molecule</em>, <em class="sig-param">number_of_electrons</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.lowest_HF.Find" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class uses stability analysis and the ability to follow the lowest eigenvector in order to find the lowest
+Hartree-Fock energy.</p>
+<dl class="method">
+<dt id="hf.HartreeFock.lowest_HF.Find.run_algorithm">
+<code class="sig-name descname">run_algorithm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hf.HartreeFock.lowest_HF.Find.run_algorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will start your calculation at the lowest possible level (RHF or UHF) and cascade downwards,
+breaking more and more symmetry along the way.
+:return: None</p>
+</dd></dl>
 
-   <h1>Python Module Index</h1>
+</dd></dl>
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-h"><strong>h</strong></a>
-   </div>
-
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-h"><td></td><td>
-       <strong>h</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">hf</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="cUHF_b.html#module-hf.HartreeFock.cUHF_b"><code class="xref">hf.HartreeFock.cUHF_b</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="cUHF_s.html#module-hf.HartreeFock.cUHF_s"><code class="xref">hf.HartreeFock.cUHF_s</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="GHF.html#module-hf.HartreeFock.GHF"><code class="xref">hf.HartreeFock.GHF</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="lowest_HF.html#module-hf.HartreeFock.lowest_HF"><code class="xref">hf.HartreeFock.lowest_HF</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="RHF.html#module-hf.HartreeFock.RHF"><code class="xref">hf.HartreeFock.RHF</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="UHF.html#module-hf.HartreeFock.UHF"><code class="xref">hf.HartreeFock.UHF</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="spin.html#module-hf.properties.spin"><code class="xref">hf.properties.spin</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="SCF_functions.html#module-hf.utilities.SCF_functions"><code class="xref">hf.utilities.SCF_functions</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="transform.html#module-hf.utilities.transform"><code class="xref">hf.utilities.transform</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="SCF_functions.html" class="btn btn-neutral float-right" title="Useful functions for SCF procedure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="GHF.html" class="btn btn-neutral float-left" title="Generalised Hartree Fock, by means of SCF procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
