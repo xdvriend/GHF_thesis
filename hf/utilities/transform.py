@@ -6,6 +6,7 @@ This file contains functions that calculate the expectation values of the differ
 """
 
 import numpy as np
+from scipy import linalg as la
 
 
 def expand_matrix(matrix):
@@ -124,3 +125,41 @@ def mix_tensor_to_basis_transform(tensor, matrix1, matrix2, matrix3, matrix4):
     tensor_nb = np.einsum('mp,mqrs->pqrs', matrix1, temp_3)
 
     return tensor_nb
+
+
+# Create a function to rotate the orbitals in case of internal instability
+def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
+    occ_mos = np.zeros(number_of_orbitals)
+    for j in range(occ):
+        occ_mos[j] = 1
+
+    def unique_variable_indices(mo_occ):
+        occ_indx_a = mo_occ > 0  # indices of occupied alpha orbitals
+        occ_indx_b = mo_occ == 2  # indices of occupied beta orbitals
+        # indices of virtual (unoccupied) alpha orbitals, done with bitwise operator: ~ (negation)
+        # indices of virtual (unoccupied) beta orbitals, done with bitwise operator: ~ (negation)
+        vir_indx_a = ~occ_indx_a
+        vir_indx_b = ~occ_indx_b
+        # & and | are bitwise operators for 'and' and 'or'
+        # each bit position is the result of the logical 'and' or 'or' of the bits
+        # in the corresponding position of the operands
+        # determine the unique variable indices, by use of bitwise operators
+        unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:, None] & occ_indx_b)
+        return unique
+
+    # put the unique variables in a new matrix used later to create a rotation matrix.
+    def unpack_unique_variables(vec, mo_occ):
+        nmo = len(mo_occ)
+        idx = unique_variable_indices(mo_occ)
+        x1 = np.zeros((nmo, nmo), dtype=eigenvec.dtype)
+        x1[idx] = vec
+        return x1 - x1.conj().T
+
+    # A function to apply a rotation on the given coefficients
+    def rotate_mo(mo_occ, dx):
+        dr = unpack_unique_variables(dx, mo_occ)
+        u = la.expm(dr)  # computes the matrix exponential
+        return np.dot(mo_coeff, u)
+
+    return rotate_mo(occ_mos, eigenvec)
+

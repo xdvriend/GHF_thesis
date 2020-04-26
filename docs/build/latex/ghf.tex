@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Apr 24, 2020}
+\date{Apr 26, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -318,6 +318,7 @@ number of iterations, scf energy, mo coefficients, last density matrix, last foc
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
+:param step\_size: Step size for orbital rotation. standard is 1e-4.
 :return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
@@ -401,20 +402,11 @@ A new guess matrix to use for the scf procedure.
 
 \end{fulllineitems}
 
-\index{get\_hessian() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_hessian()}\spxextra{hf.HartreeFock.UHF.MF method}}
+\index{get\_dens() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_dens()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
-Get the Hessian matrix after performing a stability analysis.
-:return: The hessian matrix
-
-\end{fulllineitems}
-
-\index{get\_last\_dens() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_last\_dens()}\spxextra{hf.HartreeFock.UHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
-Gets the last density matrix of the converged solution.
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_dens}}}{\emph{i=-1}}{}
+Gets the (last) density matrix of the converged solution.
 Alpha density in the first matrix, beta density in the second.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -424,24 +416,44 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_last\_fock()}\spxextra{hf.HartreeFock.UHF.MF method}}
+\index{get\_fock() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_fock()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
-Gets the last fock matrix of the converged solution.
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock}}}{\emph{i=-1}}{}
+Gets the (last) fock matrix of the converged solution.
 Alpha Fock matrix first, beta Fock matrix second.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
-The last Fock matrix.
+The requested Fock matrices.
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock\_orth() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_fock\_orth()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_fock_orth}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock\_orth}}}{\emph{i=-1}}{}
+Get the fock matrices in the orthonormal basis. Defaults to the last one
+:param i: index of the matrix you want.
+:return: a and b orthonormal fock matrix
+
+\end{fulllineitems}
+
+\index{get\_hessian() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_hessian()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{\emph{prime}}{}
+Get the Hessian matrix after performing a stability analysis.
+:param: specify whether you want to look at H’ or H’’ by putting 1 or 2
+:return: The hessian matrix
 
 \end{fulllineitems}
 
 \index{get\_mo\_coeff() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{\emph{i=-1}}{}
 Gets the mo coefficients of the converged solution.
 Alpha coefficients in the first matrix, beta coefficients in the second.
 \begin{quote}\begin{description}
@@ -449,6 +461,15 @@ Alpha coefficients in the first matrix, beta coefficients in the second.
 The mo coefficients
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_energy() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_mo\_energy()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_energy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_energy}}}{}{}
+Returns the MO energies of the converged solution.
+:return: an array of MO energies.
 
 \end{fulllineitems}
 
@@ -573,39 +594,13 @@ The scf energy, number of iterations, the mo coefficients, the last density and 
 
 \end{fulllineitems}
 
-\index{stability() (hf.HartreeFock.UHF.MF method)@\spxentry{stability()}\spxextra{hf.HartreeFock.UHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
-Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
-value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
-of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
-
-To perform a stability analysis, use the following syntax:
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{hf}\PYG{n+nn}{.}\PYG{n+nn}{HartreeFock} \PYG{k}{import} \PYG{o}{*}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\end{sphinxVerbatim}
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-New and improved MO’s.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 \index{stability\_analysis() (hf.HartreeFock.UHF.MF method)@\spxentry{stability\_analysis()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=1e-05}}{}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}}{}
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
-:param step\_size: Step size for orbital rotation. standard is 1e-5.
 :return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
@@ -1629,6 +1624,21 @@ Expand a given tensor to spinor basis representation.
 a tensor where each dimension is doubled.
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{mix\_tensor\_to\_basis\_transform() (in module hf.utilities.transform)@\spxentry{mix\_tensor\_to\_basis\_transform()}\spxextra{in module hf.utilities.transform}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{transform:hf.utilities.transform.mix_tensor_to_basis_transform}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.transform.}}\sphinxbfcode{\sphinxupquote{mix\_tensor\_to\_basis\_transform}}}{\emph{tensor}, \emph{matrix1}, \emph{matrix2}, \emph{matrix3}, \emph{matrix4}}{}
+Transform a tensor to a mixed basis. Each index can have a separate transformation matrix.
+Mostly useful in UHF calculations where tensors must be transformed to an alpha-beta basis.
+:param tensor: The tensor you wish to transform
+:param matrix1: matrix to transform index 1
+:param matrix2: matrix to transform index 2
+:param matrix3: matrix to transform index 3
+:param matrix4: matrix to transform index 4
+:return: The transformed tensor in the mixed basis.
 
 \end{fulllineitems}
 
