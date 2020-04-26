@@ -1642,6 +1642,21 @@ Mostly useful in UHF calculations where tensors must be transformed to an alpha-
 
 \end{fulllineitems}
 
+\index{rotate\_to\_eigenvec() (in module hf.utilities.transform)@\spxentry{rotate\_to\_eigenvec()}\spxextra{in module hf.utilities.transform}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{transform:hf.utilities.transform.rotate_to_eigenvec}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.transform.}}\sphinxbfcode{\sphinxupquote{rotate\_to\_eigenvec}}}{\emph{eigenvec}, \emph{mo\_coeff}, \emph{occ}, \emph{number\_of\_orbitals}}{}
+A function used to rotate a given set of coefficients to a given eigenvector.
+This is done by making an irreducible representation of the eigenvector and creating the exponential matrix
+of the result.
+:param eigenvec: The eigenvector to which you wish to rotate
+:param mo\_coeff: The MO coefficients you whish to rotate
+:param occ: the number of occupied orbitals
+:param number\_of\_orbitals: the total number of orbitals
+:return: A rotated set of coefficients.
+
+\end{fulllineitems}
+
 \index{spin\_blocked() (in module hf.utilities.transform)@\spxentry{spin\_blocked()}\spxextra{in module hf.utilities.transform}}
 
 \begin{fulllineitems}

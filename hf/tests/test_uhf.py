@@ -63,5 +63,6 @@ def test_follow_stability_analysis():
     energy state. The test molecule is H_4, which has an internal instbility in the UHF space.
     """
     x = UHF.MF(h4, 4)
+    x.scf()
     guess = x.stability_analysis('internal')
     assert np.allclose(-2.021088247649845, x.get_scf_solution(guess))

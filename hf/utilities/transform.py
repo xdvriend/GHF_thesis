@@ -127,8 +127,17 @@ def mix_tensor_to_basis_transform(tensor, matrix1, matrix2, matrix3, matrix4):
     return tensor_nb
 
 
-# Create a function to rotate the orbitals in case of internal instability
 def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
+    """
+    A function used to rotate a given set of coefficients to a given eigenvector.
+    This is done by making an irreducible representation of the eigenvector and creating the exponential matrix
+    of the result.
+    :param eigenvec: The eigenvector to which you wish to rotate
+    :param mo_coeff: The MO coefficients you whish to rotate
+    :param occ: the number of occupied orbitals
+    :param number_of_orbitals: the total number of orbitals
+    :return: A rotated set of coefficients.
+    """
     occ_mos = np.zeros(number_of_orbitals)
     for j in range(occ):
         occ_mos[j] = 1
@@ -162,4 +171,3 @@ def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
         return np.dot(mo_coeff, u)
 
     return rotate_mo(occ_mos, eigenvec)
-
