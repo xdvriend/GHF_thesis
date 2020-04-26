@@ -14,6 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Creating the molecules.
 h3 = gto.M(atom='h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1', spin=1, basis='sto-3g')
 h4 = gto.M(atom='h 0 0.707107 0; h 0.707107 0 0; h 0 -0.707107 0; h -0.707107 0 0', spin=2, basis='cc-pvdz')
+Be = gto.M(atom='Be 1 0 0', basis='4-31g')
 
 
 def test_scf():
@@ -44,11 +45,24 @@ def test_extra_e():
     assert np.isclose(-2.021088247649845, x.get_scf_solution(guess))
 
 
-def test_stability():
+def test_stability_analysis():
     """
-    test_stability will test the UHF method, with stability analysis, by checking whether or not it returns
-    the correct result
+    A test that checks whether the stability analysis correctly estimates a function's stability.
+    """
+    ber = UHF.MF(Be, 4)
+    ber.scf()
+    ber.stability_analysis('internal')
+    ber.stability_analysis('external')
+    assert ber.int_instability
+    assert ber.ext_instability
+
+
+def test_follow_stability_analysis():
+    """
+    A test that will perform an internal stability analysis, and check that the rotated coefficients return a lower
+    energy state. The test molecule is H_4, which has an internal instbility in the UHF space.
     """
     x = UHF.MF(h4, 4)
-    guess = x.stability()
+    x.scf()
+    guess = x.stability_analysis('internal')
     assert np.allclose(-2.021088247649845, x.get_scf_solution(guess))

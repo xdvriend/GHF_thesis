@@ -6,7 +6,7 @@ A number of functions used throughout the UHF and RHF calculations are summarise
 """
 from pyscf import *
 import numpy as np
-from numpy import linalg as la
+from scipy import linalg as la
 from scipy import diag
 import psi4
 
@@ -74,6 +74,16 @@ def calc_mo(f_o, t):
     val, vec = la.eigh(f_o)
     coeff = t @ vec
     return coeff
+
+
+def calc_mo_e(f_o):
+    """
+    Calculate mo energies.
+    :param f_o: Fock matrix in orthonormal basis.
+    :return: mo energies
+    """
+    val, vec = la.eigh(f_o)
+    return val
 
 
 def uhf_fock_matrix(density_matrix_1, density_matrix_2, one_electron, two_electron):

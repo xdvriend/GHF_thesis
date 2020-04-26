@@ -29,6 +29,13 @@ symmetry c1
 
 psi4.set_options({'basis': 'sto-3g'})
 
+h4 = gto.M(atom='h 0 0.707107 0;'
+                'h 0.707107 0 0;'
+                'h 0 -0.707107 0;'
+                'h -0.707107 0 0',
+           spin=2,
+           basis='sto-3g')
+
 
 def test_scf():
     """
@@ -65,3 +72,30 @@ def test_pyscf_vs_psi4():
     y = RHF.MF(h2o_psi4, 10, 'psi4')
     assert np.isclose(x.scf(convergence=1e-6)[0], y.scf(convergence=1e-6)[0])
     assert x.scf(convergence=1e-6)[1] == y.scf(convergence=1e-6)[1]
+
+
+def test_stability():
+    """
+    A test for the RHF stability analysis.
+    """
+    x = RHF.MF(h2o, 10)
+    x.diis()
+    x.stability_analysis('internal')
+    x.stability_analysis('external')
+    assert x.int_instability is None
+    assert x.ext_instability is None
+
+
+def test_follow_stability():
+    """
+    A test used to see if following the stability analysis can lead to a lower lying energy state and
+    a more stable solution.
+    """
+    test = RHF.MF(h4, 4)
+    test.get_scf_solution()
+
+    x = test.stability_analysis('internal')
+    while test.int_instability:
+        test.get_scf_solution(x)
+        x = test.stability_analysis('internal')
+    assert test.int_instability is None

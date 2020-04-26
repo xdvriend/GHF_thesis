@@ -7,7 +7,9 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 """
 
 import hf.utilities.SCF_functions as Scf
+import hf.utilities.transform as t
 import numpy as np
+from scipy import linalg as la
 import collections as c
 from pyscf import *
 
@@ -49,6 +51,9 @@ class MF:
         self.fock = None
         self.fock_orth = None
         self.iterations = None
+        self.int_instability = None
+        self.ext_instability = None
+        self.hessian = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
         if number_of_electrons % 2 == 0:
@@ -85,26 +90,41 @@ class MF:
         """
         return self.integrals[3]  # Get the nuclear repulsion value of the given molecule
 
-    def scf(self, convergence=1e-12, complex_method=False):
+    def scf(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Performs a self consistent field calculation to find the lowest RHF energy.
 
+        :param guess: Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
         :param convergence: Convergence criterion. If none is specified, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        if complex_method:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            core_guess = core_guess.astype(complex)
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
-            guess_density[0, :] += 0.1j
-            guess_density[:, 0] -= 0.1j
+        if guess is None:
+            if complex_method:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                core_guess = core_guess.astype(complex)
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+                guess_density[0, :] += 0.1j
+                guess_density[:, 0] -= 0.1j
+            else:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
         else:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
+            coefficients = guess
+            coefficients_r = coefficients[:, :self.occupied]
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    guess_density[0, :] += .1j
+                    guess_density[:, 0] -= .1j
+                else:
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
-        densities = [guess_density]  # put the guess density in an array
+        # put the guess density in an array
+        densities = [guess_density]
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
@@ -174,15 +194,16 @@ class MF:
 
         return scf_e, i, get_mo(), dens(), fock()
 
-    def get_scf_solution(self, convergence=1e-12, complex_method=False):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
 
+        :param guess: Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: the converged energy
         """
-        self.scf(convergence=convergence, complex_method=complex_method)
+        self.scf(guess=guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
@@ -227,24 +248,46 @@ class MF:
         """
         return self.fock_orth[i]
 
-    def diis(self, convergence=1e-12, complex_method=False):
+    def get_mo_energy(self):
+        """
+        Returns the MO energies.
+        :return: an array of MO energies.
+        """
+        e = Scf.calc_mo_e(self.get_fock_orth())
+        return e
+
+    def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 
+        :param guess: Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        if complex_method:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            core_guess = core_guess.astype(complex)
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
-            guess_density[0, :] += 0.1j
-            guess_density[:, 0] -= 0.1j
+        if guess is None:
+            if complex_method:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                core_guess = core_guess.astype(complex)
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+                guess_density[0, :] += 0.1j
+                guess_density[:, 0] -= 0.1j
+            else:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
         else:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.occupied]
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    guess_density[0, :] += .1j
+                    guess_density[:, 0] -= .1j
+                else:
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -380,7 +423,7 @@ class MF:
 
         return scf_e, i, get_mo(), dens(), fock()
 
-    def get_scf_solution_diis(self, convergence=1e-12, complex_method=False):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
@@ -390,11 +433,12 @@ class MF:
         >>> x = RHF.MF(h2, 2)
         >>> x.get_scf_solution_diis()
 
+        :param guess: Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy, using DIIS.
         """
-        self.diis(convergence=convergence, complex_method=complex_method)
+        self.diis(guess=guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
@@ -406,3 +450,140 @@ class MF:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real RHF, DIIS)")
         return self.energy
+
+    def stability_analysis(self, method):
+        """
+        Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+        :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+        be internal or external.
+        :return: In case of internal stability analysis, it returns a new set of coefficients.
+        """
+        # Determine the number of occupied and virtual orbitals.
+        # Determine coefficients, mo energies, and other needed parameters.
+        occ = int(self.occupied)
+        vir = int(np.shape(self.get_ovlp())[0] - occ)
+        coeff = self.get_mo_coeff()
+        mo_e = self.get_mo_energy()
+        mo_e_vir = mo_e[occ:]
+        mo_e_occ = mo_e[:occ]
+
+        # Determine the two electron integrals in MO basis.
+        eri_ao = self.get_two_e()
+        eri_mo = t.tensor_basis_transform(eri_ao, coeff)
+
+        # Create A_singlet
+        a1 = np.einsum('ckld->kcld', eri_mo[occ:, :occ, :occ, occ:]) * 2
+        a1 -= np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
+
+        e_values = np.zeros((int(len(mo_e_vir)), int(len(mo_e_occ))))
+        for i in range(vir):
+            for j in range(occ):
+                e_values[i][j] = mo_e_vir[i] + (-1 * mo_e_occ[j])
+
+        for a in range(vir):
+            for i in range(occ):
+                a1[i, a, i, a] += e_values[a, i]
+
+        # Create B_singlet
+        b1 = np.einsum('ckdl->kcld', eri_mo[occ:, :occ, occ:, :occ]) * 2
+        b1 -= np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+
+        # Create A_triplet
+        a3 = - np.einsum('cdlk->kcld', eri_mo[occ:, occ:, :occ, :occ])
+        for a in range(vir):
+            for i in range(occ):
+                a3[i, a, i, a] += e_values[a, i]
+
+        # Create B_triplet
+        b3 = np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+
+        # reshape to matrices
+        a1 = a1.reshape((occ * vir, occ * vir))
+        b1 = b1.reshape((occ * vir, occ * vir))
+        a3 = a3.reshape((occ * vir, occ * vir))
+        b3 = b3.reshape((occ * vir, occ * vir))
+
+        # # Create a function to rotate the orbitals in case of internal instability
+        # def rotate_to_eigenvec(eigenvec):
+        #     if isinstance(self.energy, complex):
+        #         indx = int(np.shape(eigenvec)[0] / 2)
+        #         eigenvec = eigenvec[:indx]
+        #
+        #     block_ba = eigenvec.reshape((occ, vir), order='F')
+        #     block_bb = np.zeros((occ, occ))
+        #     block_ab = block_ba.conj().T
+        #     block_aa = np.zeros((vir, vir))
+        #     k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
+        #     coeff_init = self.get_mo_coeff()
+        #     exp = la.expm(-1 * step_size * k)
+        #     return coeff_init @ exp
+
+        # Check the different stability matrices to verify the stability.
+        if not isinstance(self.energy, complex):
+            if method == 'internal':
+                # the stability matrix for the real sub problem consists of a + b
+                stability_matrix = a1 + b1  # real restricted internal
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                lowest_eigenvec = v[:, 0]
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the real RHF wave function.")
+                    self.int_instability = True
+                    return t.rotate_to_eigenvec(lowest_eigenvec, coeff, occ, np.shape(self.get_ovlp())[0])
+                else:
+                    print('The wave function is stable within the real RHF space.')
+                    self.int_instability = None
+
+            elif method == 'external':
+                # the stability matrix for the complex sub problem consists of a - b
+                stability_matrix_1 = a1 - b1  # real -> complex
+                stability_matrix_3 = a3 - b3  # restricted -> unrestricted
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e_1, v_1 = la.eigh(stability_matrix_1)
+                e_3, v_3 = la.eigh(stability_matrix_3)
+                if np.amin(e_1) < -1e-5:  # this points towards an instability
+                    print("There is an external real/complex instability in the real RHF wave function.")
+                    self.ext_instability = True
+                if np.amin(e_3) < -1e-5:
+                    print("There is an external restricted/unrestricted instability in the real RHF wave function.")
+                    self.ext_instability = True
+                else:
+                    print('The wave function is stable within the real/complex & RHF/UHF space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
+        else:
+            if method == 'internal':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = t.spin_blocked(a1, b1, b1.conj(), a1.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                lowest_eigenvec = v[:, 0]
+                real_part = lowest_eigenvec[:int(len(lowest_eigenvec) / 2)]
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an internal instability in the complex RHF wave function.")
+                    self.int_instability = True
+                    return t.rotate_to_eigenvec(real_part, coeff, occ, np.shape(self.get_ovlp())[0])
+                else:
+                    print('The wave function is stable within the complex RHF space.')
+                    self.int_instability = None
+            elif method == 'external':
+                # The total stability matrix consists of a & b in the upper corners, and b* and a* in the lower corners
+                stability_matrix = t.spin_blocked(a3, b3, b3.conj(), a3.conj())
+
+                # Calculate the eigenvalues of the stability matrix to asses stability
+                e, v = la.eigh(stability_matrix)
+                if np.amin(e) < -1e-5:  # this points towards an instability
+                    print("There is an external RHF/UHF instability in the complex RHF wave function.")
+                    self.ext_instability = True
+
+                else:
+                    print('The wave function is stable within the complex RHF space.')
+                    self.ext_instability = None
+            else:
+                raise Exception('Only internal and external stability analysis are possible. '
+                                'Please enter a valid type.')
