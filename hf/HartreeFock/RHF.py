@@ -90,26 +90,41 @@ class MF:
         """
         return self.integrals[3]  # Get the nuclear repulsion value of the given molecule
 
-    def scf(self, convergence=1e-12, complex_method=False):
+    def scf(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Performs a self consistent field calculation to find the lowest RHF energy.
 
+        :param guess: Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
         :param convergence: Convergence criterion. If none is specified, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        if complex_method:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            core_guess = core_guess.astype(complex)
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
-            guess_density[0, :] += 0.1j
-            guess_density[:, 0] -= 0.1j
+        if guess is None:
+            if complex_method:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                core_guess = core_guess.astype(complex)
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+                guess_density[0, :] += 0.1j
+                guess_density[:, 0] -= 0.1j
+            else:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
         else:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
+            coefficients = guess
+            coefficients_r = coefficients[:, :self.occupied]
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    guess_density[0, :] += .1j
+                    guess_density[:, 0] -= .1j
+                else:
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
-        densities = [guess_density]  # put the guess density in an array
+        # put the guess density in an array
+        densities = [guess_density]
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
@@ -179,15 +194,16 @@ class MF:
 
         return scf_e, i, get_mo(), dens(), fock()
 
-    def get_scf_solution(self, convergence=1e-12, complex_method=False):
+    def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged scf energy.
 
+        :param guess: Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: the converged energy
         """
-        self.scf(convergence=convergence, complex_method=complex_method)
+        self.scf(guess=guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
@@ -240,24 +256,38 @@ class MF:
         e = Scf.calc_mo_e(self.get_fock_orth())
         return e
 
-    def diis(self, convergence=1e-12, complex_method=False):
+    def diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 
+        :param guess: Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: scf energy, number of iterations, mo coefficients, last density matrix, last fock matrix
         """
         s_12 = Scf.trans_matrix(self.get_ovlp())  # calculate the transformation matrix
-        if complex_method:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            core_guess = core_guess.astype(complex)
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
-            guess_density[0, :] += 0.1j
-            guess_density[:, 0] -= 0.1j
+        if guess is None:
+            if complex_method:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                core_guess = core_guess.astype(complex)
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)  # calculate the guess density
+                guess_density[0, :] += 0.1j
+                guess_density[:, 0] -= 0.1j
+            else:
+                core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
+                guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
         else:
-            core_guess = s_12 @ self.get_one_e() @ s_12.conj().T  # orthogonalise the transformation matrix.
-            guess_density = Scf.density_matrix(core_guess, self.occupied, s_12)
+            coefficients = guess
+            coefficients_r = coefficients[:, 0:self.occupied]
+            if complex_method:
+                if not isinstance(guess[0][0], complex):
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
+                    guess_density[0, :] += .1j
+                    guess_density[:, 0] -= .1j
+                else:
+                    guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
+            else:
+                guess_density = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
         def rhf_fock_matrix(dens_matrix):
             """calculate a fock matrix from a given density matrix"""
@@ -393,7 +423,7 @@ class MF:
 
         return scf_e, i, get_mo(), dens(), fock()
 
-    def get_scf_solution_diis(self, convergence=1e-12, complex_method=False):
+    def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
         Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
         a normal scf, but the energy value will be the same. Example:
@@ -403,11 +433,12 @@ class MF:
         >>> x = RHF.MF(h2, 2)
         >>> x.get_scf_solution_diis()
 
+        :param guess: Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param complex_method: Specify whether or not you want to work in the complex space. Default is real.
         :return: The converged scf energy, using DIIS.
         """
-        self.diis(convergence=convergence, complex_method=complex_method)
+        self.diis(guess=guess, convergence=convergence, complex_method=complex_method)
         e = self.energy
         if complex_method:
             if abs(np.imag(e)) > 1e-12:
@@ -425,7 +456,6 @@ class MF:
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
         be internal or external.
-        :param step_size: Step size for orbital rotation. standard is 1e-4.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Determine the number of occupied and virtual orbitals.
@@ -496,10 +526,11 @@ class MF:
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
-                # lowest_eigenvec = v[:, 0]
+                lowest_eigenvec = v[:, 0]
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the real RHF wave function.")
                     self.int_instability = True
+                    return t.rotate_to_eigenvec(lowest_eigenvec, coeff, occ, np.shape(self.get_ovlp())[0])
                 else:
                     print('The wave function is stable within the real RHF space.')
                     self.int_instability = None
@@ -531,10 +562,12 @@ class MF:
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e, v = la.eigh(stability_matrix)
+                lowest_eigenvec = v[:, 0]
+                real_part = lowest_eigenvec[:int(len(lowest_eigenvec) / 2)]
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the complex RHF wave function.")
                     self.int_instability = True
-
+                    return t.rotate_to_eigenvec(real_part, coeff, occ, np.shape(self.get_ovlp())[0])
                 else:
                     print('The wave function is stable within the complex RHF space.')
                     self.int_instability = None

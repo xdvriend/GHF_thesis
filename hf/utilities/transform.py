@@ -133,7 +133,7 @@ def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
     This is done by making an irreducible representation of the eigenvector and creating the exponential matrix
     of the result.
     :param eigenvec: The eigenvector to which you wish to rotate
-    :param mo_coeff: The MO coefficients you whish to rotate
+    :param mo_coeff: The MO coefficients you wish to rotate
     :param occ: the number of occupied orbitals
     :param number_of_orbitals: the total number of orbitals
     :return: A rotated set of coefficients.
@@ -156,7 +156,7 @@ def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
         unique = (vir_indx_a[:, None] & occ_indx_a) | (vir_indx_b[:, None] & occ_indx_b)
         return unique
 
-    # put the unique variables in a new matrix used later to create a rotation matrix.
+    # put the unique variables in a new matrix used to create a irreducible presentation.
     def unpack_unique_variables(vec, mo_occ):
         nmo = len(mo_occ)
         idx = unique_variable_indices(mo_occ)

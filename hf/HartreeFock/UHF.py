@@ -551,10 +551,15 @@ class MF:
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e_3, v_3 = la.eigh(stability_matrix_3)
+                lowest_eigenvec = v_3[:, 0]
+                real_part = lowest_eigenvec[:int(len(lowest_eigenvec) / 2)]
+                lowest_real_a = real_part[:occ_a * vir_a]
+                lowest_real_b = real_part[occ_b * vir_b:]
                 if np.amin(e_3) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the complex UHF wave function.")
                     self.int_instability = True
-                    # lowest_eigenvec = v[:, 0]
+                    return t.rotate_to_eigenvec(lowest_real_a, mo_a, occ_a, n_orb), \
+                        t.rotate_to_eigenvec(lowest_real_b, mo_b, occ_b, n_orb)
                 else:
                     print('The wave function is stable in the complex UHF space.')
                     self.int_instability = None

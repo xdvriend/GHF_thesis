@@ -27,8 +27,6 @@ h2o.get_scf_solution_diis()
 
 
 # RHF functions can have both internal and external instabilities and both can be checked.
-# As for now, stability analysis can't be followed, meaning it does not yet return a set of MO coefficients
-# which results in a lower lying energy/more stable solution
 h2o.stability_analysis('internal')
 h2o.stability_analysis('external')
 

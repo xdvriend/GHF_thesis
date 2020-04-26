@@ -113,10 +113,13 @@ and the number of iterations needed to get this value.
 \index{diis() (hf.HartreeFock.RHF.MF method)@\spxentry{diis()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -218,10 +221,13 @@ The overlap matrix
 \index{get\_scf\_solution() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -240,7 +246,7 @@ the converged energy
 \index{get\_scf\_solution\_diis() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:
 
@@ -252,6 +258,9 @@ a normal scf, but the energy value will be the same. Example:
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -292,10 +301,13 @@ The nuclear repulsion value
 \index{scf() (hf.HartreeFock.RHF.MF method)@\spxentry{scf()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Performs a self consistent field calculation to find the lowest RHF energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Convergence criterion. If none is specified, 1e-12 is used.
 
@@ -318,7 +330,6 @@ number of iterations, scf energy, mo coefficients, last density matrix, last foc
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
-:param step\_size: Step size for orbital rotation. standard is 1e-4.
 :return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
@@ -1650,7 +1661,7 @@ A function used to rotate a given set of coefficients to a given eigenvector.
 This is done by making an irreducible representation of the eigenvector and creating the exponential matrix
 of the result.
 :param eigenvec: The eigenvector to which you wish to rotate
-:param mo\_coeff: The MO coefficients you whish to rotate
+:param mo\_coeff: The MO coefficients you wish to rotate
 :param occ: the number of occupied orbitals
 :param number\_of\_orbitals: the total number of orbitals
 :return: A rotated set of coefficients.
