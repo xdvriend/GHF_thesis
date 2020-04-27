@@ -61,7 +61,8 @@ class MF:
         self.hessian_p = None
         self.hessian_pp = None
         self.int_instability = None
-        self.ext_instability = None
+        self.ext_instability_rc = None
+        self.ext_instability_ug = None
         if number_of_electrons % 2 == 0:
             self.n_a = int(number_of_electrons / 2)
             self.n_b = int(number_of_electrons / 2)
@@ -260,13 +261,13 @@ class MF:
         """
         return self.fock_orth[i][0], self.fock_orth[i][1]
 
-    def get_mo_energy(self):
+    def get_mo_energy(self, i=-1):
         """
         Returns the MO energies of the converged solution.
         :return: an array of MO energies.
         """
-        e_a = Scf.calc_mo_e(self.get_fock_orth()[0])
-        e_b = Scf.calc_mo_e(self.get_fock_orth()[1])
+        e_a = Scf.calc_mo_e(self.get_fock_orth(i)[0])
+        e_b = Scf.calc_mo_e(self.get_fock_orth(i)[1])
         return e_a, e_b
 
     def get_dens(self, i=-1):
@@ -533,13 +534,14 @@ class MF:
                 e_2, v_2 = la.eigh(stability_matrix_2)
                 if np.amin(e_1) < -1e-5:  # this points towards an instability
                     print("There is an external real/complex instability in the real UHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_rc = True
                 if np.amin(e_2) < -1e-5:  # this points towards an instability
                     print("There is an external unrestricted/generalised instability in the real UHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_ug = True
                 else:
                     print('The wave function is stable within the real/complex & unrestricted/generalised space.')
-                    self.ext_instability = None
+                    self.ext_instability_rc = None
+                    self.ext_instability_ug = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')
@@ -573,10 +575,10 @@ class MF:
 
                 if np.amin(e_4) < -1e-5:  # this points towards an instability
                     print("There is an external unrestricted/generalised instability in the complex UHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_ug = True
                 else:
                     print('The wave function is stable within the complex UHF space.')
-                    self.ext_instability = None
+                    self.ext_instability_ug = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')

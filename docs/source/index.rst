@@ -15,6 +15,7 @@ HF's documentation
    cUHF_s
    cUHF_b
    GHF
+   lowest_HF
    SCF_functions
    spin
    transform

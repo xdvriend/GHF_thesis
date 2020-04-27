@@ -52,7 +52,8 @@ class MF:
         self.fock_orth = None
         self.iterations = None
         self.int_instability = None
-        self.ext_instability = None
+        self.ext_instability_rc = None
+        self.ext_instability_ru = None
         self.hessian = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
@@ -248,12 +249,12 @@ class MF:
         """
         return self.fock_orth[i]
 
-    def get_mo_energy(self):
+    def get_mo_energy(self, i=-1):
         """
         Returns the MO energies.
         :return: an array of MO energies.
         """
-        e = Scf.calc_mo_e(self.get_fock_orth())
+        e = Scf.calc_mo_e(self.get_fock_orth(i))
         return e
 
     def diis(self, guess=None, convergence=1e-12, complex_method=False):
@@ -545,13 +546,14 @@ class MF:
                 e_3, v_3 = la.eigh(stability_matrix_3)
                 if np.amin(e_1) < -1e-5:  # this points towards an instability
                     print("There is an external real/complex instability in the real RHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_rc = True
                 if np.amin(e_3) < -1e-5:
                     print("There is an external restricted/unrestricted instability in the real RHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_ru = True
                 else:
                     print('The wave function is stable within the real/complex & RHF/UHF space.')
-                    self.ext_instability = None
+                    self.ext_instability_rc = None
+                    self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')
@@ -579,11 +581,11 @@ class MF:
                 e, v = la.eigh(stability_matrix)
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an external RHF/UHF instability in the complex RHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_ru = True
 
                 else:
                     print('The wave function is stable within the complex RHF space.')
-                    self.ext_instability = None
+                    self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')

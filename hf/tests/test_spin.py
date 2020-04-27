@@ -31,6 +31,6 @@ def test_ghf_spin():
     g = x.random_guess()
     x.diis(g)
     s = spin.ghf(x.get_mo_coeff(), x.number_of_electrons, Scf.trans_matrix(x.get_ovlp()))
-    assert np.isclose(-2.1576929460587202e-05, s[0])
+    assert np.isclose(-1.9902329445486977e-05, s[0])
     assert np.isclose(0.7790732218658856, s[1])
     assert np.isclose(2.02886492587938, s[2])
