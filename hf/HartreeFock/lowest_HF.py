@@ -17,7 +17,7 @@ class Find:
     This class uses stability analysis and the ability to follow the lowest eigenvector in order to find the lowest
     Hartree-Fock energy.
     """
-    def __init__(self, molecule, number_of_electrons):
+    def __init__(self, molecule, number_of_electrons, int_method='pyscf'):
         """
         Molecules are made in a way that they can be used by the other classes, so either pySCF or psi4.
         First, the algorithm looks for a stable solution within the method. Next, external stabilities are checked.
@@ -27,6 +27,7 @@ class Find:
         """
         self.molecule = molecule
         self.n_e = number_of_electrons
+        self.int_method = int_method
 
     def run_algorithm(self):
         """
@@ -38,7 +39,7 @@ class Find:
             print('====================================')
             print('Checking real RHF internal stability')
             print('====================================')
-            rhf = RHF.MF(self.molecule, self.n_e)
+            rhf = RHF.MF(self.molecule, self.n_e, self.int_method)
             rhf.get_scf_solution()
             imp_mo = rhf.stability_analysis('internal')
             while rhf.int_instability:
@@ -76,7 +77,7 @@ class Find:
         print('====================================')
         print('Checking real UHF internal stability')
         print('====================================')
-        uhf = UHF.MF(self.molecule, self.n_e)
+        uhf = UHF.MF(self.molecule, self.n_e, self.int_method)
         uhf.get_scf_solution()
         imp_mo_u = uhf.stability_analysis('internal')
         while uhf.int_instability:
@@ -114,7 +115,7 @@ class Find:
         print('====================================')
         print('Checking real GHF internal stability')
         print('====================================')
-        ghf = GHF.MF(self.molecule, self.n_e)
+        ghf = GHF.MF(self.molecule, self.n_e, self.int_method)
         ghf.get_scf_solution()
         imp_mo_g = ghf.stability_analysis('internal')
         while ghf.int_instability:
