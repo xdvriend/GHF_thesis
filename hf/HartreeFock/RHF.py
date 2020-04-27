@@ -129,7 +129,7 @@ class MF:
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f.conj()), dens_matrix)
 
         energies = [0.0]
 
@@ -351,7 +351,7 @@ class MF:
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f.conj()), dens_matrix)
 
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis = [guess_density]

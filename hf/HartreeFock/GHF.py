@@ -215,8 +215,8 @@ class MF:
             if complex_method:
                 if not isinstance(initial_guess[0][0], complex):
                     p_g = density(initial_guess) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = density(initial_guess)
             else:
@@ -229,8 +229,8 @@ class MF:
             if complex_method:
                 if not isinstance(guess[0][0], complex):
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
             else:
@@ -298,12 +298,13 @@ class MF:
             """
            Calculates the scf energy for the GHF method
             """
-            return np.sum(d * (t.expand_matrix(self.get_one_e()) + f)) / 2
+            return np.sum(d * (t.expand_matrix(self.get_one_e()) + f.conj())) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
         energies = [0.0]
         delta_e = []
+        rms = []
 
         def iteration():
             """
@@ -336,7 +337,7 @@ class MF:
 
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= convergence and i < 5000:
+        while abs(delta_e[-1]) >= convergence and i < 10000:
             iteration()
             i += 1
         self.iterations = i
@@ -536,7 +537,9 @@ class MF:
                     self.int_instability = True
                     lowest_eigenvec = v[:, 0]
                     real_part = lowest_eigenvec[:int(len(lowest_eigenvec)/2)]
-                    return t.rotate_to_eigenvec(real_part, coeff, occ,
+                    imag_part = lowest_eigenvec[int(len(lowest_eigenvec)/2):]
+                    lowest_complex = real_part + (imag_part * 1j)
+                    return t.rotate_to_eigenvec(lowest_complex, coeff, occ,
                                                 int(np.shape(t.expand_matrix(self.get_ovlp()))[0]))
                 else:
                     print('The wave function is stable in the complex GHF space.')
@@ -733,7 +736,7 @@ class MF:
             """
             Calculates the scf energy for the GHF method
             """
-            temp = np.sum(d * (t.expand_matrix(self.get_one_e()) + f))
+            temp = np.sum(d * (t.expand_matrix(self.get_one_e()) + f.conj()))
             temp *= 0.5
             return temp
 

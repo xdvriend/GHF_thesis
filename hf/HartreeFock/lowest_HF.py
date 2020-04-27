@@ -121,6 +121,7 @@ class Find:
         while ghf.int_instability:
             ghf.get_scf_solution(imp_mo_g)
             imp_mo_g = ghf.stability_analysis('internal')
+        g = ghf.get_mo_coeff()
         print('====================================')
         print('Checking real GHF external stability')
         print('====================================')
@@ -134,16 +135,14 @@ class Find:
             print('=======================================')
             print('Checking complex GHF internal stability')
             print('=======================================')
-            ghf.get_scf_solution(complex_method=True)
+            ghf.get_scf_solution(g, complex_method=True)
             imp_mo_g = ghf.stability_analysis('internal')
             i = 0
-            while ghf.int_instability and i < 25:
+            while ghf.int_instability:
                 ghf.get_scf_solution(imp_mo_g, complex_method=True)
                 imp_mo_g = ghf.stability_analysis('internal')
                 i += 1
             print("=========================================")
             print('Complex GHF converges to lowest HF energy')
             print("=========================================")
-            if i == 25:
-                print('The lower lying complex GHF energy could not be found. (Stability analysis followed 25 times.)')
             return None

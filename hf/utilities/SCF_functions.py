@@ -109,7 +109,7 @@ def uhf_scf_energy(density_matrix_a, density_matrix_b, fock_a, fock_b, one_elect
     """
     scf_e = np.einsum('ij, ij->', density_matrix_a + density_matrix_b,
                       one_electron)  # np.einsum here is used to add all the matrix values together
-    scf_e += np.einsum('ij, ij->', density_matrix_a, fock_a)
-    scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b)
+    scf_e += np.einsum('ij, ij->', density_matrix_a, fock_a.conj())
+    scf_e += np.einsum('ij, ij->', density_matrix_b, fock_b.conj())
     scf_e *= 0.5  # divide by two, since the summation technically adds the alpha and beta values twice
     return scf_e
