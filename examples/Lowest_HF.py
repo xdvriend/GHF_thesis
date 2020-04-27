@@ -1,4 +1,4 @@
-from hf.HartreeFock import lowest_HF as lowest
+from hf.HartreeFock import lowest_HF as Lowest
 from pyscf import *
 
 
@@ -13,4 +13,4 @@ h3 = gto.M(atom='h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1',
 # first you will have to make an object, using "Find"
 # The arguments are a molecule and the number of electrons.
 # In order to search the lowest solution, use the command 'run_algorithm()'
-lowest.Find(h3, 3).run_algorithm()
+Lowest.Find(h3, 3).run_algorithm()
