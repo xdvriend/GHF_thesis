@@ -462,6 +462,8 @@ class MF:
         i = 1
         iteration_diis(i)
         while abs(delta_e_diis[-1]) >= convergence:
+            if i == 1000:
+                raise Exception('maximum number of iterations exceeded')
             iteration_diis(i)
             i += 1
 
