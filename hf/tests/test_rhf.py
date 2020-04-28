@@ -61,9 +61,10 @@ def test_complex_method():
     energy as the real RHF state with complex MO coefficients.
     """
     x = RHF.MF(h2o, 10)
-    assert np.isclose(-74.9420799281921, x.scf(complex_method=True))
+    y = x.scf(complex_method=True)
     c_i = x.get_mo_coeff().imag
-    assert np.sum(c_i) > 1e-3
+    assert np.isclose(-74.9420799281921, y[0])
+    assert abs(np.sum(c_i)) > 1e-3
 
 
 def test_scf_vs_diis():

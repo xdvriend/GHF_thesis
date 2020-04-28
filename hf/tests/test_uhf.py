@@ -41,11 +41,11 @@ def test_complex_method():
     energy as the real UHF state with complex MO coefficients.
     """
     x = UHF.MF(h4, 4)
-    assert np.isclose(-1.956749178, x.scf(complex_method=True))
+    assert np.isclose(-1.956749178, x.scf(complex_method=True)[0])
     c_i_a = x.get_mo_coeff()[0].imag
     c_i_b = x.get_mo_coeff()[1].imag
-    assert np.sum(c_i_a) > 1e-3
-    assert np.sum(c_i_b) > 1e-3
+    assert abs(np.sum(c_i_a)) > 1e-3
+    assert abs(np.sum(c_i_b)) > 1e-3
 
 
 def test_extra_e():
