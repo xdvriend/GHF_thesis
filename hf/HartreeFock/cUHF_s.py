@@ -128,7 +128,7 @@ class MF:
 
         return random_unitary_matrix(dim), random_unitary_matrix(dim)
 
-    def scf(self, initial_guess=None, convergence=1e-12, diis=True):
+    def scf(self, initial_guess=None, convergence=1e-12, diis=True, contype=None):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
@@ -136,6 +136,7 @@ class MF:
         :param initial_guess: Random initial guess, if none is given the Core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
+        :param contype: string that specifies constraint algorithm. Psi4 algorithm by default ('paper' or 'thesis')
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix (X_)
@@ -233,7 +234,9 @@ class MF:
             f_b = self.get_one_e() + f_p - f_m
             return f_a, f_b
 
-        def constrain2(d_a, d_b, f_a, f_b, x): #paper algorithm
+        def constrain2(j_a, j_b, k_a, k_b, d_a, d_b, x): #paper algorithm
+            f_a = self.get_one_e() + j_a + j_b - k_a
+            f_b = self.get_one_e() + j_b + j_a - k_b
             p = (d_a + d_b) / 2.0
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
@@ -254,7 +257,9 @@ class MF:
             f_b = f_cs - delta_cuhf
             return f_a, f_b
 
-        def constrain3(d_a, d_b, f_a, f_b, x): #thesis algorithm
+        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x): #thesis algorithm
+            f_a = self.get_one_e() + j_a + j_b - k_a
+            f_b = self.get_one_e() + j_b + j_a - k_b
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
             f_aa = f_cs + delta_uhf
@@ -309,7 +314,12 @@ class MF:
 
         def iterate(n_i):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
-            f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            if contype == 'thesis':
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            elif contype == 'paper':
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            else:
+                f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
             delta_e.append(energies[-1] - energies[-2])
 
