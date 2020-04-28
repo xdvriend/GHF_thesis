@@ -40,6 +40,20 @@ def test_diis():
     assert np.isclose(-14.557798355720772, b.diis(g)[0])
 
 
+def test_complex_method():
+    """
+    Beryllium in the 4-31G basis set is one of the few systems with a known complex GHF solution.
+    This test checks whether the complex GHF algorithm can find it.
+    """
+    a = GHF.MF(Be, 4)
+    a.scf()
+    mos = a.stability_analysis('internal')
+    b = a.scf(mos, complex_method=True)
+    c_i = a.get_mo_coeff().imag
+    assert np.isclose(-14.55781859592479, b[0])
+    assert np.isclose(np.sum(c_i), 0) is False
+
+
 def test_int_stability():
     """
     test_int_stability will test the internal stability analysis on the GHF method by checking the stability of Be,
