@@ -44,8 +44,8 @@ def test_complex_method():
     assert np.isclose(-1.956749178, x.scf(complex_method=True))
     c_i_a = x.get_mo_coeff()[0].imag
     c_i_b = x.get_mo_coeff()[1].imag
-    assert np.isclose(np.sum(c_i_a), 0) is False
-    assert np.isclose(np.sum(c_i_b), 0) is False
+    assert np.sum(c_i_a) > 1e-3
+    assert np.sum(c_i_b) > 1e-3
 
 
 def test_extra_e():

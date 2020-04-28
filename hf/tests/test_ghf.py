@@ -51,7 +51,7 @@ def test_complex_method():
     b = a.scf(mos, complex_method=True)
     c_i = a.get_mo_coeff().imag
     assert np.isclose(-14.55781859592479, b[0])
-    assert np.isclose(np.sum(c_i), 0) is False
+    assert np.sum(c_i) > 1e-3
 
 
 def test_int_stability():

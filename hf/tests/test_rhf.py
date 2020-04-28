@@ -63,7 +63,7 @@ def test_complex_method():
     x = RHF.MF(h2o, 10)
     assert np.isclose(-74.9420799281921, x.scf(complex_method=True))
     c_i = x.get_mo_coeff().imag
-    assert np.isclose(np.sum(c_i), 0) is False
+    assert np.sum(c_i) > 1e-3
 
 
 def test_scf_vs_diis():

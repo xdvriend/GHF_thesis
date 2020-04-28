@@ -195,8 +195,8 @@ class MF:
             """
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
             eigenval, eigenvec = la.eigh(f)
-            coeff = s_12_o @ eigenvec
-            coeff_r = coeff[:, 0:self.number_of_electrons]
+            coeff = (s_12_o @ eigenvec)
+            coeff_r = coeff[:, 0:self.number_of_electrons].conj()
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
 
