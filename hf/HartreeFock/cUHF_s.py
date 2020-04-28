@@ -13,6 +13,8 @@ import numpy as np
 from pyscf import *
 import numpy.linalg as la
 import collections as c
+from hf.HartreeFock import UHF
+from hf.utilities.transform import *
 
 
 class MF:
@@ -128,7 +130,7 @@ class MF:
 
         return random_unitary_matrix(dim), random_unitary_matrix(dim)
 
-    def scf(self, initial_guess=None, convergence=1e-12, diis=True):
+    def scf(self, initial_guess=None, convergence=1e-12, diis=True, mix_guess=False):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
@@ -136,6 +138,7 @@ class MF:
         :param initial_guess: Random initial guess, if none is given the Core Hamiltonian is used.
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
+        :param mix_guess: Uses the UHF coefficients where HOMO and LUMO are mixed as initial guess, default is False
         :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix (X_)
@@ -257,11 +260,31 @@ class MF:
         # core Hamiltonian guess
 
         # If no initial guess is given, use the orthogonalised core Hamiltonian
+        # If mix_guess is True, do UHF calculation and use the coefficients with mixed HOMO and LUMO as guess
         # Else, use the given initial guess.
-        if initial_guess is None:
+        if initial_guess is None and mix_guess is False:
             # create guess density matrix from core guess, separate for alpha and beta and put them into an array
             c_a, guess_d_a = density(self.get_one_e(), self.n_a)
             c_b, guess_d_b = density(self.get_one_e(), self.n_b)
+
+        elif mix_guess is True:
+            # UHF calculation to determine the coefficients
+            x = UHF.MF(self.molecule, self.n_a + self.n_b)
+            x.scf()
+            coeff = x.get_mo_coeff()
+            # Mix HOMO and LUMO
+            coeff = mix_mo_coeff(coeff, self.n_a, self.n_b)
+
+            c_a = coeff[0]
+            c_b = coeff[1]
+
+            # Get C_alpha and C_beta
+            coeff_r_a = c_a[:, 0:self.n_a]
+            coeff_r_b = c_b[:, 0:self.n_b]
+
+            guess_d_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+            guess_d_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
+
         else:
             # Make the coefficients orthogonal in the correct basis.
             c_a = s_12 @ initial_guess[0]
@@ -345,7 +368,7 @@ class MF:
 
         return energies[-1], i
 
-    def get_scf_solution(self, guess=None, convergence=1e-12, diis=True):
+    def get_scf_solution(self, guess=None, convergence=1e-12, diis=True, mix_guess=False):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
@@ -353,9 +376,10 @@ class MF:
         :param guess: Initial scf guess
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
+        :param mix_guess: Uses the UHF coefficients where HOMO and LUMO are mixed as initial guess, default is False
         :return: The converged scf energy.
         """
-        self.scf(guess, convergence=convergence, diis=diis)
+        self.scf(guess, convergence=convergence, diis=diis, mix_guess=mix_guess)
         s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF)")
