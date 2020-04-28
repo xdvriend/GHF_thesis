@@ -298,13 +298,12 @@ class MF:
             """
            Calculates the scf energy for the GHF method
             """
-            return np.sum(d * (t.expand_matrix(self.get_one_e()) + f.conj())) / 2
+            return np.sum(d * (t.expand_matrix(self.get_one_e()) + f)) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
         energies = [0.0]
         delta_e = []
-        rms = []
 
         def iteration():
             """
@@ -317,7 +316,7 @@ class MF:
             f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb).conj()
             f_list.append(f)
 
             # Calculate the new energy and add it to the energies array.
@@ -736,7 +735,7 @@ class MF:
             """
             Calculates the scf energy for the GHF method
             """
-            temp = np.sum(d * (t.expand_matrix(self.get_one_e()) + f.conj()))
+            temp = np.sum(d * (t.expand_matrix(self.get_one_e()) + f))
             temp *= 0.5
             return temp
 
@@ -775,6 +774,7 @@ class MF:
                 f = diis_fock(fock_list, error_list)
 
             f_list.append(f)
+            f = f.conj()
 
             # orthogonalise the Fock matrix
             f_o = s_12_o.conj().T @ f @ s_12_o

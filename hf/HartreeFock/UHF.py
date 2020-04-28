@@ -166,6 +166,8 @@ class MF:
             # create a fock matrix for beta from last beta density
             fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
             f_list.append([fock_a, fock_b])
+            fock_a = fock_a.conj()
+            fock_b = fock_b.conj()
             # calculate the improved scf energy and add it to the array
             energies.append(Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
             # calculate the energy difference and add it to the delta_E array
@@ -745,6 +747,8 @@ class MF:
 
             # fill the arrays
             f_list.append([f_a, f_b])
+            f_a = f_a.conj()
+            f_b = f_b.conj()
 
             # Orthogonalise the fock matrices
             f_orth_a = s_12.conj().T @ f_a @ s_12

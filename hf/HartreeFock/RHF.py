@@ -129,7 +129,7 @@ class MF:
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + f.conj()), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
 
         energies = [0.0]
 
@@ -149,7 +149,7 @@ class MF:
         def iteration():
             """create an iteration procedure, calculate fock from density,
             orthogonalise, new density from new fock,..."""
-            f = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
+            f = rhf_fock_matrix(densities[-1]).conj()  # calculate fock matrix from the newest density matrix
             f_list.append(f)
             # calculate the electronic energy and put it into the energies array
             energies.append(rhf_scf_energy(densities[-1], f) + self.nuc_rep())
@@ -351,7 +351,7 @@ class MF:
 
         def rhf_scf_energy(dens_matrix, f):
             """calculate the scf energy value from a given density matrix and a given fock matrix"""
-            return np.einsum('pq, pq->', (self.get_one_e() + f.conj()), dens_matrix)
+            return np.einsum('pq, pq->', (self.get_one_e() + f), dens_matrix)
 
         # Create the necessary arrays to perform an iterative diis procedure
         densities_diis = [guess_density]
@@ -380,6 +380,7 @@ class MF:
 
             # fill the arrays
             f_list.append(f)
+            f = f.conj()
 
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
