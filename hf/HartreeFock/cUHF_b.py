@@ -230,7 +230,9 @@ class MF:
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
         i = 1
         iteration(i)
-        while abs(delta_e[-1]) >= convergence and i < 1000:
+        while abs(delta_e[-1]) >= convergence:
+            if i == 1000:
+                raise Exception('maximum number of iterations exceeded')
             iteration(i)
             i += 1
         self.iterations = i
@@ -460,6 +462,8 @@ class MF:
         i = 1
         iteration_diis(i)
         while abs(delta_e_diis[-1]) >= convergence:
+            if i == 1000:
+                raise Exception('maximum number of iterations exceeded')
             iteration_diis(i)
             i += 1
 
