@@ -21,21 +21,19 @@ hf = gto.M(atom = 'F 0 0 0; H 0 0 0.9', basis = 'sto-3g')
 def test_uhf_mulliken():
     x = UHF.MF(no, 15)
     y = UHF.MF(h3, 3)
+    z = UHF.MF(hf, 10)
     x.scf()
     y.scf()
+    z.scf()
     m = mulliken(no, x.get_dens(), x.get_ovlp())[0]
     l = mulliken(h3, y.get_dens(), y.get_ovlp())[0]
+    k = mulliken(hf, z.get_dens(), z.get_ovlp())
     assert np.isclose(m[0], 0.07271, atol=1e-3)
-    assert np.isclose(m[1], -0.7271, atol=1e-3)
+    assert np.isclose(m[1], -0.07271, atol=1e-3)
     assert np.isclose(l[0], -0.12265, atol=1e-3)
     assert np.isclose(l[1], 0.24507, atol=1e-3)
     assert np.isclose(l[2], -0.12265, atol=1e-3)
-
-def test_rhf_mulliken():
-    x = RHF.HF(hf, 10)
-    x.scf()
-    m = mulliken(hf, x.get_dens(), x.get_ovlp())
-    assert np.isclose(m[0], -0.220092, atol=1e-3)
-    assert np.isclose(m[1], 0.220092, atol=1e-3)
+    assert np.isclose(k[0], -0.220092, atol=1e-3)
+    assert np.isclose(k[1], 0.220092, atol=1e-3)
 
 

@@ -8,6 +8,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 
 import hf.utilities.SCF_functions as Scf
 import hf.utilities.transform as t
+from hf.properties.mulliken import mulliken
 import numpy as np
 from scipy import linalg as la
 import collections as c
@@ -194,6 +195,17 @@ class MF:
         self.energy = scf_e
 
         return scf_e, i, get_mo(), dens(), fock()
+
+    def calculate_mulliken(self):
+        """
+        Calculates Mulliken charges for each atom in the pyscf molecule.
+
+        !!!IMPORTANT!!! Only supported with pyscf.
+
+        :print: The Mulliken charges and their corresponding atoms.
+        """
+        x = mulliken(self.molecule, self.dens, self.integrals[0])
+        print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
 
     def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """

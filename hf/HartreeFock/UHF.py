@@ -7,6 +7,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 """
 
 import hf.utilities.SCF_functions as Scf
+from hf.properties.mulliken import mulliken
 import hf.properties.spin as spin
 import hf.utilities.transform as t
 import numpy as np
@@ -288,6 +289,16 @@ class MF:
         """
         return self.focks[i][0], self.focks[i][1]
 
+    def calculate_mulliken(self):
+        """
+        Calculates Mulliken charges for each atom in the pyscf molecule.
+
+        !!!IMPORTANT!!! Only supported with pyscf.
+
+        :print: The Mulliken charges and their corresponding atoms.
+        """
+        x = mulliken(self.molecule, (self.dens[0][-1], self.dens[1][-1]), self.integrals[0])
+        print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
     def extra_electron_guess(self):
         """
         This method adds two electrons to the system in order to get coefficients that can be used as a better guess

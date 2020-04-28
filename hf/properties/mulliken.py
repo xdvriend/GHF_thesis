@@ -44,3 +44,5 @@ def mulliken(molecule, dens, overlap):
     for c, value in enumerate(goptot):
         charge_mulliken.append(molecule.atom_charge(c) - value) # Z - GAP
     return charge_mulliken, atoms
+
+
