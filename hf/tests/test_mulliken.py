@@ -5,7 +5,6 @@ Testing the functions used to calculate the Mulliken charges.
 Simple tests to check whether or not the functions return the correct value.
 """
 from hf.HartreeFock import *
-from hf.properties.mulliken import mulliken
 import numpy as np
 from pyscf import gto
 import os
@@ -25,7 +24,6 @@ def test_uhf_mulliken():
     x.scf()
     y.scf()
     z.scf()
-    #m = mulliken(no, x.get_dens(), x.get_ovlp())[0]
     m = x.calculate_mulliken()[0]
     l = y.calculate_mulliken()[0]
     k = z.calculate_mulliken()[0]

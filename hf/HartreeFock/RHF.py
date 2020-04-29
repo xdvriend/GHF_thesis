@@ -203,6 +203,7 @@ class MF:
         !!!IMPORTANT!!! Only supported with pyscf.
 
         :print: The Mulliken charges and their corresponding atoms.
+        :return: The Mulliken charges and their corresponding atoms.
         """
         x = mulliken(self.molecule, self.dens, self.integrals[0])
         print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
