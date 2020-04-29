@@ -844,6 +844,8 @@ class MF:
             else:
                 print("Number of iterations: " + str(self.iterations))
                 print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF, DIIS)")
+                print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
+                      str(s_values[2]))
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
