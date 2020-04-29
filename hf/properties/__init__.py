@@ -1,1 +1,1 @@
-__all__ = ['spin']
+__all__ = ['spin', 'mulliken']
