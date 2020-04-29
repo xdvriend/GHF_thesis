@@ -59,7 +59,7 @@ def ghf(coeff, n_e, trans):
     s_z = (0.5 * (number_occ_a - number_occ_b)).real
 
     temp = ovlp_a - ovlp_b
-    ss_z = (s_z ** 2) + 0.25 * ((number_occ_a + number_occ_b) - np.einsum('ij, ij', temp, temp))
+    ss_z = (s_z ** 2) + 0.25 * ((number_occ_a + number_occ_b) - np.einsum('ij, ij', temp, temp.conj()))
     ss_mp = number_occ_b + ((ovlp_ba.trace() * ovlp_ab.trace()) - np.einsum('ij, ji', ovlp_ba, ovlp_ab))
     s_2 = (ss_mp + s_z + ss_z).real
 

@@ -141,9 +141,19 @@ class MF:
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
             if complex_method:
-                # Create the guess density matrices from the given coefficients
-                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
-                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+                if not isinstance(initial_guess[0][0], complex):
+                    # Create the guess density matrices from the given coefficients
+                    guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                    guess_density_a[0, :] += .1j
+                    guess_density_a[:, 0] -= .1j
+
+                    guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+                    guess_density_b[0, :] += .1j
+                    guess_density_b[:, 0] -= .1j
+
+                else:
+                    guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                    guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
             else:
                 guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
                 guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
@@ -432,7 +442,11 @@ class MF:
         # Create the complete a'+b' stability matrix
         dim_a = occ_a * vir_a
         dim_b = occ_b * vir_b
-        h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b))
+        if isinstance(h_aa[0][0][0][0], complex):
+            h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b)).astype(complex)
+        else:
+            h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b))
+
         h_a_plus_b[:dim_a, :dim_a] = h_aa.reshape(dim_a, dim_a)
         h_a_plus_b[dim_a:, dim_a:] = h_bb.reshape(dim_b, dim_b)
         h_a_plus_b[:dim_a, dim_a:] = h_ab.reshape(dim_a, dim_b)
@@ -454,7 +468,11 @@ class MF:
 
         # There is no need to create a mixed part since these terms become zero in the equations.
         # Create the complete a'-b' stability matrix
-        h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b))
+        if isinstance(h_aa_m[0][0][0][0], complex):
+            h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b)).astype(complex)
+        else:
+            h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b))
+
         h_a_min_b[:dim_a, :dim_a] = h_aa_m.reshape(dim_a, dim_a)
         h_a_min_b[dim_a:, dim_a:] = h_bb_m.reshape(dim_b, dim_b)
 
@@ -482,7 +500,12 @@ class MF:
         # Create the complete A''+B'' stability matrix
         dim_mix_1 = occ_b * vir_a
         dim_mix_2 = occ_a * vir_b
-        h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
+        if isinstance(h_abab[0][0][0][0], complex):
+            h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2)).astype(complex)
+        else:
+            h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
         h_a_plus_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
         h_a_plus_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
         h_a_plus_b_p[:dim_mix_1, dim_mix_1:] = h_abba.reshape(dim_mix_1, dim_mix_2)
@@ -493,7 +516,11 @@ class MF:
         h_baab_m = np.einsum('biaj->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
 
         # Create the complete A''-B'' stability matrix
-        h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+        if isinstance(h_abab[0][0][0][0], complex):
+            h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2)).astype(complex)
+        else:
+            h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
         h_a_min_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
         h_a_min_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
         h_a_min_b_p[:dim_mix_1, dim_mix_1:] = h_abba_m.reshape(dim_mix_1, dim_mix_2)
@@ -559,11 +586,18 @@ class MF:
                 real_part = lowest_eigenvec[:int(len(lowest_eigenvec) / 2)]
                 lowest_real_a = real_part[:occ_a * vir_a]
                 lowest_real_b = real_part[occ_b * vir_b:]
+
+                imag_part = lowest_eigenvec[int(len(lowest_eigenvec) / 2):]
+                lowest_imag_a = imag_part[:occ_a * vir_a]
+                lowest_imag_b = imag_part[occ_b * vir_b:]
+
+                lowest_a = lowest_real_a + lowest_imag_a * 1j
+                lowest_b = lowest_real_b + lowest_imag_b * 1j
                 if np.amin(e_3) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the complex UHF wave function.")
                     self.int_instability = True
-                    return t.rotate_to_eigenvec(lowest_real_a, mo_a, occ_a, n_orb), \
-                        t.rotate_to_eigenvec(lowest_real_b, mo_b, occ_b, n_orb)
+                    return t.rotate_to_eigenvec(lowest_a, mo_a, occ_a, n_orb), \
+                        t.rotate_to_eigenvec(lowest_b, mo_b, occ_b, n_orb)
                 else:
                     print('The wave function is stable in the complex UHF space.')
                     self.int_instability = None
