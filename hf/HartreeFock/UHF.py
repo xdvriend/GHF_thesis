@@ -416,9 +416,9 @@ class MF:
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_mo_aa = t.tensor_basis_transform(eri_ao, mo_a)
-        eri_mo_bb = t.tensor_basis_transform(eri_ao, mo_b)
-        eri_mo_ab = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a, mo_b, mo_b)
+        eri_mo_aa = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a.conj(), mo_a, mo_a.conj())
+        eri_mo_bb = t.mix_tensor_basis_transform(eri_ao, mo_b, mo_b.conj(), mo_b, mo_b.conj())
+        eri_mo_ab = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a.conj(), mo_b, mo_b.conj())
 
         # Create the alpha->alpha part of the a'+b' stability matrix
         h_aa = np.einsum('aijb->iajb', eri_mo_aa[occ_a:, :occ_a, :occ_a, occ_a:]) * 2
@@ -565,10 +565,10 @@ class MF:
                     print("There is an external real/complex instability in the real UHF wave function.")
                     self.ext_instability_rc = True
                 if np.amin(e_2) < -1e-5:  # this points towards an instability
-                    print("There is an external unrestricted/generalised instability in the real UHF wave function.")
+                    print("There is an external UHF/GHF instability in the real UHF wave function.")
                     self.ext_instability_ug = True
                 else:
-                    print('The wave function is stable within the real/complex & unrestricted/generalised space.')
+                    print('The wave function is stable within the real/complex & UHF/GHF space.')
                     self.ext_instability_rc = None
                     self.ext_instability_ug = None
             else:
@@ -610,10 +610,10 @@ class MF:
                 e_4, v_4 = la.eigh(stability_matrix_4)
 
                 if np.amin(e_4) < -1e-5:  # this points towards an instability
-                    print("There is an external unrestricted/generalised instability in the complex UHF wave function.")
+                    print("There is an external UHF/GHF instability in the complex UHF wave function.")
                     self.ext_instability_ug = True
                 else:
-                    print('The wave function is stable within the complex UHF space.')
+                    print('The wave function is stable within the complex UHF/GHF space.')
                     self.ext_instability_ug = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '

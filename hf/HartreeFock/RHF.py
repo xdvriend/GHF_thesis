@@ -471,7 +471,7 @@ class MF:
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_mo = t.tensor_basis_transform(eri_ao, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao, coeff, coeff.conj(), coeff, coeff.conj())
 
         # Create A_singlet
         a1 = np.einsum('ckld->kcld', eri_mo[occ:, :occ, :occ, occ:]) * 2
@@ -534,7 +534,7 @@ class MF:
                     print("There is an external real/complex instability in the real RHF wave function.")
                     self.ext_instability_rc = True
                 if np.amin(e_3) < -1e-5:
-                    print("There is an external restricted/unrestricted instability in the real RHF wave function.")
+                    print("There is an external RHF/UHF instability in the real RHF wave function.")
                     self.ext_instability_ru = True
                 else:
                     print('The wave function is stable within the real/complex & RHF/UHF space.')
@@ -570,7 +570,7 @@ class MF:
                     self.ext_instability_ru = True
 
                 else:
-                    print('The wave function is stable within the RHF/UHF space.')
+                    print('The wave function is stable within the complex RHF/UHF space.')
                     self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
