@@ -356,6 +356,7 @@ class MF:
         """
         x = mulliken(self.molecule, (self.dens[0][-1], self.dens[1][-1]), self.integrals[0])
         print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
+        return x
 
     def get_scf_solution(self, guess=None, convergence=1e-12, diis=True):
         """

@@ -299,6 +299,7 @@ class MF:
         """
         x = mulliken(self.molecule, (self.dens[0][-1], self.dens[1][-1]), self.integrals[0])
         print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
+        return x
     def extra_electron_guess(self):
         """
         This method adds two electrons to the system in order to get coefficients that can be used as a better guess

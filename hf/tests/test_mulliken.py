@@ -25,9 +25,10 @@ def test_uhf_mulliken():
     x.scf()
     y.scf()
     z.scf()
-    m = mulliken(no, x.get_dens(), x.get_ovlp())[0]
-    l = mulliken(h3, y.get_dens(), y.get_ovlp())[0]
-    k = mulliken(hf, z.get_dens(), z.get_ovlp())[0]
+    #m = mulliken(no, x.get_dens(), x.get_ovlp())[0]
+    m = x.calculate_mulliken()[0]
+    l = y.calculate_mulliken()[0]
+    k = z.calculate_mulliken()[0]
     assert np.isclose(m[0], 0.07271, atol=1e-3)
     assert np.isclose(m[1], -0.07271, atol=1e-3)
     assert np.isclose(l[0], -0.12265, atol=1e-3)
