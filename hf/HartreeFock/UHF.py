@@ -418,7 +418,7 @@ class MF:
         eri_ao = self.get_two_e()
         eri_mo_aa = t.tensor_basis_transform(eri_ao, mo_a)
         eri_mo_bb = t.tensor_basis_transform(eri_ao, mo_b)
-        eri_mo_ab = t.mix_tensor_to_basis_transform(eri_ao, mo_a, mo_a, mo_b, mo_b)
+        eri_mo_ab = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a, mo_b, mo_b)
 
         # Create the alpha->alpha part of the a'+b' stability matrix
         h_aa = np.einsum('aijb->iajb', eri_mo_aa[occ_a:, :occ_a, :occ_a, occ_a:]) * 2

@@ -108,7 +108,7 @@ def tensor_basis_transform(tensor, matrix):
     return tensor_nb
 
 
-def mix_tensor_to_basis_transform(tensor, matrix1, matrix2, matrix3, matrix4):
+def mix_tensor_basis_transform(tensor, matrix1, matrix2, matrix3, matrix4):
     """
     Transform a tensor to a mixed basis. Each index can have a separate transformation matrix.
     Mostly useful in UHF calculations where tensors must be transformed to an alpha-beta basis.

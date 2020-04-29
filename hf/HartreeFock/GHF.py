@@ -468,7 +468,7 @@ class MF:
         eri_ao = self.get_two_e()
         eri_ao_spinor = t.expand_tensor(eri_ao)
 
-        eri_mo = t.tensor_basis_transform(eri_ao_spinor, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao_spinor, coeff, coeff.conj(), coeff, coeff.conj())
         eri_mo_anti = eri_mo - eri_mo.transpose(0, 3, 2, 1)
 
         a_iajb = np.einsum('aijb->iajb', eri_mo_anti[occ:, :occ, :occ, occ:])
