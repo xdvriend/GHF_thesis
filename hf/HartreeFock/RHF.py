@@ -505,21 +505,6 @@ class MF:
         a3 = a3.reshape((occ * vir, occ * vir))
         b3 = b3.reshape((occ * vir, occ * vir))
 
-        # # Create a function to rotate the orbitals in case of internal instability
-        # def rotate_to_eigenvec(eigenvec):
-        #     if isinstance(self.energy, complex):
-        #         indx = int(np.shape(eigenvec)[0] / 2)
-        #         eigenvec = eigenvec[:indx]
-        #
-        #     block_ba = eigenvec.reshape((occ, vir), order='F')
-        #     block_bb = np.zeros((occ, occ))
-        #     block_ab = block_ba.conj().T
-        #     block_aa = np.zeros((vir, vir))
-        #     k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
-        #     coeff_init = self.get_mo_coeff()
-        #     exp = la.expm(-1 * step_size * k)
-        #     return coeff_init @ exp
-
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
             if method == 'internal':
@@ -585,7 +570,7 @@ class MF:
                     self.ext_instability_ru = True
 
                 else:
-                    print('The wave function is stable within the complex RHF space.')
+                    print('The wave function is stable within the RHF/UHF space.')
                     self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
