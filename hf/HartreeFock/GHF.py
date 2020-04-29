@@ -336,7 +336,7 @@ class MF:
 
         iteration()
         i = 1
-        while abs(delta_e[-1]) >= convergence and i < 10000:
+        while abs(delta_e[-1]) >= convergence and i < 5000:
             iteration()
             i += 1
         self.iterations = i
