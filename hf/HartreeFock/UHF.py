@@ -142,9 +142,19 @@ class MF:
             coeff_r_b = coeff_b[:, 0:self.n_b]
 
             if complex_method:
-                # Create the guess density matrices from the given coefficients
-                guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
-                guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+                if not isinstance(initial_guess[0][0], complex):
+                    # Create the guess density matrices from the given coefficients
+                    guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a).astype(complex)
+                    guess_density_a[0, :] += .1j
+                    guess_density_a[:, 0] -= .1j
+
+                    guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b).astype(complex)
+                    guess_density_b[0, :] += .1j
+                    guess_density_b[:, 0] -= .1j
+
+                else:
+                    guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
+                    guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
             else:
                 guess_density_a = np.einsum('ij,kj->ik', coeff_r_a, coeff_r_a)
                 guess_density_b = np.einsum('ij,kj->ik', coeff_r_b, coeff_r_b)
@@ -167,6 +177,8 @@ class MF:
             # create a fock matrix for beta from last beta density
             fock_b = Scf.uhf_fock_matrix(densities_b[-1], densities_a[-1], self.get_one_e(), self.get_two_e())
             f_list.append([fock_a, fock_b])
+            fock_a = fock_a.conj()
+            fock_b = fock_b.conj()
             # calculate the improved scf energy and add it to the array
             energies.append(Scf.uhf_scf_energy(densities_a[-1], densities_b[-1], fock_a, fock_b, self.get_one_e()))
             # calculate the energy difference and add it to the delta_E array
@@ -417,9 +429,9 @@ class MF:
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_mo_aa = t.tensor_basis_transform(eri_ao, mo_a)
-        eri_mo_bb = t.tensor_basis_transform(eri_ao, mo_b)
-        eri_mo_ab = t.mix_tensor_to_basis_transform(eri_ao, mo_a, mo_a, mo_b, mo_b)
+        eri_mo_aa = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a.conj(), mo_a, mo_a.conj())
+        eri_mo_bb = t.mix_tensor_basis_transform(eri_ao, mo_b, mo_b.conj(), mo_b, mo_b.conj())
+        eri_mo_ab = t.mix_tensor_basis_transform(eri_ao, mo_a, mo_a.conj(), mo_b, mo_b.conj())
 
         # Create the alpha->alpha part of the a'+b' stability matrix
         h_aa = np.einsum('aijb->iajb', eri_mo_aa[occ_a:, :occ_a, :occ_a, occ_a:]) * 2
@@ -443,7 +455,11 @@ class MF:
         # Create the complete a'+b' stability matrix
         dim_a = occ_a * vir_a
         dim_b = occ_b * vir_b
-        h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b))
+        if isinstance(h_aa[0][0][0][0], complex):
+            h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b)).astype(complex)
+        else:
+            h_a_plus_b = np.empty((dim_a + dim_b, dim_a + dim_b))
+
         h_a_plus_b[:dim_a, :dim_a] = h_aa.reshape(dim_a, dim_a)
         h_a_plus_b[dim_a:, dim_a:] = h_bb.reshape(dim_b, dim_b)
         h_a_plus_b[:dim_a, dim_a:] = h_ab.reshape(dim_a, dim_b)
@@ -465,7 +481,11 @@ class MF:
 
         # There is no need to create a mixed part since these terms become zero in the equations.
         # Create the complete a'-b' stability matrix
-        h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b))
+        if isinstance(h_aa_m[0][0][0][0], complex):
+            h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b)).astype(complex)
+        else:
+            h_a_min_b = np.zeros((dim_a + dim_b, dim_a + dim_b))
+
         h_a_min_b[:dim_a, :dim_a] = h_aa_m.reshape(dim_a, dim_a)
         h_a_min_b[dim_a:, dim_a:] = h_bb_m.reshape(dim_b, dim_b)
 
@@ -493,7 +513,12 @@ class MF:
         # Create the complete A''+B'' stability matrix
         dim_mix_1 = occ_b * vir_a
         dim_mix_2 = occ_a * vir_b
-        h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
+        if isinstance(h_abab[0][0][0][0], complex):
+            h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2)).astype(complex)
+        else:
+            h_a_plus_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
         h_a_plus_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
         h_a_plus_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
         h_a_plus_b_p[:dim_mix_1, dim_mix_1:] = h_abba.reshape(dim_mix_1, dim_mix_2)
@@ -504,7 +529,11 @@ class MF:
         h_baab_m = np.einsum('biaj->iajb', eri_mo_ab[occ_a:, :occ_a, occ_b:, :occ_b])
 
         # Create the complete A''-B'' stability matrix
-        h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+        if isinstance(h_abab[0][0][0][0], complex):
+            h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2)).astype(complex)
+        else:
+            h_a_min_b_p = np.empty((dim_mix_1 + dim_mix_2, dim_mix_1 + dim_mix_2))
+
         h_a_min_b_p[:dim_mix_1, :dim_mix_1] = h_abab.reshape(dim_mix_1, dim_mix_1)
         h_a_min_b_p[dim_mix_1:, dim_mix_1:] = h_baba.reshape(dim_mix_2, dim_mix_2)
         h_a_min_b_p[:dim_mix_1, dim_mix_1:] = h_abba_m.reshape(dim_mix_1, dim_mix_2)
@@ -549,10 +578,10 @@ class MF:
                     print("There is an external real/complex instability in the real UHF wave function.")
                     self.ext_instability_rc = True
                 if np.amin(e_2) < -1e-5:  # this points towards an instability
-                    print("There is an external unrestricted/generalised instability in the real UHF wave function.")
+                    print("There is an external UHF/GHF instability in the real UHF wave function.")
                     self.ext_instability_ug = True
                 else:
-                    print('The wave function is stable within the real/complex & unrestricted/generalised space.')
+                    print('The wave function is stable within the real/complex & UHF/GHF space.')
                     self.ext_instability_rc = None
                     self.ext_instability_ug = None
             else:
@@ -570,11 +599,18 @@ class MF:
                 real_part = lowest_eigenvec[:int(len(lowest_eigenvec) / 2)]
                 lowest_real_a = real_part[:occ_a * vir_a]
                 lowest_real_b = real_part[occ_b * vir_b:]
+
+                imag_part = lowest_eigenvec[int(len(lowest_eigenvec) / 2):]
+                lowest_imag_a = imag_part[:occ_a * vir_a]
+                lowest_imag_b = imag_part[occ_b * vir_b:]
+
+                lowest_a = lowest_real_a + lowest_imag_a * 1j
+                lowest_b = lowest_real_b + lowest_imag_b * 1j
                 if np.amin(e_3) < -1e-5:  # this points towards an instability
                     print("There is an internal instability in the complex UHF wave function.")
                     self.int_instability = True
-                    return t.rotate_to_eigenvec(lowest_real_a, mo_a, occ_a, n_orb), \
-                        t.rotate_to_eigenvec(lowest_real_b, mo_b, occ_b, n_orb)
+                    return t.rotate_to_eigenvec(lowest_a, mo_a, occ_a, n_orb), \
+                        t.rotate_to_eigenvec(lowest_b, mo_b, occ_b, n_orb)
                 else:
                     print('The wave function is stable in the complex UHF space.')
                     self.int_instability = None
@@ -587,10 +623,10 @@ class MF:
                 e_4, v_4 = la.eigh(stability_matrix_4)
 
                 if np.amin(e_4) < -1e-5:  # this points towards an instability
-                    print("There is an external unrestricted/generalised instability in the complex UHF wave function.")
+                    print("There is an external UHF/GHF instability in the complex UHF wave function.")
                     self.ext_instability_ug = True
                 else:
-                    print('The wave function is stable within the complex UHF space.')
+                    print('The wave function is stable within the complex UHF/GHF space.')
                     self.ext_instability_ug = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
@@ -758,6 +794,8 @@ class MF:
 
             # fill the arrays
             f_list.append([f_a, f_b])
+            f_a = f_a.conj()
+            f_b = f_b.conj()
 
             # Orthogonalise the fock matrices
             f_orth_a = s_12.conj().T @ f_a @ s_12

@@ -136,14 +136,10 @@ class Find:
             print('=======================================')
             ghf.get_scf_solution(complex_method=True)
             imp_mo_g = ghf.stability_analysis('internal')
-            i = 0
-            while ghf.int_instability and i < 25:
+            while ghf.int_instability:
                 ghf.get_scf_solution(imp_mo_g, complex_method=True)
                 imp_mo_g = ghf.stability_analysis('internal')
-                i += 1
             print("=========================================")
             print('Complex GHF converges to lowest HF energy')
             print("=========================================")
-            if i == 25:
-                print('The lower lying complex GHF energy could not be found. (Stability analysis followed 25 times.)')
             return None

@@ -150,7 +150,7 @@ class MF:
         def iteration():
             """create an iteration procedure, calculate fock from density,
             orthogonalise, new density from new fock,..."""
-            f = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
+            f = rhf_fock_matrix(densities[-1]).conj()  # calculate fock matrix from the newest density matrix
             f_list.append(f)
             # calculate the electronic energy and put it into the energies array
             energies.append(rhf_scf_energy(densities[-1], f) + self.nuc_rep())
@@ -394,6 +394,7 @@ class MF:
 
             # fill the arrays
             f_list.append(f)
+            f = f.conj()
 
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
@@ -484,7 +485,7 @@ class MF:
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_mo = t.tensor_basis_transform(eri_ao, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao, coeff, coeff.conj(), coeff, coeff.conj())
 
         # Create A_singlet
         a1 = np.einsum('ckld->kcld', eri_mo[occ:, :occ, :occ, occ:]) * 2
@@ -510,28 +511,13 @@ class MF:
                 a3[i, a, i, a] += e_values[a, i]
 
         # Create B_triplet
-        b3 = np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+        b3 = -1 * np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
 
         # reshape to matrices
         a1 = a1.reshape((occ * vir, occ * vir))
         b1 = b1.reshape((occ * vir, occ * vir))
         a3 = a3.reshape((occ * vir, occ * vir))
         b3 = b3.reshape((occ * vir, occ * vir))
-
-        # # Create a function to rotate the orbitals in case of internal instability
-        # def rotate_to_eigenvec(eigenvec):
-        #     if isinstance(self.energy, complex):
-        #         indx = int(np.shape(eigenvec)[0] / 2)
-        #         eigenvec = eigenvec[:indx]
-        #
-        #     block_ba = eigenvec.reshape((occ, vir), order='F')
-        #     block_bb = np.zeros((occ, occ))
-        #     block_ab = block_ba.conj().T
-        #     block_aa = np.zeros((vir, vir))
-        #     k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
-        #     coeff_init = self.get_mo_coeff()
-        #     exp = la.expm(-1 * step_size * k)
-        #     return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -553,7 +539,7 @@ class MF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix_1 = a1 - b1  # real -> complex
-                stability_matrix_3 = a3 - b3  # restricted -> unrestricted
+                stability_matrix_3 = a3 + b3  # restricted -> unrestricted
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e_1, v_1 = la.eigh(stability_matrix_1)
@@ -562,7 +548,7 @@ class MF:
                     print("There is an external real/complex instability in the real RHF wave function.")
                     self.ext_instability_rc = True
                 if np.amin(e_3) < -1e-5:
-                    print("There is an external restricted/unrestricted instability in the real RHF wave function.")
+                    print("There is an external RHF/UHF instability in the real RHF wave function.")
                     self.ext_instability_ru = True
                 else:
                     print('The wave function is stable within the real/complex & RHF/UHF space.')
@@ -598,7 +584,7 @@ class MF:
                     self.ext_instability_ru = True
 
                 else:
-                    print('The wave function is stable within the complex RHF space.')
+                    print('The wave function is stable within the complex RHF/UHF space.')
                     self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '

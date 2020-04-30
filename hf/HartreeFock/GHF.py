@@ -195,7 +195,7 @@ class MF:
             """
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
             eigenval, eigenvec = la.eigh(f)
-            coeff = s_12_o @ eigenvec
+            coeff = (s_12_o @ eigenvec)
             coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
@@ -215,8 +215,8 @@ class MF:
             if complex_method:
                 if not isinstance(initial_guess[0][0], complex):
                     p_g = density(initial_guess) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = density(initial_guess)
             else:
@@ -229,8 +229,8 @@ class MF:
             if complex_method:
                 if not isinstance(guess[0][0], complex):
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj()) + 0j
-                    p_g[0, :] += .0j
-                    p_g[:, 0] -= .0j
+                    p_g[0, :] += .1j
+                    p_g[:, 0] -= .1j
                 else:
                     p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
             else:
@@ -316,7 +316,7 @@ class MF:
             f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb).conj()
             f_list.append(f)
 
             # Calculate the new energy and add it to the energies array.
@@ -468,7 +468,7 @@ class MF:
         eri_ao = self.get_two_e()
         eri_ao_spinor = t.expand_tensor(eri_ao)
 
-        eri_mo = t.tensor_basis_transform(eri_ao_spinor, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao_spinor, coeff, coeff.conj(), coeff, coeff.conj())
         eri_mo_anti = eri_mo - eri_mo.transpose(0, 3, 2, 1)
 
         a_iajb = np.einsum('aijb->iajb', eri_mo_anti[occ:, :occ, :occ, occ:])
@@ -536,7 +536,9 @@ class MF:
                     self.int_instability = True
                     lowest_eigenvec = v[:, 0]
                     real_part = lowest_eigenvec[:int(len(lowest_eigenvec)/2)]
-                    return t.rotate_to_eigenvec(real_part, coeff, occ,
+                    imag_part = lowest_eigenvec[int(len(lowest_eigenvec)/2):]
+                    lowest_complex = real_part + (imag_part * 1j)
+                    return t.rotate_to_eigenvec(lowest_complex, coeff, occ,
                                                 int(np.shape(t.expand_matrix(self.get_ovlp()))[0]))
                 else:
                     print('The wave function is stable in the complex GHF space.')
@@ -772,6 +774,7 @@ class MF:
                 f = diis_fock(fock_list, error_list)
 
             f_list.append(f)
+            f = f.conj()
 
             # orthogonalise the Fock matrix
             f_o = s_12_o.conj().T @ f @ s_12_o
@@ -841,9 +844,10 @@ class MF:
             else:
                 print("Number of iterations: " + str(self.iterations))
                 print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF, DIIS)")
+
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
-            print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
-                  str(s_values[2]))
+        print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
+              str(s_values[2]))
         return self.energy
