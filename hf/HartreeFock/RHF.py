@@ -497,7 +497,7 @@ class MF:
                 a3[i, a, i, a] += e_values[a, i]
 
         # Create B_triplet
-        b3 = np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+        b3 = -1 * np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
 
         # reshape to matrices
         a1 = a1.reshape((occ * vir, occ * vir))
@@ -525,7 +525,7 @@ class MF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix_1 = a1 - b1  # real -> complex
-                stability_matrix_3 = a3 - b3  # restricted -> unrestricted
+                stability_matrix_3 = a3 + b3  # restricted -> unrestricted
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e_1, v_1 = la.eigh(stability_matrix_1)
