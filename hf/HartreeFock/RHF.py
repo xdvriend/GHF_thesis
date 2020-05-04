@@ -8,6 +8,7 @@ molecule = gto.M(atom = geometry, spin = diff. in alpha and beta electrons, basi
 
 import hf.utilities.SCF_functions as Scf
 import hf.utilities.transform as t
+from hf.properties.mulliken import mulliken
 import numpy as np
 from scipy import linalg as la
 import collections as c
@@ -52,7 +53,8 @@ class MF:
         self.fock_orth = None
         self.iterations = None
         self.int_instability = None
-        self.ext_instability = None
+        self.ext_instability_rc = None
+        self.ext_instability_ru = None
         self.hessian = None
         # For closed shell calculations the number of electrons should be a multiple of 2.
         # If this is not the case, a message is printed telling you to adjust the parameter.
@@ -148,7 +150,7 @@ class MF:
         def iteration():
             """create an iteration procedure, calculate fock from density,
             orthogonalise, new density from new fock,..."""
-            f = rhf_fock_matrix(densities[-1])  # calculate fock matrix from the newest density matrix
+            f = rhf_fock_matrix(densities[-1]).conj()  # calculate fock matrix from the newest density matrix
             f_list.append(f)
             # calculate the electronic energy and put it into the energies array
             energies.append(rhf_scf_energy(densities[-1], f) + self.nuc_rep())
@@ -193,6 +195,19 @@ class MF:
         self.energy = scf_e
 
         return scf_e, i, get_mo(), dens(), fock()
+
+    def calculate_mulliken(self):
+        """
+        Calculates Mulliken charges for each atom in the pyscf molecule.
+
+        !!!IMPORTANT!!! Only supported with pyscf.
+
+        :print: The Mulliken charges and their corresponding atoms.
+        :return: The Mulliken charges and their corresponding atoms.
+        """
+        x = mulliken(self.molecule, self.dens, self.integrals[0])
+        print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
+        return x
 
     def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -248,12 +263,12 @@ class MF:
         """
         return self.fock_orth[i]
 
-    def get_mo_energy(self):
+    def get_mo_energy(self, i=-1):
         """
         Returns the MO energies.
         :return: an array of MO energies.
         """
-        e = Scf.calc_mo_e(self.get_fock_orth())
+        e = Scf.calc_mo_e(self.get_fock_orth(i))
         return e
 
     def diis(self, guess=None, convergence=1e-12, complex_method=False):
@@ -379,6 +394,7 @@ class MF:
 
             # fill the arrays
             f_list.append(f)
+            f = f.conj()
 
             # orthogonalize the new fock matrix
             # calculate density matrix from the new fock matrix
@@ -469,7 +485,7 @@ class MF:
 
         # Determine the two electron integrals in MO basis.
         eri_ao = self.get_two_e()
-        eri_mo = t.tensor_basis_transform(eri_ao, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao, coeff, coeff.conj(), coeff, coeff.conj())
 
         # Create A_singlet
         a1 = np.einsum('ckld->kcld', eri_mo[occ:, :occ, :occ, occ:]) * 2
@@ -495,28 +511,13 @@ class MF:
                 a3[i, a, i, a] += e_values[a, i]
 
         # Create B_triplet
-        b3 = np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
+        b3 = -1 * np.einsum('cldk->kcld', eri_mo[occ:, :occ, occ:, :occ])
 
         # reshape to matrices
         a1 = a1.reshape((occ * vir, occ * vir))
         b1 = b1.reshape((occ * vir, occ * vir))
         a3 = a3.reshape((occ * vir, occ * vir))
         b3 = b3.reshape((occ * vir, occ * vir))
-
-        # # Create a function to rotate the orbitals in case of internal instability
-        # def rotate_to_eigenvec(eigenvec):
-        #     if isinstance(self.energy, complex):
-        #         indx = int(np.shape(eigenvec)[0] / 2)
-        #         eigenvec = eigenvec[:indx]
-        #
-        #     block_ba = eigenvec.reshape((occ, vir), order='F')
-        #     block_bb = np.zeros((occ, occ))
-        #     block_ab = block_ba.conj().T
-        #     block_aa = np.zeros((vir, vir))
-        #     k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
-        #     coeff_init = self.get_mo_coeff()
-        #     exp = la.expm(-1 * step_size * k)
-        #     return coeff_init @ exp
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -538,20 +539,21 @@ class MF:
             elif method == 'external':
                 # the stability matrix for the complex sub problem consists of a - b
                 stability_matrix_1 = a1 - b1  # real -> complex
-                stability_matrix_3 = a3 - b3  # restricted -> unrestricted
+                stability_matrix_3 = a3 + b3  # restricted -> unrestricted
 
                 # Calculate the eigenvalues of the stability matrix to asses stability
                 e_1, v_1 = la.eigh(stability_matrix_1)
                 e_3, v_3 = la.eigh(stability_matrix_3)
                 if np.amin(e_1) < -1e-5:  # this points towards an instability
                     print("There is an external real/complex instability in the real RHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_rc = True
                 if np.amin(e_3) < -1e-5:
-                    print("There is an external restricted/unrestricted instability in the real RHF wave function.")
-                    self.ext_instability = True
+                    print("There is an external RHF/UHF instability in the real RHF wave function.")
+                    self.ext_instability_ru = True
                 else:
                     print('The wave function is stable within the real/complex & RHF/UHF space.')
-                    self.ext_instability = None
+                    self.ext_instability_rc = None
+                    self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')
@@ -579,11 +581,11 @@ class MF:
                 e, v = la.eigh(stability_matrix)
                 if np.amin(e) < -1e-5:  # this points towards an instability
                     print("There is an external RHF/UHF instability in the complex RHF wave function.")
-                    self.ext_instability = True
+                    self.ext_instability_ru = True
 
                 else:
-                    print('The wave function is stable within the complex RHF space.')
-                    self.ext_instability = None
+                    print('The wave function is stable within the complex RHF/UHF space.')
+                    self.ext_instability_ru = None
             else:
                 raise Exception('Only internal and external stability analysis are possible. '
                                 'Please enter a valid type.')

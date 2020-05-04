@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cUHF_s.html">Constrained unrestricted Hartree Fock by Scuseria</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cUHF_b.html">Constrained unrestricted Hartree Fock by P. Bultinck</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GHF.html">Generalised Hartree Fock, by means of SCF procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowest_HF.html">Finding the lowest Hartree-Fock solution.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
@@ -158,6 +159,7 @@
  <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -212,6 +214,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="lowest_HF.html#hf.HartreeFock.lowest_HF.Find">Find (class in hf.HartreeFock.lowest_HF)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -222,7 +232,11 @@
       <ul>
         <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_dens">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_dens">(hf.HartreeFock.GHF.MF method)</a>
+</li>
         <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_dens">(hf.HartreeFock.RHF.MF method)</a>
+</li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_dens">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_fock">get_fock() (hf.HartreeFock.cUHF_b.MF method)</a>
@@ -230,11 +244,21 @@
       <ul>
         <li><a href="cUHF_s.html#hf.HartreeFock.cUHF_s.MF.get_fock">(hf.HartreeFock.cUHF_s.MF method)</a>
 </li>
+        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_fock">(hf.HartreeFock.GHF.MF method)</a>
+</li>
         <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_fock">(hf.HartreeFock.RHF.MF method)</a>
 </li>
-      </ul></li>
-      <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_fock_orth">get_fock_orth() (hf.HartreeFock.RHF.MF method)</a>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_fock">(hf.HartreeFock.UHF.MF method)</a>
 </li>
+      </ul></li>
+      <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_fock_orth">get_fock_orth() (hf.HartreeFock.GHF.MF method)</a>
+
+      <ul>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_fock_orth">(hf.HartreeFock.RHF.MF method)</a>
+</li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_fock_orth">(hf.HartreeFock.UHF.MF method)</a>
+</li>
+      </ul></li>
       <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_hessian">get_hessian() (hf.HartreeFock.GHF.MF method)</a>
 
       <ul>
@@ -246,21 +270,9 @@
       <li><a href="SCF_functions.html#hf.utilities.SCF_functions.get_integrals_pyscf">get_integrals_pyscf() (in module hf.utilities.SCF_functions)</a>
 </li>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_last_dens">get_last_dens() (hf.HartreeFock.cUHF_b.MF method)</a>
-
-      <ul>
-        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_last_dens">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_last_dens">(hf.HartreeFock.UHF.MF method)</a>
-</li>
-      </ul></li>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_last_fock">get_last_fock() (hf.HartreeFock.cUHF_b.MF method)</a>
-
-      <ul>
-        <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_last_fock">(hf.HartreeFock.GHF.MF method)</a>
 </li>
-        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_last_fock">(hf.HartreeFock.UHF.MF method)</a>
-</li>
-      </ul></li>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_mo">get_mo() (hf.HartreeFock.cUHF_b.MF method)</a>
 </li>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_mo_coeff">get_mo_coeff() (hf.HartreeFock.cUHF_b.MF method)</a>
@@ -275,8 +287,14 @@
         <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_mo_coeff">(hf.HartreeFock.UHF.MF method)</a>
 </li>
       </ul></li>
-      <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_mo_energy">get_mo_energy() (hf.HartreeFock.RHF.MF method)</a>
+      <li><a href="GHF.html#hf.HartreeFock.GHF.MF.get_mo_energy">get_mo_energy() (hf.HartreeFock.GHF.MF method)</a>
+
+      <ul>
+        <li><a href="RHF.html#hf.HartreeFock.RHF.MF.get_mo_energy">(hf.HartreeFock.RHF.MF method)</a>
 </li>
+        <li><a href="UHF.html#hf.HartreeFock.UHF.MF.get_mo_energy">(hf.HartreeFock.UHF.MF method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cUHF_b.html#hf.HartreeFock.cUHF_b.MF.get_one_e">get_one_e() (hf.HartreeFock.cUHF_b.MF method)</a>
@@ -353,10 +371,12 @@
 </li>
       <li><a href="GHF.html#module-hf.HartreeFock.GHF">hf.HartreeFock.GHF (module)</a>
 </li>
-      <li><a href="RHF.html#module-hf.HartreeFock.RHF">hf.HartreeFock.RHF (module)</a>
+      <li><a href="lowest_HF.html#module-hf.HartreeFock.lowest_HF">hf.HartreeFock.lowest_HF (module)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="RHF.html#module-hf.HartreeFock.RHF">hf.HartreeFock.RHF (module)</a>
+</li>
       <li><a href="UHF.html#module-hf.HartreeFock.UHF">hf.HartreeFock.UHF (module)</a>
 </li>
       <li><a href="spin.html#module-hf.properties.spin">hf.properties.spin (module)</a>
@@ -383,6 +403,10 @@
         <li><a href="UHF.html#hf.HartreeFock.UHF.MF">(class in hf.HartreeFock.UHF)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="transform.html#hf.utilities.transform.mix_tensor_to_basis_transform">mix_tensor_to_basis_transform() (in module hf.utilities.transform)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -416,6 +440,12 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="transform.html#hf.utilities.transform.rotate_to_eigenvec">rotate_to_eigenvec() (in module hf.utilities.transform)</a>
+</li>
+      <li><a href="lowest_HF.html#hf.HartreeFock.lowest_HF.Find.run_algorithm">run_algorithm() (hf.HartreeFock.lowest_HF.Find method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
@@ -436,8 +466,6 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="transform.html#hf.utilities.transform.spin_blocked">spin_blocked() (in module hf.utilities.transform)</a>
-</li>
-      <li><a href="UHF.html#hf.HartreeFock.UHF.MF.stability">stability() (hf.HartreeFock.UHF.MF method)</a>
 </li>
       <li><a href="GHF.html#hf.HartreeFock.GHF.MF.stability_analysis">stability_analysis() (hf.HartreeFock.GHF.MF method)</a>
 

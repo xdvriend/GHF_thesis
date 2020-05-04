@@ -10,6 +10,7 @@ functions to get intermediate values such as MO coefficients, density and fock m
 
 import hf.utilities.SCF_functions as Scf
 import hf.properties.spin as spin
+from hf.properties.mulliken import mulliken
 import numpy as np
 from pyscf import *
 import scipy.linalg as la
@@ -252,7 +253,9 @@ class MF:
         # start and continue the iteration process as long as the energy difference is larger than 1e-12
         i = 1
         iteration(i)
-        while abs(delta_e[-1]) >= convergence and i < 1000:
+        while abs(delta_e[-1]) >= convergence:
+            if i == 1000:
+                raise Exception('maximum number of iterations exceeded')
             iteration(i)
             i += 1
         self.iterations = i
@@ -483,6 +486,8 @@ class MF:
         i = 1
         iteration_diis(i)
         while abs(delta_e_diis[-1]) >= convergence:
+            if i == 1000:
+                raise Exception('maximum number of iterations exceeded')
             iteration_diis(i)
             i += 1
 
@@ -590,3 +595,16 @@ class MF:
         if i != -1:
             return self.fock_orth_list[i]
         return self.fock_orth_list[self.iterations-1]
+      
+    def calculate_mulliken(self):
+        """
+        Calculates Mulliken charges for each atom in the pyscf molecule.
+
+        !!!IMPORTANT!!! Only supported with pyscf.
+
+        :print: The Mulliken charges and their corresponding atoms.
+        :return: The Mulliken charges and their corresponding atoms.
+        """
+        x = mulliken(self.molecule, self.last_dens, self.integrals[0])
+        print('Mulliken charges: {}\tCorresponding atoms: {}'.format(x[0], x[1]))
+        return x

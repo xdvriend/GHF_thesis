@@ -35,6 +35,19 @@ def test_diis():
     assert np.isclose(-1.335980054016416, x.diis()[0])
 
 
+def test_complex_method():
+    """
+    Most systems don't have a real/complex instability in UHF, but the complex method should still find the same
+    energy as the real UHF state with complex MO coefficients.
+    """
+    x = UHF.MF(h4, 4)
+    assert np.isclose(-1.956749178, x.scf(complex_method=True)[0])
+    c_i_a = x.get_mo_coeff()[0].imag
+    c_i_b = x.get_mo_coeff()[1].imag
+    assert abs(np.sum(c_i_a)) > 1e-3
+    assert abs(np.sum(c_i_b)) > 1e-3
+
+
 def test_extra_e():
     """
     test_extra_e will test the UHF method, with the added option of first adding 2 electrons to the system and using
@@ -54,7 +67,8 @@ def test_stability_analysis():
     ber.stability_analysis('internal')
     ber.stability_analysis('external')
     assert ber.int_instability
-    assert ber.ext_instability
+    assert ber.ext_instability_rc is None
+    assert ber.ext_instability_ug
 
 
 def test_follow_stability_analysis():

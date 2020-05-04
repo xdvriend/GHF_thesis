@@ -12,12 +12,8 @@ Be = gto.M(atom='Be 1 0 0', basis='4-31g')
 # The default integral calculation method is pySCF.
 be = GHF.MF(Be, 4)
 
-# To find a lower lying GHF solution, you should always use a random guess, in order to activate the off-diagonal
-# blocks of your matrices.
-guess = be.random_guess()
-
 # To perform a calculation and print out the result, simply run:
-be.get_scf_solution(guess)
+be.get_scf_solution()
 
 # Now to check the stability of the solution
 # We can check internal and external (real/complex) stability
