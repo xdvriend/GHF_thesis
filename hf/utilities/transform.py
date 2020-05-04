@@ -7,6 +7,7 @@ This file contains functions that calculate the expectation values of the differ
 
 import numpy as np
 from scipy import linalg as la
+import math
 
 
 def expand_matrix(matrix):
@@ -171,3 +172,40 @@ def rotate_to_eigenvec(eigenvec, mo_coeff, occ, number_of_orbitals):
         return np.dot(mo_coeff, u)
 
     return rotate_mo(occ_mos, eigenvec)
+
+
+def mix_mo_coeff(coeff, n_a, n_b, angle=(math.pi/4)):
+    """
+    A function that mixes the HOMO and LUMO of a given coefficient matrix
+
+    :param coeff: The mo coefficients with the alpha coefficents in the first matrix and beta coefficients in the second
+    :param n_a: Number of alpha electrons
+    :param n_b: Number of beta electrons
+    :param angle: This is rotation angle in radians and is it's default value is pi/4
+    """
+    # Determine HOMO and LUMO
+    if n_a == n_b:
+        homo = coeff[1][:, n_b - 1]
+        lumo = coeff[0][:, n_a]
+
+    else:
+        homo = coeff[0][:, n_a - 1]
+        lumo = coeff[1][:, n_b]
+
+    rotation_matrix = np.array([[math.cos(angle), -math.sin(angle)],
+                                [math.sin(angle), math.cos(angle)]])
+
+    # Creating a matrix with the HOMO in the first column and the LUMO in the second column
+    matrix = np.array([homo, lumo]).T
+    # Mixing HOMO and LUMO
+    matrix = matrix @ rotation_matrix
+    # Putting new MO's back in the coefficient matrix
+    if n_a == n_b:
+        coeff[1][:, n_b - 1] = matrix[:, 0]
+        coeff[0][:, n_a] = matrix[:, 1]
+
+    else:
+        coeff[0][:, n_a - 1] = matrix[:, 0]
+        coeff[1][:, n_b] = matrix[:, 1]
+
+    return coeff
