@@ -131,7 +131,7 @@ class MF:
 
         return random_unitary_matrix(dim), random_unitary_matrix(dim)
 
-    def scf(self, initial_guess=None, convergence=1e-12, diis=True, mix_guess=False):
+    def scf(self, initial_guess=None, convergence=1e-12, diis=True, mix_guess=False, contype=None):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
@@ -140,7 +140,7 @@ class MF:
         :param convergence: Set the convergence criterion. If none is given, 1e-12 is used.
         :param diis: Accelerates the convergence, default is true.
         :param mix_guess: Uses the UHF coefficients where HOMO and LUMO are mixed as initial guess, default is False
-        :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
+        :param contype: string that specifies constraint algorithm. Psi4 algorithm by default ('paper' or 'thesis')        :return: The scf energy, number of iterations, the mo coefficients, the last density and the last fock matrices
         """
         # calculate the transformation matrix (X_)
         s_12 = Scf.trans_matrix(self.get_ovlp())
@@ -220,7 +220,7 @@ class MF:
             return f
 
         # constraint function
-        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x):
+        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x): #Psi4 algorithm
             f_p = 0.5 * (2 * (j_a + j_b) - k_a - k_b)
             f_m = -0.5 * (k_a - k_b)
 
@@ -237,7 +237,9 @@ class MF:
             f_b = self.get_one_e() + f_p - f_m
             return f_a, f_b
 
-        def constrain2(d_a, d_b, f_a, f_b, x):
+        def constrain2(j_a, j_b, k_a, k_b, d_a, d_b, x): #paper algorithm
+            f_a = self.get_one_e() + j_a + j_b - k_a
+            f_b = self.get_one_e() + j_b + j_a - k_b
             p = (d_a + d_b) / 2.0
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
@@ -256,6 +258,28 @@ class MF:
 
             f_a = f_cs + delta_cuhf
             f_b = f_cs - delta_cuhf
+            return f_a, f_b
+
+        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x): #thesis algorithm
+            f_a = self.get_one_e() + j_a + j_b - k_a
+            f_b = self.get_one_e() + j_b + j_a - k_b
+            f_cs = (f_a + f_b) / 2.0
+            delta_uhf = (f_a - f_b) / 2.0
+            f_aa = f_cs + delta_uhf
+            f_bb = f_cs - delta_uhf
+
+            p = (d_a + d_b) / 2
+            p = la.inv(x) @ p @ la.inv(x.T)
+            nat_occ_num, nat_occ_vec = la.eigh(p)
+
+            delta_uhf_no = la.inv(nat_occ_vec) @ la.inv(x) @ delta_uhf @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+            lam = np.zeros(np.shape(delta_uhf_no))
+            lam[:self.n_b, self.n_a:] = -delta_uhf_no[:self.n_b, self.n_a:]
+            lam[self.n_a:, :self.n_b] = -delta_uhf_no[self.n_a:, :self.n_b]
+            lam = x @ nat_occ_vec @ lam @ nat_occ_vec.T @ x.T
+
+            f_a = f_aa + lam
+            f_b = f_bb - lam
             return f_a, f_b
 
         # core Hamiltonian guess
@@ -313,7 +337,12 @@ class MF:
 
         def iterate(n_i):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
-            f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            if contype == 'thesis':
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            elif contype == 'paper':
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+            else:
+                f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
             delta_e.append(energies[-1] - energies[-2])
 
