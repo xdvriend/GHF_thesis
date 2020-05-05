@@ -90,7 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transform.html">Functions to deal with matrix and tensor transformations.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
             
@@ -173,8 +172,6 @@ and the number of iterations needed to get this value.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">h3</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">atom</span> <span class="o">=</span> <span class="s1">&#39;h 0 0 0; h 0 0.86602540378 0.5; h 0 0 1&#39;</span><span class="p">,</span> <span class="n">spin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;cc-pvdz&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span> <span class="n">get_scf_solution</span><span class="p">()</span>
-<span class="go">Number of iterations: 81</span>
-<span class="go">Converged SCF energy in Hartree: -1.5062743202607725 (Real GHF)</span>
 </pre></div>
 </div>
 <dl class="method">
@@ -286,11 +283,8 @@ just like with a normal scf calculation.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">GHF</span><span class="o">.</span><span class="n">MF</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">guess</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">random_guess</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">get_scf_solution_diis</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span>
-<span class="go">Number of iterations: 23</span>
-<span class="go">Converged SCF energy in Hartree: -1.5062743202915496 (Real GHF)</span>
 </pre></div>
 </div>
-<p>Without DIIS, 81 iterations are needed to find this solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

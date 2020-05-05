@@ -20,7 +20,10 @@ h4 = UHF.MF(h4, 4)
 h4.get_scf_solution()
 
 # Then, we run the stability analysis
-next_guess = h4.stability()
+next_guess = h4.stability_analysis('internal')
 
 # Then, you run a new calculation, starting from the guess you got from the stability analysis.
 h4.get_scf_solution(next_guess)
+
+# Once the solution is stable, you can also check the external stability analysis.
+h4.stability_analysis('external')

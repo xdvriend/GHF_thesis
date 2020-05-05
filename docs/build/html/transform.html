@@ -35,7 +35,6 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Testing the RHF and UHF methods" href="tests.html" />
     <link rel="prev" title="Functions to calculate spin expectation values" href="spin.html" /> 
 </head>
 
@@ -90,7 +89,6 @@
 <li class="toctree-l1"><a class="reference internal" href="SCF_functions.html">Useful functions for SCF procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spin.html">Functions to calculate spin expectation values</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Functions to deal with matrix and tensor transformations.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Testing the RHF and UHF methods</a></li>
 </ul>
 
             
@@ -161,18 +159,32 @@
 <dl class="function">
 <dt id="hf.utilities.transform.expand_matrix">
 <code class="sig-prename descclassname">hf.utilities.transform.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.transform.expand_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand a matrix to spinor basis.
-:param matrix: a matrix.
-:return: a matrix double the size, where blocks of zero’s are added top right and bottom left.</p>
+<dd><p>Expand a matrix to spinor basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> – a matrix.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a matrix double the size, where blocks of zero’s are added top right and bottom left.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="hf.utilities.transform.expand_tensor">
 <code class="sig-prename descclassname">hf.utilities.transform.</code><code class="sig-name descname">expand_tensor</code><span class="sig-paren">(</span><em class="sig-param">tensor</em>, <em class="sig-param">complexity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.transform.expand_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand a given tensor to spinor basis representation.
-:param tensor: The tensor, usually eri, that you wish to expand.
-:param complexity: Is your tensor complex or not? Default is false.
-:return: a tensor where each dimension is doubled.</p>
+<dd><p>Expand a given tensor to spinor basis representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> – The tensor, usually eri, that you wish to expand.</p></li>
+<li><p><strong>complexity</strong> – Is your tensor complex or not? Default is false.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tensor where each dimension is doubled.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -180,17 +192,29 @@
 <code class="sig-prename descclassname">hf.utilities.transform.</code><code class="sig-name descname">spin_blocked</code><span class="sig-paren">(</span><em class="sig-param">block_1</em>, <em class="sig-param">block_2</em>, <em class="sig-param">block_3</em>, <em class="sig-param">block_4</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.transform.spin_blocked" title="Permalink to this definition">¶</a></dt>
 <dd><p>When creating the blocks of the density or fock matrix separately, this function is used to add them together,
 and create the total density or Fock matrix in spin Blocked notation. Transforms four separate matrices to 1 big
-matrix in spin-blocked notation.
-:return: a density matrix in the spin-blocked notation</p>
+matrix in spin-blocked notation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a density matrix in the spin-blocked notation</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="hf.utilities.transform.tensor_basis_transform">
 <code class="sig-prename descclassname">hf.utilities.transform.</code><code class="sig-name descname">tensor_basis_transform</code><span class="sig-paren">(</span><em class="sig-param">tensor</em>, <em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#hf.utilities.transform.tensor_basis_transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform the two electron tensor to MO basis. Scales as N^5.
-:param tensor: A tensor in it’s initial basis.
-:param matrix: the transformation matrix.
-:return: The tensor in the basis of the transformation matrix.</p>
+<dd><p>Transform the two electron tensor to MO basis. Scales as N^5.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> – A tensor in it’s initial basis.</p></li>
+<li><p><strong>matrix</strong> – the transformation matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The tensor in the basis of the transformation matrix.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -202,8 +226,6 @@ matrix in spin-blocked notation.
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="tests.html" class="btn btn-neutral float-right" title="Testing the RHF and UHF methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="spin.html" class="btn btn-neutral float-left" title="Functions to calculate spin expectation values" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

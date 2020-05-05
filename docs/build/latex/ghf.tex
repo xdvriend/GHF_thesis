@@ -72,7 +72,7 @@
 
 
 \title{GHF}
-\date{Apr 23, 2020}
+\date{Apr 26, 2020}
 \release{0.1}
 \author{Xeno De Vriendt}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -113,10 +113,13 @@ and the number of iterations needed to get this value.
 \index{diis() (hf.HartreeFock.RHF.MF method)@\spxentry{diis()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 When needed, DIIS can be used to speed up the RHF calculations by reducing the needed iterations.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -184,6 +187,15 @@ The mo coefficients
 
 \end{fulllineitems}
 
+\index{get\_mo\_energy() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_mo\_energy()}\spxextra{hf.HartreeFock.RHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_mo_energy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_energy}}}{\emph{i=-1}}{}
+Returns the MO energies.
+:return: an array of MO energies.
+
+\end{fulllineitems}
+
 \index{get\_one\_e() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_one\_e()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
@@ -209,10 +221,13 @@ The overlap matrix
 \index{get\_scf\_solution() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_scf\_solution()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged scf energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -231,7 +246,7 @@ the converged energy
 \index{get\_scf\_solution\_diis() (hf.HartreeFock.RHF.MF method)@\spxentry{get\_scf\_solution\_diis()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.get_scf_solution_diis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_scf\_solution\_diis}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Prints the number of iterations and the converged DIIS energy. The number of iterations will be lower than with
 a normal scf, but the energy value will be the same. Example:
 
@@ -243,6 +258,9 @@ a normal scf, but the energy value will be the same. Example:
 \end{sphinxVerbatim}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the diis procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Set the convergence criterion. If none is given, 1e-12 is used.
 
@@ -283,10 +301,13 @@ The nuclear repulsion value
 \index{scf() (hf.HartreeFock.RHF.MF method)@\spxentry{scf()}\spxextra{hf.HartreeFock.RHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{convergence=1e-12}, \emph{complex\_method=False}}{}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.scf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scf}}}{\emph{guess=None}, \emph{convergence=1e-12}, \emph{complex\_method=False}}{}
 Performs a self consistent field calculation to find the lowest RHF energy.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{guess}} \textendash{} Initial guess for the scf procedure. If not specified, core Hamiltonian is used.
+
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{convergence}} \textendash{} Convergence criterion. If none is specified, 1e-12 is used.
 
@@ -299,6 +320,17 @@ Performs a self consistent field calculation to find the lowest RHF energy.
 number of iterations, scf energy, mo coefficients, last density matrix, last fock matrix
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{stability\_analysis() (hf.HartreeFock.RHF.MF method)@\spxentry{stability\_analysis()}\spxextra{hf.HartreeFock.RHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{RHF:hf.HartreeFock.RHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}}{}
+Internal stability analysis to verify whether the wave function is stable within the space of the used method.
+:param method: Indicate whether you want to check the internal or external stability of the wave function. Can
+be internal or external.
+:return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
 
@@ -381,20 +413,11 @@ A new guess matrix to use for the scf procedure.
 
 \end{fulllineitems}
 
-\index{get\_hessian() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_hessian()}\spxextra{hf.HartreeFock.UHF.MF method}}
+\index{get\_dens() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_dens()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{}{}
-Get the Hessian matrix after performing a stability analysis.
-:return: The hessian matrix
-
-\end{fulllineitems}
-
-\index{get\_last\_dens() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_last\_dens()}\spxextra{hf.HartreeFock.UHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
-Gets the last density matrix of the converged solution.
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_dens}}}{\emph{i=-1}}{}
+Gets the (last) density matrix of the converged solution.
 Alpha density in the first matrix, beta density in the second.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -404,24 +427,44 @@ The last density matrix.
 
 \end{fulllineitems}
 
-\index{get\_last\_fock() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_last\_fock()}\spxextra{hf.HartreeFock.UHF.MF method}}
+\index{get\_fock() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_fock()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
-Gets the last fock matrix of the converged solution.
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock}}}{\emph{i=-1}}{}
+Gets the (last) fock matrix of the converged solution.
 Alpha Fock matrix first, beta Fock matrix second.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
-The last Fock matrix.
+The requested Fock matrices.
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock\_orth() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_fock\_orth()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_fock_orth}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock\_orth}}}{\emph{i=-1}}{}
+Get the fock matrices in the orthonormal basis. Defaults to the last one
+:param i: index of the matrix you want.
+:return: a and b orthonormal fock matrix
+
+\end{fulllineitems}
+
+\index{get\_hessian() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_hessian()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_hessian}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_hessian}}}{\emph{prime}}{}
+Get the Hessian matrix after performing a stability analysis.
+:param: specify whether you want to look at H’ or H’’ by putting 1 or 2
+:return: The hessian matrix
 
 \end{fulllineitems}
 
 \index{get\_mo\_coeff() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{\emph{i=-1}}{}
 Gets the mo coefficients of the converged solution.
 Alpha coefficients in the first matrix, beta coefficients in the second.
 \begin{quote}\begin{description}
@@ -429,6 +472,15 @@ Alpha coefficients in the first matrix, beta coefficients in the second.
 The mo coefficients
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_energy() (hf.HartreeFock.UHF.MF method)@\spxentry{get\_mo\_energy()}\spxextra{hf.HartreeFock.UHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.get_mo_energy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_energy}}}{\emph{i=-1}}{}
+Returns the MO energies of the converged solution.
+:return: an array of MO energies.
 
 \end{fulllineitems}
 
@@ -553,39 +605,13 @@ The scf energy, number of iterations, the mo coefficients, the last density and 
 
 \end{fulllineitems}
 
-\index{stability() (hf.HartreeFock.UHF.MF method)@\spxentry{stability()}\spxextra{hf.HartreeFock.UHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability}}}{}{}
-Performing a stability analysis checks whether or not the wave function is stable, by checking the lowest eigen-
-value of the Hessian matrix. If there’s an instability, the MO’s will be rotated in the direction
-of the lowest eigenvalue. These new MO’s can then be used to start a new scf procedure.
-
-To perform a stability analysis, use the following syntax:
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{k+kn}{from} \PYG{n+nn}{hf}\PYG{n+nn}{.}\PYG{n+nn}{HartreeFock} \PYG{k}{import} \PYG{o}{*}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{h4} \PYG{o}{=} \PYG{n}{gto}\PYG{o}{.}\PYG{n}{M}\PYG{p}{(}\PYG{n}{atom} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{h 0 0 0; h 1 0 0; h 0 1 0; h 1 1 0}\PYG{l+s+s1}{\PYGZsq{}} \PYG{p}{,} \PYG{n}{spin} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{basis} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{cc\PYGZhy{}pvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x} \PYG{o}{=} \PYG{n}{UHF}\PYG{o}{.}\PYG{n}{MF}\PYG{p}{(}\PYG{n}{h4}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{guess} \PYG{o}{=} \PYG{n}{x}\PYG{o}{.}\PYG{n}{stability}\PYG{p}{(}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{x}\PYG{o}{.}\PYG{n}{get\PYGZus{}scf\PYGZus{}solution}\PYG{p}{(}\PYG{n}{guess}\PYG{p}{)}
-\end{sphinxVerbatim}
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-New and improved MO’s.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 \index{stability\_analysis() (hf.HartreeFock.UHF.MF method)@\spxentry{stability\_analysis()}\spxextra{hf.HartreeFock.UHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=1e-05}}{}
+\phantomsection\label{\detokenize{UHF:hf.HartreeFock.UHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}}{}
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
-:param step\_size: Step size for orbital rotation. standard is 1e-5.
 :return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
@@ -1151,6 +1177,45 @@ scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matri
 
 \end{fulllineitems}
 
+\index{get\_dens() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_dens()}\spxextra{hf.HartreeFock.GHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_dens}}}{\emph{i=-1}}{}
+Gets the (last) density matrix.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last density matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_fock()}\spxextra{hf.HartreeFock.GHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock}}}{\emph{i=-1}}{}
+Gets the (last) fock matrix.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_fock\_orth() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_fock\_orth()}\spxextra{hf.HartreeFock.GHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_fock_orth}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_fock\_orth}}}{\emph{i=-1}}{}
+Gets the (last) fock matrix.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The last Fock matrix.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{get\_hessian() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_hessian()}\spxextra{hf.HartreeFock.GHF.MF method}}
 
 \begin{fulllineitems}
@@ -1160,37 +1225,24 @@ After stability analysis is performed, the hessian is stored and can be used for
 
 \end{fulllineitems}
 
-\index{get\_last\_dens() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_last\_dens()}\spxextra{hf.HartreeFock.GHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_last_dens}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_dens}}}{}{}
-Gets the last density matrix of the converged solution.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-The last density matrix.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{get\_last\_fock() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_last\_fock()}\spxextra{hf.HartreeFock.GHF.MF method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_last_fock}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_last\_fock}}}{}{}
-Gets the last fock matrix of the converged solution.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-The last Fock matrix.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 \index{get\_mo\_coeff() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_mo\_coeff()}\spxextra{hf.HartreeFock.GHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{}{}
-Gets the mo coefficients of the converged solution.
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_mo_coeff}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_coeff}}}{\emph{i=-1}}{}
+Gets the mo coefficients of the converged solution, or any intermediate value.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+The mo coefficients
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_mo\_energy() (hf.HartreeFock.GHF.MF method)@\spxentry{get\_mo\_energy()}\spxextra{hf.HartreeFock.GHF.MF method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.get_mo_energy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_mo\_energy}}}{\emph{i=-1}}{}
+Gets the mo energies. Uses the i’th Fock\_orth matrix.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 The mo coefficients
@@ -1357,11 +1409,10 @@ scf\_energy, iterations, mo coefficients, last density matrix \& last Fock matri
 \index{stability\_analysis() (hf.HartreeFock.GHF.MF method)@\spxentry{stability\_analysis()}\spxextra{hf.HartreeFock.GHF.MF method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}, \emph{step\_size=0.0001}}{}
+\phantomsection\label{\detokenize{GHF:hf.HartreeFock.GHF.MF.stability_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{stability\_analysis}}}{\emph{method}}{}
 Internal stability analysis to verify whether the wave function is stable within the space of the used method.
 :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
 be internal or external.
-:param step\_size: Step size for orbital rotation. standard is 1e-4.
 :return: In case of internal stability analysis, it returns a new set of coefficients.
 
 \end{fulllineitems}
@@ -1393,6 +1444,32 @@ A rotated guess matrix.
 
 \end{fulllineitems}
 
+\phantomsection\label{\detokenize{lowest_HF:module-hf.HartreeFock.lowest_HF}}\index{hf.HartreeFock.lowest\_HF (module)@\spxentry{hf.HartreeFock.lowest\_HF}\spxextra{module}}
+
+\chapter{Finding the lowest Hartree-Fock solution.}
+\label{\detokenize{lowest_HF:finding-the-lowest-hartree-fock-solution}}\label{\detokenize{lowest_HF::doc}}
+This class uses all other Hartree fock methods to find the lowest possible HF energy,
+all while breaking as little symmetry as possible. ROHF is not included in this method, so for open shell molecules
+UHF is the starting point.
+\index{Find (class in hf.HartreeFock.lowest\_HF)@\spxentry{Find}\spxextra{class in hf.HartreeFock.lowest\_HF}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{lowest_HF:hf.HartreeFock.lowest_HF.Find}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{hf.HartreeFock.lowest\_HF.}}\sphinxbfcode{\sphinxupquote{Find}}}{\emph{molecule}, \emph{number\_of\_electrons}}{}
+This class uses stability analysis and the ability to follow the lowest eigenvector in order to find the lowest
+Hartree-Fock energy.
+\index{run\_algorithm() (hf.HartreeFock.lowest\_HF.Find method)@\spxentry{run\_algorithm()}\spxextra{hf.HartreeFock.lowest\_HF.Find method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{lowest_HF:hf.HartreeFock.lowest_HF.Find.run_algorithm}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run\_algorithm}}}{}{}
+This will start your calculation at the lowest possible level (RHF or UHF) and cascade downwards,
+breaking more and more symmetry along the way.
+:return: None
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
 \phantomsection\label{\detokenize{SCF_functions:module-hf.utilities.SCF_functions}}\index{hf.utilities.SCF\_functions (module)@\spxentry{hf.utilities.SCF\_functions}\spxextra{module}}
 
 \chapter{Useful functions for SCF procedure}
@@ -1406,6 +1483,16 @@ Calculate the mo coefficients.
 :param f\_o: Fock matrix in orthonormal basis.
 :param t: Transformation matrix.
 :return: mo coefficients
+
+\end{fulllineitems}
+
+\index{calc\_mo\_e() (in module hf.utilities.SCF\_functions)@\spxentry{calc\_mo\_e()}\spxextra{in module hf.utilities.SCF\_functions}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{SCF_functions:hf.utilities.SCF_functions.calc_mo_e}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.SCF\_functions.}}\sphinxbfcode{\sphinxupquote{calc\_mo\_e}}}{\emph{f\_o}}{}
+Calculate mo energies.
+:param f\_o: Fock matrix in orthonormal basis.
+:return: mo energies
 
 \end{fulllineitems}
 
@@ -1498,15 +1585,15 @@ matrix.
 
 \end{fulllineitems}
 
-\phantomsection\label{\detokenize{spin:module-hf.utilities.spin}}\index{hf.utilities.spin (module)@\spxentry{hf.utilities.spin}\spxextra{module}}
+\phantomsection\label{\detokenize{spin:module-hf.properties.spin}}\index{hf.properties.spin (module)@\spxentry{hf.properties.spin}\spxextra{module}}
 
 \chapter{Functions to calculate spin expectation values}
 \label{\detokenize{spin:functions-to-calculate-spin-expectation-values}}\label{\detokenize{spin::doc}}
 This file contains functions that calculate the expectation values of the different spin operators.
-\index{ghf() (in module hf.utilities.spin)@\spxentry{ghf()}\spxextra{in module hf.utilities.spin}}
+\index{ghf() (in module hf.properties.spin)@\spxentry{ghf()}\spxextra{in module hf.properties.spin}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{spin:hf.utilities.spin.ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.spin.}}\sphinxbfcode{\sphinxupquote{ghf}}}{\emph{coeff}, \emph{n\_e}, \emph{trans}}{}
+\phantomsection\label{\detokenize{spin:hf.properties.spin.ghf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.properties.spin.}}\sphinxbfcode{\sphinxupquote{ghf}}}{\emph{coeff}, \emph{n\_e}, \emph{trans}}{}
 A function used to calculate the spin expectation values in the generalised hartree fock formalism.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1528,10 +1615,10 @@ The expectation values of S\_z, S\textasciicircum{}2 and the multiplicity (2S+1)
 
 \end{fulllineitems}
 
-\index{uhf() (in module hf.utilities.spin)@\spxentry{uhf()}\spxextra{in module hf.utilities.spin}}
+\index{uhf() (in module hf.properties.spin)@\spxentry{uhf()}\spxextra{in module hf.properties.spin}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{spin:hf.utilities.spin.uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.spin.}}\sphinxbfcode{\sphinxupquote{uhf}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}
+\phantomsection\label{\detokenize{spin:hf.properties.spin.uhf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.properties.spin.}}\sphinxbfcode{\sphinxupquote{uhf}}}{\emph{occ\_a}, \emph{occ\_b}, \emph{coeff\_a}, \emph{coeff\_b}, \emph{overlap}}{}
 A function used to calculate the spin expectation values in the unrestricted hartree fock formalism.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1602,6 +1689,36 @@ a tensor where each dimension is doubled.
 
 \end{fulllineitems}
 
+\index{mix\_tensor\_to\_basis\_transform() (in module hf.utilities.transform)@\spxentry{mix\_tensor\_to\_basis\_transform()}\spxextra{in module hf.utilities.transform}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{transform:hf.utilities.transform.mix_tensor_to_basis_transform}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.transform.}}\sphinxbfcode{\sphinxupquote{mix\_tensor\_to\_basis\_transform}}}{\emph{tensor}, \emph{matrix1}, \emph{matrix2}, \emph{matrix3}, \emph{matrix4}}{}
+Transform a tensor to a mixed basis. Each index can have a separate transformation matrix.
+Mostly useful in UHF calculations where tensors must be transformed to an alpha-beta basis.
+:param tensor: The tensor you wish to transform
+:param matrix1: matrix to transform index 1
+:param matrix2: matrix to transform index 2
+:param matrix3: matrix to transform index 3
+:param matrix4: matrix to transform index 4
+:return: The transformed tensor in the mixed basis.
+
+\end{fulllineitems}
+
+\index{rotate\_to\_eigenvec() (in module hf.utilities.transform)@\spxentry{rotate\_to\_eigenvec()}\spxextra{in module hf.utilities.transform}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{transform:hf.utilities.transform.rotate_to_eigenvec}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{hf.utilities.transform.}}\sphinxbfcode{\sphinxupquote{rotate\_to\_eigenvec}}}{\emph{eigenvec}, \emph{mo\_coeff}, \emph{occ}, \emph{number\_of\_orbitals}}{}
+A function used to rotate a given set of coefficients to a given eigenvector.
+This is done by making an irreducible representation of the eigenvector and creating the exponential matrix
+of the result.
+:param eigenvec: The eigenvector to which you wish to rotate
+:param mo\_coeff: The MO coefficients you wish to rotate
+:param occ: the number of occupied orbitals
+:param number\_of\_orbitals: the total number of orbitals
+:return: A rotated set of coefficients.
+
+\end{fulllineitems}
+
 \index{spin\_blocked() (in module hf.utilities.transform)@\spxentry{spin\_blocked()}\spxextra{in module hf.utilities.transform}}
 
 \begin{fulllineitems}
@@ -1648,10 +1765,11 @@ The tensor in the basis of the transformation matrix.
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.cUHF\_b}\sphinxstyleindexpageref{cUHF_b:\detokenize{module-hf.HartreeFock.cUHF_b}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.cUHF\_s}\sphinxstyleindexpageref{cUHF_s:\detokenize{module-hf.HartreeFock.cUHF_s}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.GHF}\sphinxstyleindexpageref{GHF:\detokenize{module-hf.HartreeFock.GHF}}
+\item\relax\sphinxstyleindexentry{hf.HartreeFock.lowest\_HF}\sphinxstyleindexpageref{lowest_HF:\detokenize{module-hf.HartreeFock.lowest_HF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.RHF}\sphinxstyleindexpageref{RHF:\detokenize{module-hf.HartreeFock.RHF}}
 \item\relax\sphinxstyleindexentry{hf.HartreeFock.UHF}\sphinxstyleindexpageref{UHF:\detokenize{module-hf.HartreeFock.UHF}}
+\item\relax\sphinxstyleindexentry{hf.properties.spin}\sphinxstyleindexpageref{spin:\detokenize{module-hf.properties.spin}}
 \item\relax\sphinxstyleindexentry{hf.utilities.SCF\_functions}\sphinxstyleindexpageref{SCF_functions:\detokenize{module-hf.utilities.SCF_functions}}
-\item\relax\sphinxstyleindexentry{hf.utilities.spin}\sphinxstyleindexpageref{spin:\detokenize{module-hf.utilities.spin}}
 \item\relax\sphinxstyleindexentry{hf.utilities.transform}\sphinxstyleindexpageref{transform:\detokenize{module-hf.utilities.transform}}
 \end{sphinxtheindex}
 

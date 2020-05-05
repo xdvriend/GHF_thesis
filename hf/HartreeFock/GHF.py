@@ -58,8 +58,9 @@ class MF:
                             'Make sure the molecule instance matches the method and is given as a string.')
         self.energy = None
         self.mo = None
-        self.last_dens = None
-        self.last_fock = None
+        self.dens = None
+        self.focks = None
+        self.focks_orth = None
         self.iterations = None
         self.hessian = None
         self.int_instability = None
@@ -187,14 +188,14 @@ class MF:
         s_12_o = t.expand_matrix(s_min_12)
         c_ham = t.expand_matrix(self.get_one_e())
 
-        def density(fock):
+        def density(f):
             """
-            :param fock: a fock matrix
+            :param f: a fock matrix
             :return: one big density matrix
             """
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
-            eigenval, eigenvec = la.eigh(fock)
-            coeff = s_12_o @ eigenvec
+            eigenval, eigenvec = la.eigh(f)
+            coeff = (s_12_o @ eigenvec)
             coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
             return np.einsum('ij,kj->ik', coeff_r, coeff_r.conj())
@@ -236,6 +237,9 @@ class MF:
                 p_g = np.einsum('ij,kj->ik', coefficients_r, coefficients_r.conj())
 
         densities = [p_g]
+        f_list = []
+        f_o_list = []
+        mo_list = []
 
         # Defining functions to calculate the coulomb and exchange integrals will make it easier to create the
         # Fock matrix in it's spin-blocked notation.
@@ -290,11 +294,11 @@ class MF:
                 return d * h_st + d * (j_aa + j_bb) - k_bb
 
         # The function that will calculate the energy value according to the GHF algorithm.
-        def scf_e(dens, fock):
+        def scf_e(d, f):
             """
            Calculates the scf energy for the GHF method
             """
-            return np.sum(dens * (t.expand_matrix(self.get_one_e()) + fock)) / 2
+            return np.sum(d * (t.expand_matrix(self.get_one_e()) + f)) / 2
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
@@ -312,7 +316,8 @@ class MF:
             f_bb = fock_block('b', 'b', densities[-1])
 
             # Add them together to form the total Fock matrix in spin block notation
-            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
+            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb).conj()
+            f_list.append(f)
 
             # Calculate the new energy and add it to the energies array.
             # Calculate the energy difference and add it to the delta_e array.
@@ -321,6 +326,8 @@ class MF:
 
             # orthogonalise the Fock matrix
             f_o = s_12_o.conj().T @ f @ s_12_o
+            f_o_list.append(f_o)
+            mo_list.append(Scf.calc_mo(f_o, s_12_o))
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
@@ -336,40 +343,27 @@ class MF:
 
         # A function that gives the last density matrix of the scf procedure.
         # Then set the last_dens value of the class object to this density matrix.
-        def last_dens():
-            return densities[-1]
-        self.last_dens = last_dens()
+        def dens():
+            return densities
+        self.dens = dens()
 
         # A function that returns the last Fock matrix of the scf procedure.
         # Then, set the last_fock value of the GHF object to this Fock matrix.
-        def last_fock():
-            # Create the 4 individual spin-blocks of the last Fock matrix.
-            f_aa = fock_block('a', 'a', densities[-2])
-            f_ab = fock_block('a', 'b', densities[-2])
-            f_ba = fock_block('b', 'a', densities[-2])
-            f_bb = fock_block('b', 'b', densities[-2])
-            # Add the blocks together.
-            f = t.spin_blocked(f_aa, f_ab, f_ba, f_bb)
-            return f
-        self.last_fock = last_fock()
+        def fock():
+            return f_list
+        self.focks = fock()
+        self.focks_orth = f_o_list
 
         # A function that calculates the MO's from the last needed Fock matrix in the scf calculation.
         def get_mo():
-            # Get the last Fock matrix.
-            last_f = last_fock()
-            f_o = s_12_o.T @ last_f @ s_12_o
-            # Diagonalise the Fock matrix.
-            val, vec = la.eigh(f_o)
-            # calculate the coefficients.
-            coeff = s_12_o @ vec
-            return coeff
+            return mo_list
         self.mo = get_mo()
 
         # Calculate the final scf energy (electronic + nuclear repulsion)
         scf_e = energies[-1] + self.nuc_rep()
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -396,45 +390,67 @@ class MF:
               str(s_values[2]))
         return self.energy
 
-    def get_mo_coeff(self):
+    def get_mo_coeff(self, i=-1):
         """
-        Gets the mo coefficients of the converged solution.
+        Gets the mo coefficients of the converged solution, or any intermediate value.
 
         :return: The mo coefficients
         """
         if self.mo is None:
             raise Exception('Perform an scf calculation first.')
         else:
-            return self.mo
+            return self.mo[i]
 
-    def get_last_dens(self):
+    def get_mo_energy(self, i=-1):
         """
-        Gets the last density matrix of the converged solution.
+        Gets the mo energies. Uses the i'th Fock_orth matrix.
+
+        :return: The mo coefficients
+        """
+        if self.focks_orth is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            e = Scf.calc_mo_e(self.get_fock_orth(i))
+            return e
+
+    def get_dens(self, i=-1):
+        """
+        Gets the (last) density matrix.
 
         :return: The last density matrix.
         """
-        if self.last_dens is None:
+        if self.dens is None:
             raise Exception('Perform an scf calculation first.')
         else:
-            return self.last_dens
+            return self.dens[i]
 
-    def get_last_fock(self):
+    def get_fock(self, i=-1):
         """
-        Gets the last fock matrix of the converged solution.
+        Gets the (last) fock matrix.
 
         :return: The last Fock matrix.
         """
-        if self.last_fock is None:
+        if self.focks is None:
             raise Exception('Perform an scf calculation first.')
         else:
-            return self.last_fock
+            return self.focks[i]
 
-    def stability_analysis(self, method, step_size=1e-4):
+    def get_fock_orth(self, i=-1):
+        """
+        Gets the (last) fock matrix.
+
+        :return: The last Fock matrix.
+        """
+        if self.focks_orth is None:
+            raise Exception('Perform an scf calculation first.')
+        else:
+            return self.focks_orth[i]
+
+    def stability_analysis(self, method):
         """
         Internal stability analysis to verify whether the wave function is stable within the space of the used method.
         :param method: Indicate whether you want to check the internal or external stability of the wave function. Can
         be internal or external.
-        :param step_size: Step size for orbital rotation. standard is 1e-4.
         :return: In case of internal stability analysis, it returns a new set of coefficients.
         """
         # Calculate the A & B blocks needed for stability analysis.
@@ -442,66 +458,35 @@ class MF:
         occ = int(self.number_of_electrons)
         vir = int(np.shape(t.expand_matrix(self.get_ovlp()))[0] - self.number_of_electrons)
 
-        # Determine the Fock matrices needed.
+        # # Determine the Fock matrices needed.
         coeff = self.get_mo_coeff()
-        fock_init = self.get_last_fock()
-        fock_mo = coeff.conj().T @ fock_init @ coeff
+        mo_e = self.get_mo_energy()
+        mo_e_vir = mo_e[occ:]
+        mo_e_occ = mo_e[:occ]
 
         # Determine the two electron integrals in spinor basis.
         eri_ao = self.get_two_e()
         eri_ao_spinor = t.expand_tensor(eri_ao)
 
-        eri_mo = t.tensor_basis_transform(eri_ao_spinor, coeff)
+        eri_mo = t.mix_tensor_basis_transform(eri_ao_spinor, coeff, coeff.conj(), coeff, coeff.conj())
+        eri_mo_anti = eri_mo - eri_mo.transpose(0, 3, 2, 1)
 
-        eri_spinor_anti_abrs = eri_mo - eri_mo.transpose(0, 2, 1, 3)
-        eri_spinor_anti_asrb = eri_mo.transpose(0, 1, 3, 2) - eri_mo.transpose(0, 3, 1, 2)
+        a_iajb = np.einsum('aijb->iajb', eri_mo_anti[occ:, :occ, :occ, occ:])
 
-        # Create the tensors A and B.
-        if isinstance(self.energy, complex):
-            a_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
-            b_arbs = np.zeros((occ, vir, occ, vir)).astype(complex)
-        else:
-            a_arbs = np.zeros((occ, vir, occ, vir))
-            b_arbs = np.zeros((occ, vir, occ, vir))
+        e_values = np.zeros((int(len(mo_e_vir)), int(len(mo_e_occ))))
+        for i in range(vir):
+            for j in range(occ):
+                e_values[i][j] = mo_e_vir[i] + (-1 * mo_e_occ[j])
 
-        # Fill the A and B tensors with the correct elements.
-        for a in range(occ):
-            for r in range(occ, occ + vir):
-                for b in range(occ):
-                    for s in range(occ, occ + vir):
-                        if a == b and s == r:
-                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] - fock_mo[a][b]\
-                                                         + eri_spinor_anti_asrb[a][s][r][b]
-                        elif a == b and s != r:
-                            a_arbs[a][r-occ][b][s-occ] = fock_mo[s][r] + eri_spinor_anti_asrb[a][s][r][b]
-                        elif s == r and a != b:
-                            a_arbs[a][r-occ][b][s-occ] = -1 * fock_mo[a][b] + eri_spinor_anti_asrb[a][s][r][b]
-                        else:
-                            a_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_asrb[a][s][r][b]
-        for a in range(occ):
-            for r in range(occ, occ + vir):
-                for b in range(occ):
-                    for s in range(occ, occ + vir):
-                        b_arbs[a][r-occ][b][s-occ] = eri_spinor_anti_abrs[a][b][r][s]
+        for a in range(vir):
+            for i in range(occ):
+                a_iajb[i, a, i, a] += e_values[a, i]
+
+        b_iajb = np.einsum('aibj->iajb', eri_mo_anti[occ:, :occ, occ:, :occ])
 
         # Reshape the tensors pairwise to create the matrix representation.
-        a = a_arbs.reshape((occ*vir, occ*vir), order='F')
-        b = b_arbs.reshape((occ*vir, occ*vir), order='F')
-
-        # Create a function to rotate the orbitals in case of internal instability
-        def rotate_to_eigenvec(eigenvec):
-            if isinstance(self.energy, complex):
-                indx = int(np.shape(eigenvec)[0] / 2)
-                eigenvec = eigenvec[:indx]
-
-            block_ba = eigenvec.reshape((occ, vir), order='F')
-            block_bb = np.zeros((occ, occ))
-            block_ab = -1 * block_ba.conj().T
-            block_aa = np.zeros((vir, vir))
-            k = t.spin_blocked(block_aa, block_ab, block_ba, block_bb)
-            coeff_init = self.get_mo_coeff()
-            exp = la2.expm(-1 * step_size * k)
-            return coeff_init @ exp
+        a = a_iajb.reshape((occ * vir, occ * vir))
+        b = b_iajb.reshape((occ * vir, occ * vir))
 
         # Check the different stability matrices to verify the stability.
         if not isinstance(self.energy, complex):
@@ -516,7 +501,8 @@ class MF:
                     print("There is an internal instability in the real GHF wave function.")
                     self.int_instability = True
                     lowest_eigenvec = v[:, 0]
-                    return rotate_to_eigenvec(lowest_eigenvec)
+                    return t.rotate_to_eigenvec(lowest_eigenvec, coeff, occ,
+                                                int(np.shape(t.expand_matrix(self.get_ovlp()))[0]))
                 else:
                     print('The wave function is stable within the real GHF space.')
                     self.int_instability = None
@@ -549,7 +535,11 @@ class MF:
                     print("There is an internal instability in the complex GHF wave function.")
                     self.int_instability = True
                     lowest_eigenvec = v[:, 0]
-                    return rotate_to_eigenvec(lowest_eigenvec)
+                    real_part = lowest_eigenvec[:int(len(lowest_eigenvec)/2)]
+                    imag_part = lowest_eigenvec[int(len(lowest_eigenvec)/2):]
+                    lowest_complex = real_part + (imag_part * 1j)
+                    return t.rotate_to_eigenvec(lowest_complex, coeff, occ,
+                                                int(np.shape(t.expand_matrix(self.get_ovlp()))[0]))
                 else:
                     print('The wave function is stable in the complex GHF space.')
                     self.int_instability = None
@@ -584,13 +574,13 @@ class MF:
         s_12_o = t.expand_matrix(s_min_12)
         c_ham = t.expand_matrix(self.get_one_e())
 
-        def density(fock):
+        def density(f):
             """
-            :param fock: a fock matrix
+            :param f: a fock matrix
             :return: one big density matrix
             """
             # Get the coefficients by diagonalising the fock/guess matrix and calculate the density wit C(C.T)
-            eigenval, eigenvec = la.eigh(fock)
+            eigenval, eigenvec = la.eigh(f)
             coeff = s_12_o @ eigenvec
             coeff_r = coeff[:, 0:self.number_of_electrons]
             # np.einsum represents Sum_j^occupied_orbitals(c_ij * c_kj)
@@ -687,15 +677,15 @@ class MF:
             if sigma == 'b' and tau == 'b':  # bb-block
                 return d * h_st + d * (j_aa + j_bb) - k_bb
 
-        def residual(dens, fock):
+        def residual(d, f):
             """
             Function that calculates the error matrix for the DIIS algorithm
-            :param dens: density matrix
-            :param fock: fock matrix
+            :param d: density matrix
+            :param f: fock matrix
             :return: a value that should be zero and a fock matrix
             """
-            return s_12_o @ (fock @ dens @ t.expand_matrix(self.get_ovlp()) -
-                             t.expand_matrix(self.get_ovlp()) @ dens @ fock) @ s_12_o.conj().T
+            return s_12_o @ (f @ d @ t.expand_matrix(self.get_ovlp()) -
+                             t.expand_matrix(self.get_ovlp()) @ d @ f) @ s_12_o.conj().T
 
         # Create a list to store the errors
         # create a list to store the fock matrices
@@ -733,24 +723,29 @@ class MF:
 
             # Create a fock as a linear combination of previous focks
             if complex_method:
-                fock = np.zeros(focks[0].shape).astype(complex)
+                f = np.zeros(focks[0].shape).astype(complex)
             else:
-                fock = np.zeros(focks[0].shape)
+                f = np.zeros(focks[0].shape)
             for x in range(coeff.shape[0] - 1):
-                fock += coeff[x] * focks[x]
-            return fock
+                f += coeff[x] * focks[x]
+            return f
 
         # The function that will calculate the energy value according to the GHF algorithm.
-        def scf_e(dens, fock):
+        def scf_e(d, f):
             """
             Calculates the scf energy for the GHF method
             """
-            return np.sum(dens * (t.expand_matrix(self.get_one_e()) + fock)) / 2
+            temp = np.sum(d * (t.expand_matrix(self.get_one_e()) + f))
+            temp *= 0.5
+            return temp
 
         # Calculate the first electronic energy from the initial guess and the guess density that's calculated from it.
         # Create an array to store the energy values and another to store the energy differences.
         energies_diis = [0.0]
         delta_e_diis = []
+        f_list = []
+        f_o_list = []
+        mo_list = []
 
         def iteration_diis(number_of_iterations):
             # create the four spin blocks of the Fock matrix
@@ -778,8 +773,13 @@ class MF:
             if number_of_iterations >= 2:
                 f = diis_fock(fock_list, error_list)
 
+            f_list.append(f)
+            f = f.conj()
+
             # orthogonalise the Fock matrix
             f_o = s_12_o.conj().T @ f @ s_12_o
+            f_o_list.append(f_o)
+            mo_list.append(Scf.calc_mo(f_o, s_12_o))
 
             # Create the new density matrix from the Orthogonalised Fock matrix.
             # Add the new density matrix to the densities array.
@@ -795,37 +795,27 @@ class MF:
 
         # A function that gives the last density matrix of the scf procedure.
         # Then set the last_dens value of the class object to this density matrix.
-        def last_dens():
-            return densities_diis[-1]
-
-        self.last_dens = last_dens()
+        def dens():
+            return densities_diis
+        self.dens = dens()
 
         # A function that returns the last Fock matrix of the scf procedure.
         # Then, set the last_fock value of the GHF object to this Fock matrix.
-        def last_fock():
-            f = fock_list[-1]
-            return f
-
-        self.last_fock = last_fock()
+        def fock():
+            return f_list
+        self.focks = fock()
+        self.focks_orth = f_o_list
 
         # A function that calculates the MO's from the last needed Fock matrix in the scf calculation.
         def get_mo():
-            # Get the last Fock matrix.
-            last_f = last_fock()
-            f_o = s_12_o.T @ last_f @ s_12_o
-            # Diagonalise the Fock matrix.
-            val, vec = la.eigh(f_o)
-            # calculate the coefficients.
-            coeff = s_12_o @ vec
-            return coeff
-
+            return mo_list
         self.mo = get_mo()
 
         # Calculate the final scf energy (electronic + nuclear repulsion)
         scf_e = energies_diis[-1] + self.nuc_rep()
         self.energy = scf_e
 
-        return scf_e, i, get_mo(), last_dens(), last_fock()
+        return scf_e, i, get_mo(), dens(), fock()
 
     def get_scf_solution_diis(self, guess=None, convergence=1e-12, complex_method=False):
         """
@@ -854,9 +844,10 @@ class MF:
             else:
                 print("Number of iterations: " + str(self.iterations))
                 print("Converged SCF energy in Hartree: " + str(np.real(e)) + " (Complex GHF, DIIS)")
+
         else:
             print("Number of iterations: " + str(self.iterations))
             print("Converged SCF energy in Hartree: " + str(self.energy) + " (Real GHF, DIIS)")
-            print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
-                  str(s_values[2]))
+        print(" <S^2> = " + str(s_values[1]) + ", <S_z> = " + str(s_values[0]) + ", Multiplicity = " +
+              str(s_values[2]))
         return self.energy

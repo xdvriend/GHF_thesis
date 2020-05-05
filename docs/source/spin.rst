@@ -1,2 +1,2 @@
-.. automodule:: hf.utilities.spin
+.. automodule:: hf.properties.spin
     :members:
