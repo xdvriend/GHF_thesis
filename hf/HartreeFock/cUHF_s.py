@@ -131,7 +131,7 @@ class MF:
 
         return random_unitary_matrix(dim), random_unitary_matrix(dim)
 
-    def scf(self, initial_guess=None, convergence=1e-12, diis=True, mix_guess=False, contype=None):
+    def scf(self, initial_guess=None, convergence=1e-12, diis=True, mix_guess=False, contype=None, lag=1):
         """
         Performs a self consistent field calculation to find the lowest UHF energy.
 
@@ -260,7 +260,7 @@ class MF:
             f_b = f_cs - delta_cuhf
             return f_a, f_b
 
-        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x): #thesis algorithm
+        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x, lag): #thesis algorithm
             f_a = self.get_one_e() + j_a + j_b - k_a
             f_b = self.get_one_e() + j_b + j_a - k_b
             f_cs = (f_a + f_b) / 2.0
@@ -276,6 +276,7 @@ class MF:
             lam = np.zeros(np.shape(delta_uhf_no))
             lam[:self.n_b, self.n_a:] = -delta_uhf_no[:self.n_b, self.n_a:]
             lam[self.n_a:, :self.n_b] = -delta_uhf_no[self.n_a:, :self.n_b]
+            lam *= lag
             lam = x @ nat_occ_vec @ lam @ nat_occ_vec.T @ x.T
 
             f_a = f_aa + lam
@@ -335,12 +336,12 @@ class MF:
         focks_a = []
         focks_b = []
 
-        def iterate(n_i):
+        def iterate(n_i, lag):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
             if contype == 'thesis':
-                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, lag)
             elif contype == 'paper':
-                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+                f_a, f_b = constrain2(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             else:
                 f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
@@ -375,12 +376,12 @@ class MF:
             mo_b.append(c_b_new)
 
         i = 0
-        iterate(i)
+        iterate(i, lag)
         while abs(delta_e[-1]) >= convergence:
             if i == 1000:
                 raise Exception('maximum number of iterations exceeded')
             i += 1
-            iterate(i)
+            iterate(i, lag)
         self.iterations = i
 
         # a function that gives the last density matrix of the scf procedure, both for alpha and beta
