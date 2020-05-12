@@ -237,24 +237,24 @@ class MF:
             f_b = self.get_one_e() + f_p - f_m
             return f_a, f_b
 
-        def constrain2(j_a, j_b, k_a, k_b, d_a, d_b, x): #paper algorithm
+        def constrain2(j_a, j_b, k_a, k_b, d_a, d_b, x, Ca): #paper algorithm
             f_a = self.get_one_e() + j_a + j_b - k_a
             f_b = self.get_one_e() + j_b + j_a - k_b
             p = (d_a + d_b) / 2.0
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
 
-            p = la.inv(x) @ p @ la.inv(x.T)
+            p = Ca.T @ p @ Ca
             nat_occ_num, nat_occ_vec = np.linalg.eigh(p)
             nat_occ_vec = np.flip(nat_occ_vec, axis=1)
 
-            delta_uhf_no = la.inv(nat_occ_vec) @ la.inv(x) @ delta_uhf @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+            delta_uhf_no = nat_occ_vec.T @ Ca.T @ delta_uhf @ Ca @ nat_occ_vec
 
             delta_cuhf = np.copy(delta_uhf_no)
             delta_cuhf[:self.n_b, self.n_a:] = 0.0
             delta_cuhf[self.n_a:, :self.n_b] = 0.0
 
-            delta_cuhf = x @ nat_occ_vec @ delta_cuhf @ nat_occ_vec.T @ x.T
+            delta_cuhf = np.linalg.inv(Ca.T) @ nat_occ_vec @ delta_cuhf @ nat_occ_vec.T @ np.linalg.inv(Ca)
 
             f_a = f_cs + delta_cuhf
             f_b = f_cs - delta_cuhf
@@ -276,7 +276,7 @@ class MF:
             lam = np.zeros(np.shape(delta_uhf_no))
             lam[:self.n_b, self.n_a:] = -delta_uhf_no[:self.n_b, self.n_a:]
             lam[self.n_a:, :self.n_b] = -delta_uhf_no[self.n_a:, :self.n_b]
-            lam *= lag
+            lam[0,2] *= lag
             lam = x @ nat_occ_vec @ lam @ nat_occ_vec.T @ x.T
 
             f_a = f_aa + lam
@@ -341,7 +341,7 @@ class MF:
             if contype == 'thesis':
                 f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, lag)
             elif contype == 'paper':
-                f_a, f_b = constrain2(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+                f_a, f_b = constrain2(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, mo_a[-1])
             else:
                 f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
