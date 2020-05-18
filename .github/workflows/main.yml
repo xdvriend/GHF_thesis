@@ -23,6 +23,7 @@ jobs:
             environment-file: environment.yml
             python-version: ${{ matrix.python-version }}
             auto-activate-base: false
+            auto-update-conda: false
         - name: Test with pytest
           shell: bash -l {0}
           run: | 
