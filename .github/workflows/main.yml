@@ -14,23 +14,19 @@ jobs:
                 python-version: [3.6, 3.7]
         steps:
         - uses: actions/checkout@v2
-        - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v2
+        - uses: actions/setup-python@v2
           with:
             python-version: ${{ matrix.python-version }}
-        - name: Install Miniconda
-          run: |
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/miniconda.sh
-            bash $HOME/miniconda.sh -b -u -p $HOME/miniconda
-            echo "::add-path::$HOME/miniconda/bin"
-            conda config --set always_yes yes --set changeps1 no
-        - name: Install dependencies
+        - uses: goanpeca/setup-miniconda@v1
+            with:
+              activate-environment: ghf
+              environment-file: environment.yml
+              python-version: ${{ matrix.python-version }}
+        - name: Test with pytest
           run: | 
             conda env create -f environment.yml python=${{ matrix.python-version }}
             source activate ghf
-            pip install ".[test]"
-        - name: Test with pytest
-          run: |
             pip install pytest
+            pip install ".[test]"
             pytest
 
