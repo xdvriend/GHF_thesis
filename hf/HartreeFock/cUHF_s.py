@@ -353,9 +353,6 @@ class MF:
 
             focks_a.append(f_a)
             focks_b.append(f_b)
-            fock_orth_a = s_12.conj().T.dot(f_a).dot(s_12)
-            fock_orth_b = s_12.conj().T.dot(f_b).dot(s_12)
-            fo_list.append([fock_orth_a, fock_orth_b])
 
             if diis is True:
                 # Calculate the residuals from both
@@ -372,6 +369,11 @@ class MF:
                 if n_i >= 1:
                     f_a = diis_fock(fock_list_a, error_list_a)
                     f_b = diis_fock(fock_list_b, error_list_b)
+
+            #calculating fock_orth for orbital energy calculations
+            fock_orth_a = s_12.conj().T.dot(f_a).dot(s_12)
+            fock_orth_b = s_12.conj().T.dot(f_b).dot(s_12)
+            fo_list.append([fock_orth_a, fock_orth_b])
 
             # Compute new orbital guess
             c_a_new, d_a_new = density(f_a, self.n_a)
