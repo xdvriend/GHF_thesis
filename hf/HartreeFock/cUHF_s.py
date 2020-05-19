@@ -61,6 +61,7 @@ class MF:
         self.mo = None
         self.dens = None
         self.fock = None
+        self.fock_orth = None
         self.iterations = None
         if number_of_electrons % 2 == 0:
             self.n_a = int(number_of_electrons / 2)
@@ -337,6 +338,7 @@ class MF:
         # fock list
         focks_a = []
         focks_b = []
+        fo_list = []
 
         def iterate(n_i):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
@@ -368,6 +370,11 @@ class MF:
                     f_a = diis_fock(fock_list_a, error_list_a)
                     f_b = diis_fock(fock_list_b, error_list_b)
 
+            #calculating fock_orth for orbital energy calculations
+            fock_orth_a = s_12.conj().T.dot(f_a).dot(s_12)
+            fock_orth_b = s_12.conj().T.dot(f_b).dot(s_12)
+            fo_list.append([fock_orth_a, fock_orth_b])
+
             # Compute new orbital guess
             c_a_new, d_a_new = density(f_a, self.n_a)
             c_b_new, d_b_new = density(f_b, self.n_b)
@@ -394,6 +401,7 @@ class MF:
         def fock():
             return focks_a, focks_b
         self.fock = fock()
+        self.fock_orth = fo_list
 
         def get_mo():
             return mo_a, mo_b
@@ -447,7 +455,24 @@ class MF:
         :return: The last Fock matrix.
         """
         return self.fock[0][i], self.fock[1][i]
-      
+
+    def get_fock_orth(self, i=-1):
+        """
+        Get the fock matrices in the orthonormal basis. Defaults to the last one
+        :param i: index of the matrix you want.
+        :return: a and b orthonormal fock matrix
+        """
+        return self.fock_orth[i][0], self.fock_orth[i][1]
+
+    def get_mo_energy(self, i=-1):
+        """
+        Returns the MO energies of the converged solution.
+        :return: an array of MO energies.
+        """
+        e_a = Scf.calc_mo_e(self.get_fock_orth(i)[0])
+        e_b = Scf.calc_mo_e(self.get_fock_orth(i)[1])
+        return e_a, e_b
+
     def calculate_mulliken(self):
         """
         Calculates Mulliken charges for each atom in the pyscf molecule.

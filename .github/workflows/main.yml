@@ -1,0 +1,33 @@
+name: ghf_build
+
+on:
+    push:
+        branches:
+            - develop
+    pull_request:
+
+jobs:
+    build:
+        runs-on: macos-latest
+        strategy:
+            matrix:
+                python-version: [3.6, 3.7]
+        steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: ${{ matrix.python-version }}
+        - uses: goanpeca/setup-miniconda@v1
+          with:
+            activate-environment: ghf
+            environment-file: environment.yml
+            python-version: ${{ matrix.python-version }}
+            auto-activate-base: false
+            auto-update-conda: false
+        - name: Test with pytest
+          shell: bash -l {0}
+          run: | 
+            pip install pytest
+            pip install ".[test]"
+            pytest
+
