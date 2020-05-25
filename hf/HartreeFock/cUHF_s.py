@@ -220,21 +220,24 @@ class MF:
             return f
 
         # constraint function
-        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x): #Psi4 algorithm
+        def constrain1(j_a, j_b, k_a, k_b, d_a, d_b, x, Ca):  # Psi4 algorithm
             f_p = 0.5 * (2 * (j_a + j_b) - k_a - k_b)
             f_m = -0.5 * (k_a - k_b)
 
             p = (d_a + d_b) / 2
-            p = la.inv(x) @ p @ la.inv(x.T)
+            p = la.inv(Ca) @ p @ la.inv(Ca.T)
             nat_occ_num, nat_occ_vec = la.eigh(p)
+            nat_occ_vec = np.flip(nat_occ_vec, axis=1)
 
-            f_m = la.inv(nat_occ_vec) @ la.inv(x) @ f_m @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
-            f_m[:self.n_b, self.n_a:] = 0.0
-            f_m[self.n_a:, :self.n_b] = 0.0
-            f_m = x @ nat_occ_vec @ f_m @ nat_occ_vec.T @ x.T
+            f_m = nat_occ_vec.T @ Ca.T @ f_m @ Ca @ nat_occ_vec
 
-            f_a = self.get_one_e() + f_p + f_m
-            f_b = self.get_one_e() + f_p - f_m
+            f_m_NO = np.copy(f_m)
+            f_m_NO[:self.n_b, self.n_a:] = 0.0
+            f_m_NO[self.n_a:, :self.n_b] = 0.0
+            f_m_NO = np.linalg.inv(Ca.T) @ nat_occ_vec @ f_m_NO @ nat_occ_vec.T @ np.linalg.inv(Ca)
+
+            f_a = self.get_one_e() + f_p + f_m_NO
+            f_b = self.get_one_e() + f_p - f_m_NO
             return f_a, f_b
 
         def constrain2(j_a, j_b, k_a, k_b, d_a, d_b, x, Ca): #paper algorithm
@@ -244,7 +247,7 @@ class MF:
             f_cs = (f_a + f_b) / 2.0
             delta_uhf = (f_a - f_b) / 2.0
 
-            p = Ca.T @ p @ Ca
+            p = la.inv(Ca) @ p @ la.inv(Ca.T)
             nat_occ_num, nat_occ_vec = np.linalg.eigh(p)
             nat_occ_vec = np.flip(nat_occ_vec, axis=1)
 
@@ -253,14 +256,13 @@ class MF:
             delta_cuhf = np.copy(delta_uhf_no)
             delta_cuhf[:self.n_b, self.n_a:] = 0.0
             delta_cuhf[self.n_a:, :self.n_b] = 0.0
-
             delta_cuhf = np.linalg.inv(Ca.T) @ nat_occ_vec @ delta_cuhf @ nat_occ_vec.T @ np.linalg.inv(Ca)
 
             f_a = f_cs + delta_cuhf
             f_b = f_cs - delta_cuhf
             return f_a, f_b
 
-        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x, lag): #thesis algorithm
+        def constrain3(j_a, j_b, k_a, k_b, d_a, d_b, x, Ca, lag): #thesis algorithm
             f_a = self.get_one_e() + j_a + j_b - k_a
             f_b = self.get_one_e() + j_b + j_a - k_b
             f_cs = (f_a + f_b) / 2.0
@@ -269,15 +271,16 @@ class MF:
             f_bb = f_cs - delta_uhf
 
             p = (d_a + d_b) / 2
-            p = la.inv(x) @ p @ la.inv(x.T)
+            p = np.linalg.inv(Ca) @ p @ np.linalg.inv(Ca.T)
             nat_occ_num, nat_occ_vec = la.eigh(p)
+            nat_occ_vec = np.flip(nat_occ_vec, axis=1)
 
-            delta_uhf_no = la.inv(nat_occ_vec) @ la.inv(x) @ delta_uhf @ la.inv(x.T) @ la.inv(nat_occ_vec.T)
+            delta_uhf_no = nat_occ_vec.T @ Ca.T @ delta_uhf @ Ca @ nat_occ_vec
             lam = np.zeros(np.shape(delta_uhf_no))
             lam[:self.n_b, self.n_a:] = -delta_uhf_no[:self.n_b, self.n_a:]
             lam[self.n_a:, :self.n_b] = -delta_uhf_no[self.n_a:, :self.n_b]
-            lam[0,2] *= lag
-            lam = x @ nat_occ_vec @ lam @ nat_occ_vec.T @ x.T
+            lam *= lag
+            lam = np.linalg.inv(Ca.T) @ nat_occ_vec @ lam @ nat_occ_vec.T @ np.linalg.inv(Ca)
 
             f_a = f_aa + lam
             f_b = f_bb - lam
@@ -339,11 +342,11 @@ class MF:
         def iterate(n_i, lag):
             j_a, j_b, k_a, k_b = two_electron(dens_a[-1], dens_b[-1])
             if contype == 'thesis':
-                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, lag)
+                f_a, f_b = constrain3(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, mo_a[-1], lag)
             elif contype == 'paper':
                 f_a, f_b = constrain2(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, mo_a[-1])
             else:
-                f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12)
+                f_a, f_b = constrain1(j_a, j_b, k_a, k_b, dens_a[-1], dens_b[-1], s_12, mo_a[-1])
             energies.append(energy(dens_a[-1], dens_b[-1], f_a, f_b))
             delta_e.append(energies[-1] - energies[-2])
 
@@ -401,7 +404,7 @@ class MF:
 
         return energies[-1], i
 
-    def get_scf_solution(self, guess=None, convergence=1e-12, diis=True, mix_guess=False):
+    def get_scf_solution(self, guess=None, convergence=1e-12, diis=True, mix_guess=False, contype=None, lag=1):
         """
         Prints the number of iterations and the converged scf energy.
         Also prints the expectation value of S_z, S^2 and the multiplicity.
@@ -412,12 +415,12 @@ class MF:
         :param mix_guess: Uses the UHF coefficients where HOMO and LUMO are mixed as initial guess, default is False
         :return: The converged scf energy.
         """
-        self.scf(guess, convergence=convergence, diis=diis, mix_guess=mix_guess)
+        self.scf(guess, convergence=convergence, diis=diis, mix_guess=mix_guess, contype=contype, lag=lag)
         s_values = spin.uhf(self.n_a, self.n_b, MF.get_mo_coeff(self)[0], MF.get_mo_coeff(self)[1], self.get_ovlp())
         print("Number of iterations: " + str(self.iterations))
         print("Converged SCF energy in Hartree: " + str(self.energy) + " (Constrained UHF)")
         print("<S^2> = " + str(s_values[0]) + ", <S_z> = " + str(s_values[1]) + ", Multiplicity = " + str(s_values[2]))
-        return self.energy
+        return self.energy, s_values[0]
 
     def get_mo_coeff(self, i=-1):
         """
