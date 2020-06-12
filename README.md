@@ -1,16 +1,7 @@
 
 ![ghf](logo.jpg)
 
-## Overview
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/xdvriend/ghf/blob/master/notebooks/thesis.ipynb)
 
-This repository contains everything from restricted to generalised Hartree-Fock theory. Examples are provided, as well as documentation, to help you understand and use the library.  
+The GHF library can be used to run RHF, UHF and GHF calculations. We have provided an interactive IPython Notebook that illustrates the API of the library. For local installations, please refer to the [documentation](INSTALL.md)
 
-## Using the code
-
-To run the code, please follow the [install file](INSTALL.md). To install the code in your virtual environment, run:
-
-```
-python setup.py install
-```
-
-in the ghf folder. 
